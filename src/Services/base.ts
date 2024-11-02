@@ -1,4 +1,4 @@
-import { Config } from "@/Config";
+import { Config } from "@/General/Config";
 import { BaseQueryApi } from "@reduxjs/toolkit/dist/query/baseQueryTypes";
 import {
   createApi,
