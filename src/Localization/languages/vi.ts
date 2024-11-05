@@ -1,8 +1,9 @@
 import { LocalizationKey } from "../keys";
 
 export const vi = {
+  // Welcome
   [LocalizationKey.WELCOME]: "Xin chào",
   [LocalizationKey.HOME]: "Trang chủ",
-  [LocalizationKey.START]: "Bắt đầu",
+  [LocalizationKey.GET_STARTED]: "Bắt đầu",
   [LocalizationKey.LOADING]: "Đang tải",
 };
