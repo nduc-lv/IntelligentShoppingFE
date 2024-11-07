@@ -3,8 +3,16 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",
+    "target": "es5",
+    "module": "commonjs",
+    "jsx": "react", // hoặc "react-jsx" cho React 17+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   }
 }

@@ -4,6 +4,10 @@ import { View, Text, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { HStack, Spinner, Heading } from "native-base";
 import { User } from "@/Services";
+import { Button } from "react-native";
+import { RootScreens } from '@/Screens';
+import { RootStackParamList } from "@/Navigation";
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 export interface IHomeProps {
   data: User | undefined;
@@ -12,6 +16,7 @@ export interface IHomeProps {
 
 export const Home = (props: IHomeProps) => {
   const { data, isLoading } = props;
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -28,6 +33,10 @@ export const Home = (props: IHomeProps) => {
           <Heading color="primary.500" fontSize="md">
             {data?.username}
           </Heading>
+          <Button
+            title="Go to Welcome"
+            onPress={() => navigation.navigate(RootScreens.WELCOME)}
+          />
         </>
       )}
     </View>

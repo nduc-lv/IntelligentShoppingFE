@@ -1,6 +1,7 @@
 export enum LocalizationKey {
+  // Welcome
   WELCOME = "welcome",
   HOME = "home",
-  START = "start",
+  GET_STARTED = "get started",
   LOADING = "loading",
 }
