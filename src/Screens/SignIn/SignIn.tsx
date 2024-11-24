@@ -2,7 +2,7 @@ import React from "react";
 import { i18n, LocalizationKey } from "@/Localization";
 import { View, Text, StyleSheet, ImageBackground } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Button } from "native-base";
+import { Button, Toast } from "native-base";
 import { RootScreens } from "..";
 import AppResource from "@/General/Constants/AppResource";
 
@@ -18,7 +18,13 @@ export const SignIn = (props: {
                 </Text>
                 <Button
                     style={styles.btnGetStarted}
-                    onPress={() => props.onNavigate(RootScreens.MAIN)}
+                    onPress={() =>{
+                        props.onNavigate(RootScreens.MAIN)
+                        Toast.show({
+                            description:"Logging in!",
+                            placement:'top'
+                        })
+                    }}
                 >
                     {i18n.t(LocalizationKey.GET_STARTED)}
                 </Button>

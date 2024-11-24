@@ -8,35 +8,35 @@ import { RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
 
 export type RootStackParamList = {
-  [RootScreens.MAIN]: undefined;
-  [RootScreens.WELCOME]: undefined;
-  [RootScreens.SIGN_IN]: undefined;
+	[RootScreens.MAIN]: undefined;
+	[RootScreens.WELCOME]: undefined;
+	[RootScreens.SIGN_IN]: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 // @refresh reset
 const ApplicationNavigator = () => {
-  return (
-    <NavigationContainer>
-      <StatusBar />
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen
-          name={RootScreens.WELCOME}
-          component={WelcomeContainer}
-        />
-        <RootStack.Screen
-          name={RootScreens.MAIN}
-          component={MainNavigator}
-          options={{}}
-        />
-        <RootStack.Screen
-          name={RootScreens.SIGN_IN}
-          component={SignInContainer}
-        />
-      </RootStack.Navigator>
-    </NavigationContainer>
-  );
+	return (
+		<NavigationContainer>
+			<StatusBar />
+			<RootStack.Navigator initialRouteName={RootScreens.WELCOME} screenOptions={{ headerShown: true }}>
+				<RootStack.Screen
+					name={RootScreens.WELCOME}
+					component={WelcomeContainer}
+				/>
+				<RootStack.Screen
+					name={RootScreens.MAIN}
+					component={MainNavigator}
+					options={{}}
+				/>
+				<RootStack.Screen
+					name={RootScreens.SIGN_IN}
+					component={SignInContainer}
+				/>
+			</RootStack.Navigator>
+		</NavigationContainer>
+	);
 };
 
 export { ApplicationNavigator };
