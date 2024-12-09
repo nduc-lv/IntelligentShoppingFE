@@ -12,4 +12,5 @@ export const i18n = new I18n({
   [Language.ENGLISH]: en,
 });
 
+i18n.defaultLocale=Language.ENGLISH
 export * from "./keys";
