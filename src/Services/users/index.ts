@@ -35,8 +35,12 @@ const userApi = API.injectEndpoints({
     getUser: build.query<User, string>({
       query: (id) => `users/${id}`,
     }),
+    getUserGroup: build.query({
+      query: (id) => `group/by-user/${id}`,
+      transformResponse: (response: {data: any}) => response.data
+    })
   }),
   overrideExisting: true,
 });
 
-export const { useLazyGetUserQuery } = userApi;
+export const { useLazyGetUserQuery, useLazyGetUserGroupQuery } = userApi;
