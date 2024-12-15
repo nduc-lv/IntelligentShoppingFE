@@ -36,8 +36,10 @@ const userApi = API.injectEndpoints({
       query: (id) => `users/${id}`,
     }),
     getUserGroup: build.query({
-      query: (id) => `group/by-user/${id}`,
-      transformResponse: (response: {data: any}) => response.data
+      query: (id) => `shopping-list/group/${id}`,
+      transformResponse: (response: {groups: any}) => {
+        return response.groups
+      }
     })
   }),
   overrideExisting: true,

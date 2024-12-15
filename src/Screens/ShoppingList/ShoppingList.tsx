@@ -14,13 +14,16 @@ const mockUserId = '84ef5319-acef-4d19-b048-fdf00ff3e386';
 
 export const ShoppingListScreen: React.FC = () => {
   // Lazy loading the groups with user ID
-  const [fetchGroups, { data: groups, isLoading, isError }] = useLazyGetUserGroupQuery();
+  const [fetchGroups, { data, isLoading, isError, currentData }] = useLazyGetUserGroupQuery();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     // Fetch groups when the component mounts
     fetchGroups(mockUserId);
   }, [fetchGroups]);
+
+  useEffect(() => {
+  }, [data])
 
   // Loading state
   if (isLoading) {
@@ -48,9 +51,9 @@ export const ShoppingListScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Groups</Text>
-      {groups && groups.length > 0 ? (
+      {data && data && data.length > 0 ? (
         <FlatList
-          data={groups}
+          data={data}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: Group }) => (
             <View style={styles.groupItem}>
