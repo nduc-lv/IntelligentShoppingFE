@@ -12,7 +12,7 @@ export interface Shopping {
   name: string;
   date: string;
   group: any;
-  foods: Food[];
+  foods: any[];
   tasks: any[];
 }
 

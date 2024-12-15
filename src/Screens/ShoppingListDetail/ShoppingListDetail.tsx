@@ -15,7 +15,10 @@ import {
   Input,
   Form,
   Space,
+  Calendar,
   Toast,
+  CalendarPicker,
+  DatePicker
 } from "antd-mobile";
 import { Select, FormControl, WarningOutlineIcon, CheckIcon } from "native-base";
 import { useRoute, RouteProp } from "@react-navigation/native";
@@ -63,7 +66,7 @@ export const ShoppingListDetail: React.FC = () => {
   const loadPickerData = useCallback(() => {
     fetchFoodList({ userId: mockUserId });
     fetchUnitList({ userId: mockUserId });
-    fetchUserList({groupId: groupId});
+    fetchUserList({ groupId: groupId });
   }, [fetchFoodList, fetchUnitList, fetchUserList]);
 
   // Add new item
@@ -92,11 +95,24 @@ export const ShoppingListDetail: React.FC = () => {
       loadPickerData();
       form.resetFields();
       if (action === "edit" && item) {
-        form.setFieldsValue({ date: item.date, items: item.foods });
+        form.setFieldsValue({ date: moment(item.date).format("MM-DD-YY") });
+        const items = item.tasks.map(item => {
+          return {
+            food: item?.food_id,
+            unit: item?.unit_id,
+            assignee: item?.task?.user_id
+          }
+        })
+        setItems([...items]);
+      }
+      if (action === "create") {
+        setItems([{food: "", assignee: "", unit: ""}]);
       }
     }
     setIsModalVisible(true);
   };
+  const [showCalendar, setShowCalendar] = useState(false);
+
 
   const handleModalClose = () => {
     setIsModalVisible(false);
@@ -117,29 +133,29 @@ export const ShoppingListDetail: React.FC = () => {
         Toast.show({ content: "Please fill in all fields for each item.", icon: "fail" });
         return;
       }
-      
+
       const values = await form.validateFields();
       console.log(items);
       console.log(values)
       // {name, date, groupId, foods: [{food_id, quantity, user_id, unit_id}]}
+      const payload = {
+        groupId: groupId,
+        date: values.date,
+        name: "Default",
+        foods: items.map(item => {
+          return {
+            food_id: item.food,
+            quantity: 1,
+            user_id: item.assignee,
+            unit_id: item.unit
+          }
+        })
+      }
       if (currentAction === "create") {
-        const payload = {
-          groupId: groupId,
-          date: values.date,
-          name: "Default",
-          foods: items.map(item => {
-            return {
-              food_id: item.food,
-              quantity: 1,
-              user_id: item.assignee,
-              unit_id: item.unit
-            }
-          })
-        }
         await createShoppingList(payload).unwrap();
         Toast.show({ content: "Shopping list created successfully!", icon: "success" });
       } else if (currentAction === "edit" && selectedItem) {
-        // await updateShoppingList({ id: selectedItem.id, ...values }).unwrap();
+        await updateShoppingList({ id: selectedItem.id, ...payload}).unwrap();
         Toast.show({ content: "Shopping list updated successfully!", icon: "success" });
       }
       fetchShoppingList({ groupId, ...pagination });
@@ -212,8 +228,29 @@ export const ShoppingListDetail: React.FC = () => {
         ) : (
           <Form form={form} layout="vertical">
             {/* Date Field */}
-            <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}>
-              <Input type="date" />
+            <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
+            >
+              <Input
+                readOnly
+                value={moment(form.getFieldValue("date")).format("MM-DD-YY")}
+                onClick={() => setShowCalendar(true)}
+              />
+              <Button onClick={() => setShowCalendar(true)}>
+                Choose Date
+              </Button>
+              <DatePicker
+                title='Choose Date'
+                visible={showCalendar}
+                confirmText="Confirm"
+                cancelText="Cancle"
+                onClose={() => {
+                  setShowCalendar(false);
+                }}
+                onConfirm={val => {
+                  form.setFieldValue("date", moment(val).format("MM-DD-YYYY"))
+                  Toast.show(val.toDateString())
+                }}
+              />
             </Form.Item>
 
             {/* Scrollable Items */}
@@ -224,6 +261,7 @@ export const ShoppingListDetail: React.FC = () => {
                     <Select
                       minWidth="200"
                       placeholder="Select Food"
+                      defaultValue={item.food || undefined}
                       _selectedItem={{
                         bg: 'teal.600',
                         endIcon: <CheckIcon size={5} />,
@@ -243,6 +281,7 @@ export const ShoppingListDetail: React.FC = () => {
                     <Select
                       minWidth="200"
                       placeholder="Select Unit"
+                      defaultValue={item.unit || undefined}
                       _selectedItem={{
                         bg: 'teal.600',
                         endIcon: <CheckIcon size={5} />,
@@ -268,6 +307,7 @@ export const ShoppingListDetail: React.FC = () => {
                     <Select
                       minWidth="200"
                       placeholder="Select Assignee"
+                      defaultValue={item.assignee || undefined}
                       _selectedItem={{
                         bg: 'teal.600',
                         endIcon: <CheckIcon size={5} />,
