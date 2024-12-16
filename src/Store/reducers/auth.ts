@@ -1,7 +1,7 @@
 // slices/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface AuthState {
+export interface AuthState {
   accessToken: string | null;
   // refreshToken: string | null;
 }
@@ -21,6 +21,7 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       // state.refreshToken = action.payload.refreshToken;
       localStorage.setItem('accessToken', action.payload.accessToken);
+      localStorage.getItem('accessToken');
       // localStorage.setItem('refreshToken', action.payload.refreshToken);
     },
     clearTokens: (state) => {

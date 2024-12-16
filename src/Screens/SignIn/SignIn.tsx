@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { i18n, LocalizationKey } from "@/Localization";
 import {
 	View,
@@ -13,8 +13,8 @@ import { Button, Toast } from "native-base";
 import { RootScreens } from "..";
 import axios from "axios";
 import { userApi } from "@/Services";
-import { useDispatch } from "react-redux";
-import { setTokens } from "@/Store/reducers";
+import { useDispatch, useSelector } from "react-redux";
+import { AuthState, setTokens } from "@/Store/reducers";
 type SignInAndRegisterProps = {
 	onNavigate: (screen: RootScreens) => void;
 };
@@ -164,6 +164,14 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 	const [password, setPassword] = useState("");
 	const [login, { isLoading, error, data }] = userApi.useLoginMutation();
 	const dispatch=useDispatch()
+	const accessToken=useSelector((state:{
+		auth:AuthState
+	})=>state.auth.accessToken)
+	useEffect(()=>{
+		if(accessToken){
+			props.onNavigate(RootScreens.MAIN);
+		}
+	},[accessToken])
 	const handleLogin = async () => {
 		try {
 			const response = await login({
@@ -177,7 +185,6 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 				description: i18n.t(LocalizationKey.LOGIN_SUCCESS),
 				placement: "top",
 			});
-			props.onNavigate(RootScreens.MAIN);
 		} catch (error) {
 			console.error(error)
 			Toast.show({
@@ -233,7 +240,6 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 			<Button
 				style={styles.btnGetStarted}
 				onPress={() => {
-					props.onNavigate(RootScreens.MAIN);
 					Toast.show({
 						description: "Logging in!",
 						placement: "top",
