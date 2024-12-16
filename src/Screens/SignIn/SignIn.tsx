@@ -46,6 +46,14 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 	);
 	const [register, { isLoading, error, data }] = userApi.useRegisterMutation();
 	const dispatch=useDispatch();
+	const accessToken=useSelector((state:{
+		auth:AuthState
+	})=>state.auth.accessToken)
+	useEffect(()=>{
+		if(accessToken){
+			props.onNavigate(RootScreens.MAIN);
+		}
+	},[accessToken])
 	const handleRegister = async () => {
 		try {
 			const response = await register({
@@ -62,7 +70,6 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 				description: i18n.t(LocalizationKey.REGISTER_SUCCESS),
 				placement: "top",
 			});
-			props.onNavigate(RootScreens.MAIN);
 		} catch {
 			Toast.show({
 				description: i18n.t(LocalizationKey.REGISTER_FAILED),
@@ -146,7 +153,6 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 			<Button
 				style={styles.btnGetStarted}
 				onPress={() => {
-					props.onNavigate(RootScreens.MAIN);
 					Toast.show({
 						description: "Skipping registration for development!",
 						placement: "top",
