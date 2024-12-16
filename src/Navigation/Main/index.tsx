@@ -4,6 +4,7 @@ import { HomeContainer } from "@/Screens/Home";
 import { GroupContainer } from "@/Screens/Group";
 import { Home, User, Users } from "lucide-react-native"; // Import các icon từ Lucide
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
+import { UserTabContainer } from "@/Screens/UserTab/UserTabContainer";
 
 const Tab = createBottomTabNavigator();
 
@@ -34,7 +35,7 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="User"
-        component={HomeContainer}
+        component={UserTabContainer}
         options={{
           tabBarIcon: ({ color, size }) => (
             <User color={color} size={size} />
