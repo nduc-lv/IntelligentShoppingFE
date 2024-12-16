@@ -8,13 +8,15 @@ import { RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
+import { ShoppingListByIdContainer } from "@/Screens/ShoppingListById/ShoppingListByIdContainer";
 
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
 	[RootScreens.SIGN_IN]: undefined;
 	SHOPPING_LIST: undefined;
-	SHOPPING_LIST_DETAIL: {groupId: string}
+	SHOPPING_LIST_DETAIL: {groupId: string};
+	SHOPPING_LIST_BY_ID: {groupId:string, shoppingId: string}
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -45,6 +47,9 @@ const ApplicationNavigator = () => {
 				<RootStack.Screen
 				name="SHOPPING_LIST_DETAIL"
 				component={ShoppingListDetailContainer}/>
+				<RootStack.Screen
+				name="SHOPPING_LIST_BY_ID"
+				component={ShoppingListByIdContainer}/>
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);

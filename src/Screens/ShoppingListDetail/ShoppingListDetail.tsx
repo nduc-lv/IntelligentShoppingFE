@@ -10,7 +10,6 @@ import {
   ScrollView, // Import ScrollView
 } from "react-native";
 import {
-  Button,
   Popup,
   Input,
   Form,
@@ -20,7 +19,9 @@ import {
   CalendarPicker,
   DatePicker
 } from "antd-mobile";
-import { Select, FormControl, WarningOutlineIcon, CheckIcon } from "native-base";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "@/Navigation";
+import { Select, FormControl, WarningOutlineIcon, CheckIcon, Modal, Button } from "native-base";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { Shopping, useLazyGetAllUserQuery } from "@/Services/shoppingList";
 import {
@@ -40,8 +41,9 @@ export const ShoppingListDetail: React.FC = () => {
   const mockUserId = "84ef5319-acef-4d19-b048-fdf00ff3e386";
   const route = useRoute<RouteProp<ShoppingListRouteParams, "ShoppingListDetail">>();
   const { groupId } = route.params;
-
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [fetchShoppingList, { data: rows = [], isLoading, isError }] = useLazyGetShoppingListQuery();
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [deleteShoppingList] = useDeleteShoppingListMutation();
   const [updateShoppingList] = useUpdateShoppingListMutation();
   const [createShoppingList] = useCreateShoppingListMutation();
@@ -60,7 +62,7 @@ export const ShoppingListDetail: React.FC = () => {
     fetchShoppingList({ groupId, ...pagination });
   }, [groupId, pagination, fetchShoppingList]);
 
-  const [items, setItems] = useState([{ food: "", unit: "", assignee: "" }]);
+  const [items, setItems] = useState([{ food: "", unit: "", assignee: "", quantity: 0 }]);
 
   // Fetch food and unit data only when needed
   const loadPickerData = useCallback(() => {
@@ -71,7 +73,7 @@ export const ShoppingListDetail: React.FC = () => {
 
   // Add new item
   const addItem = () => {
-    setItems([...items, { food: "", unit: "", assignee: "" }]);
+    setItems([...items, { food: "", unit: "", assignee: "", quantity: 0 }]);
   };
 
   // Remove an item
@@ -81,8 +83,8 @@ export const ShoppingListDetail: React.FC = () => {
   };
 
   // Update item values
-  const updateItem = (index: number, key: string, value: string) => {
-    const updatedItems: Array<{ food: string; assignee: string; unit: string;[key: string]: string }> = [...items];
+  const updateItem = (index: number, key: string, value: string | number) => {
+    const updatedItems: Array<{ food: string; assignee: string; unit: string; quantity: number;[key: string]: string | number }> = [...items];
     updatedItems[index][key] = value;
     setItems(updatedItems);
   };
@@ -100,13 +102,14 @@ export const ShoppingListDetail: React.FC = () => {
           return {
             food: item?.food_id,
             unit: item?.unit_id,
-            assignee: item?.task?.user_id
+            assignee: item?.task?.user_id,
+            quantity: item?.quantity || 0
           }
         })
         setItems([...items]);
       }
       if (action === "create") {
-        setItems([{food: "", assignee: "", unit: ""}]);
+        setItems([{ food: "", assignee: "", unit: "", quantity: 0 }]);
       }
     }
     setIsModalVisible(true);
@@ -135,8 +138,6 @@ export const ShoppingListDetail: React.FC = () => {
       }
 
       const values = await form.validateFields();
-      console.log(items);
-      console.log(values)
       // {name, date, groupId, foods: [{food_id, quantity, user_id, unit_id}]}
       const payload = {
         groupId: groupId,
@@ -145,7 +146,7 @@ export const ShoppingListDetail: React.FC = () => {
         foods: items.map(item => {
           return {
             food_id: item.food,
-            quantity: 1,
+            quantity: item.quantity,
             user_id: item.assignee,
             unit_id: item.unit
           }
@@ -155,7 +156,7 @@ export const ShoppingListDetail: React.FC = () => {
         await createShoppingList(payload).unwrap();
         Toast.show({ content: "Shopping list created successfully!", icon: "success" });
       } else if (currentAction === "edit" && selectedItem) {
-        await updateShoppingList({ id: selectedItem.id, ...payload}).unwrap();
+        await updateShoppingList({ id: selectedItem.id, ...payload }).unwrap();
         Toast.show({ content: "Shopping list updated successfully!", icon: "success" });
       }
       fetchShoppingList({ groupId, ...pagination });
@@ -183,7 +184,7 @@ export const ShoppingListDetail: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Shopping Lists</Text>
-      <Button onClick={() => handleModalOpen("create")}>Create New Shopping List</Button>
+      <Button onPress={() => handleModalOpen("create")}>Create New Shopping List</Button>
 
       {isLoading ? (
         <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
@@ -200,8 +201,8 @@ export const ShoppingListDetail: React.FC = () => {
               <Text>{moment(item.date).format("MM-DD-YY")}</Text>
               <Text>{item.name}</Text>
               <View style={styles.buttonContainer}>
-                <Button onClick={() => { handleModalOpen("edit", item); }}>Edit</Button>
-                <Button onClick={() => { handleModalOpen("delete", item); }}>Delete</Button>
+                <Button onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id })}}>Edit</Button>
+                <Button onPress={() => { handleModalOpen("delete", item); }}>Delete</Button>
               </View>
             </View>
           )}
@@ -222,8 +223,8 @@ export const ShoppingListDetail: React.FC = () => {
       >
         {currentAction === "delete" ? (
           <View style={styles.modalButtons}>
-            <Button onClick={confirmDelete}>Confirm Delete</Button>
-            <Button onClick={handleModalClose}>Cancel</Button>
+            <Button onPress={confirmDelete}>Confirm Delete</Button>
+            <Button onPress={handleModalClose}>Cancel</Button>
           </View>
         ) : (
           <Form form={form} layout="vertical">
@@ -235,7 +236,7 @@ export const ShoppingListDetail: React.FC = () => {
                 value={moment(form.getFieldValue("date")).format("MM-DD-YY")}
                 onClick={() => setShowCalendar(true)}
               />
-              <Button onClick={() => setShowCalendar(true)}>
+              <Button onPress={() => setShowCalendar(true)}>
                 Choose Date
               </Button>
               <DatePicker
@@ -323,26 +324,82 @@ export const ShoppingListDetail: React.FC = () => {
                     </FormControl.ErrorMessage>
                   </FormControl>
 
+                  <FormControl isInvalid={!item.food}>
+                    {/* <Select
+                      minWidth="200"
+                      placeholder="Choose Quantity"
+                      defaultValue={item.food || undefined}
+                      _selectedItem={{
+                        bg: 'teal.600',
+                        endIcon: <CheckIcon size={5} />,
+                      }}
+                      onValueChange={(value: any) => updateItem(index, "food", value)}
+                    >
+                      {foods.map((food) => (
+                        <Select.Item key={food.id} label={food.name} value={food.id} />
+                      ))}
+                    </Select> */}
+                    <Input type="number" placeholder="Choose Quantity" onChange={(value => updateItem(index, "quantity", value))} defaultValue={`${item.quantity || 0}`}></Input>
+                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+                      Please select food quantity!
+                    </FormControl.ErrorMessage>
+                  </FormControl>
+
                   {/* Remove Button */}
-                  <Button onClick={() => removeItem(index)} color="danger" size="small">
+                  <Button onPress={() => removeItem(index)} color="danger" size="small">
                     Remove
+                  </Button>
+
+                  {/* Add to fridge button */}
+                  <Button onPress={() => setShowModal(true)} color="danger" size="small">
+                    Add To Fridge
                   </Button>
                 </View>
               ))}
             </ScrollView>
 
             {/* Add Button */}
-            <Button onClick={addItem} block>
+            <Button onPress={addItem}>
               Add Item
             </Button>
 
             {/* Save Button */}
-            <Button onClick={saveShoppingList} block>
+            <Button onPress={saveShoppingList}>
               Save Shopping List
             </Button>
           </Form>
         )}
       </Popup>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+        <Modal.Content maxWidth="400px">
+          <Modal.CloseButton />
+          <Modal.Header>Contact Us</Modal.Header>
+          <Modal.Body>
+            <FormControl>
+              <FormControl.Label>Name</FormControl.Label>
+              <Input />
+            </FormControl>
+            <FormControl mt="3">
+              <FormControl.Label>Email</FormControl.Label>
+              <Input />
+            </FormControl>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button.Group space={2}>
+              <Button variant="ghost" colorScheme="blueGray" onPress={() => {
+                setShowModal(false);
+              }}>
+                Cancel
+              </Button>
+              <Button onPress={() => {
+                setShowModal(false);
+              }}>
+                Save
+              </Button>
+            </Button.Group>
+          </Modal.Footer>
+        </Modal.Content>
+      </Modal>
     </View>
   );
 };
