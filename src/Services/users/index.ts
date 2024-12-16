@@ -19,13 +19,17 @@ export interface RegisterRequest {
   link_avatar: string,
 }
 
-export const userApi = API.injectEndpoints({
+export const userApi = API
+  .enhanceEndpoints({ addTagTypes: ['User'] })
+  .injectEndpoints({
   endpoints: (build) => ({
     getUser: build.query<User, string>({
       query: (id) => `user/${id}`,
+      providesTags: (result, error, id) => [{ type: 'User', id }],
     }),
     getMe: build.query<User, void>({
       query: () => `user/me`,
+      providesTags: (result, error) => [{ type: 'User', id:'me' }],
     }),
     login: build.mutation<GenericResponse, LoginRequest>({
       query: (credentials) => ({
@@ -33,6 +37,7 @@ export const userApi = API.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      invalidatesTags: (result, error) => [{ type: 'User', id:'me' }],
     }),
     register: build.mutation<GenericResponse, RegisterRequest>({
       query: (credentials) => ({
@@ -40,9 +45,26 @@ export const userApi = API.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      invalidatesTags: (result, error) => [{ type: 'User', id:'me' }],
+    }),
+    updateUser: build.mutation<User, Partial<Omit<User,"is_active"|"is_confirmed"|"updated_at"|"created_at">>& { id: string }>({
+      query: ({ id, ...data }) => ({
+        url: `user/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error,{id}) => [{ type: 'User', id:id }],
+    }),
+    updateMe: build.mutation<User, Partial<Omit<User,"is_active"|"is_confirmed"|"updated_at"|"created_at">>>({
+      query: (data) => ({
+        url: `user/me`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error) => [{ type: 'User', id:'me' }],
     }),
   }),
   overrideExisting: true,
 });
 
-export const { useLazyGetUserQuery,useLazyGetMeQuery,useRegisterMutation,useLoginMutation } = userApi;
+export const { useLazyGetUserQuery,useLazyGetMeQuery,useRegisterMutation,useLoginMutation ,useUpdateUserMutation,useUpdateMeMutation} = userApi;
