@@ -1,5 +1,5 @@
 import React from "react";
-import { SignIn } from "./SignIn";
+import { SignInAndRegister } from "./SignIn";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "..";
@@ -16,5 +16,5 @@ export const SignInContainer = ({
         navigation.navigate(screen);
     };
 
-    return <SignIn onNavigate={onNavigate} />;
+    return <SignInAndRegister onNavigate={onNavigate} />;
 };
