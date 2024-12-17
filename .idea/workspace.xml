@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="30a66a70-252f-4a10-9c2e-b266b5a0795b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Navigation/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/Navigation/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Screens/Group/Group.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/Screens/Group/Group.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Screens/Group/GroupContainer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/Screens/Group/GroupContainer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Services/group/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/Services/group/index.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

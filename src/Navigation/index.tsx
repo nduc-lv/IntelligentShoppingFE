@@ -8,16 +8,22 @@ import { RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
+import { GroupDetailContainer } from "@/Screens/GroupDetail/GroupDetailContainer";
+import { GroupContainer } from "@/Screens/Group/GroupContainer";
 import { AccountSettingsContainer } from "@/Screens/Account";
 import { userApi } from "@/Services";
 import Loading from "@/General/Components/Loading";
+import { GroupInfoContainer } from "@/Screens/GroupInfo/GroupInfoContainer";
 
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
 	[RootScreens.SIGN_IN]: undefined;
 	SHOPPING_LIST: undefined;
-	SHOPPING_LIST_DETAIL: { groupId: string }
+	SHOPPING_LIST_DETAIL: { groupId: string };
+	GROUP_DETAIL: { groupId: string, groupName: string, isAdmin: boolean };
+	GROUP: undefined;
+	GROUP_INFO: { groupId: string, groupName: string, isAdmin: boolean };
 	[RootScreens.ACCOUNT_SETTING]: undefined;
 };
 
@@ -37,7 +43,7 @@ const ApplicationNavigator = () => {
 			<StatusBar />
 			<RootStack.Navigator
 				initialRouteName={data ? RootScreens.MAIN : RootScreens.WELCOME}
-				screenOptions={{ headerShown: true }}
+				screenOptions={{ headerShown: false }}
 			>
 				<RootStack.Screen
 					name={RootScreens.WELCOME}
@@ -63,6 +69,15 @@ const ApplicationNavigator = () => {
 					name={RootScreens.ACCOUNT_SETTING}
 					component={AccountSettingsContainer}
 				/>
+				<RootStack.Screen
+					name="GROUP_DETAIL"
+					component={GroupDetailContainer} />
+				<RootStack.Screen
+					name="GROUP_INFO"
+					component={GroupInfoContainer} />
+				<RootStack.Screen
+					name="GROUP"
+					component={GroupContainer} />
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);
