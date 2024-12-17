@@ -6,17 +6,27 @@ import { MainNavigator } from "./Main";
 import { WelcomeContainer } from "@/Screens/Welcome";
 import { RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
-import { AccountSettingsContainer } from "@/Screens/AccountSettings";
-import { userApi } from "@/Services";
-import Loading from "@/General/Components/Loading";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/Store";
 import { AuthState, fetchTokens } from "@/Store/reducers";
+import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
+import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
+import { GroupDetailContainer } from "@/Screens/GroupDetail/GroupDetailContainer";
+import { GroupContainer } from "@/Screens/Group/GroupContainer";
+import { AccountSettingsContainer } from "@/Screens/AccountSettings";
+import { userApi } from "@/Services";
+import Loading from "@/General/Components/Loading";
+import { GroupInfoContainer } from "@/Screens/GroupInfo/GroupInfoContainer";
 
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
 	[RootScreens.SIGN_IN]: undefined;
+	SHOPPING_LIST: undefined;
+	SHOPPING_LIST_DETAIL: { groupId: string };
+	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
+	GROUP: undefined;
+	GROUP_INFO: { groupId: string, isAdmin: boolean };
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -75,6 +85,22 @@ const _ApplicationNavigator = () => {
 					name={RootScreens.SIGN_IN}
 					component={SignInContainer}
 				/>
+				<RootStack.Screen
+					name={'SHOPPING_LIST'}
+					component={ShoppingListContainer}
+				/>
+				<RootStack.Screen
+					name="SHOPPING_LIST_DETAIL"
+					component={ShoppingListDetailContainer} />
+				<RootStack.Screen
+					name="GROUP_DETAIL"
+					component={GroupDetailContainer} />
+				<RootStack.Screen
+					name="GROUP_INFO"
+					component={GroupInfoContainer} />
+				<RootStack.Screen
+					name="GROUP"
+					component={GroupContainer} />
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);
