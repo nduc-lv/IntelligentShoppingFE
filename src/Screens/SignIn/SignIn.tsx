@@ -11,10 +11,10 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { Button, Toast } from "native-base";
 import { RootScreens } from "..";
-import axios from "axios";
 import { userApi } from "@/Services";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthState, setTokens } from "@/Store/reducers";
+import { AppDispatch } from "@/Store";
 type SignInAndRegisterProps = {
 	onNavigate: (screen: RootScreens) => void;
 };
@@ -45,7 +45,7 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 		i18n.t(LocalizationKey.LINK_AVATAR_DEFAULT)
 	);
 	const [register, { isLoading, error, data }] = userApi.useRegisterMutation();
-	const dispatch=useDispatch();
+	const dispatch=useDispatch<AppDispatch>();
 	const accessToken=useSelector((state:{
 		auth:AuthState
 	})=>state.auth.accessToken)
@@ -169,7 +169,7 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [login, { isLoading, error, data }] = userApi.useLoginMutation();
-	const dispatch=useDispatch()
+	const dispatch=useDispatch<AppDispatch>()
 	const accessToken=useSelector((state:{
 		auth:AuthState
 	})=>state.auth.accessToken)

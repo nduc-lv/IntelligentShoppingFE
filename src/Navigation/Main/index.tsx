@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeContainer } from "@/Screens/Home";
 import {UserTabContainer} from "@/Screens/UserTab"
 import { Home, User } from "lucide-react-native"; // Import các icon từ Lucide
+import { UserTabNavigation } from "./UserTab";
 
 const Tab = createBottomTabNavigator();
 
@@ -10,7 +11,7 @@ const Tab = createBottomTabNavigator();
 export const MainNavigator = () => {
 
   return (
-    <Tab.Navigator>
+    <Tab.Navigator screenOptions={{popToTopOnBlur:true}}>
       <Tab.Screen
         name="Home"
         component={HomeContainer}
@@ -23,8 +24,9 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="User"
-        component={UserTabContainer}
+        component={UserTabNavigation}
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <User color={color} size={size} />
           ),

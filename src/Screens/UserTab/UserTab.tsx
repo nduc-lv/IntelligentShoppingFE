@@ -13,14 +13,16 @@ import { Settings,LockIcon,HelpCircleIcon, LucideIcon, LogOutIcon } from "lucide
 import { User } from "@/Store/types";
 import { useDispatch } from "react-redux";
 import { clearTokens } from "@/Store/reducers";
-import { RootScreens } from "..";
+import { RootScreens,UserTabScreens } from "..";
 import Loading from "@/General/Components/Loading";
+import { AppDispatch } from "@/Store";
+import { RootNavigationContainerRef } from "@/Navigation";
 type UserTabListItem ={ title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void } 
-export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoading: boolean, onNavigate: (screen: RootScreens) => void }) => {
+export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoading: boolean, onNavigate: (screen: UserTabScreens) => void }) => {
   useEffect(()=>{
     console.log(data)
   },[data])
-  const dispatch=useDispatch();
+  const dispatch=useDispatch<AppDispatch>();
 
   if (isLoading) {
     return (
@@ -29,7 +31,7 @@ export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoad
   }
 
   if (!data&& !isLoading) {
-    onNavigate(RootScreens.SIGN_IN)
+    RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
     return <></>
   }
 
@@ -42,13 +44,12 @@ export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoad
 
   const settings:Array<UserTabListItem> = [
     { title: "Account Settings", icon: Settings, onClick:(e)=>{
-      onNavigate(RootScreens.ACCOUNT_SETTING)
+      onNavigate(UserTabScreens.ACCOUNT_SETTING)
     } },
     { title: "Privacy Settings", icon: LockIcon },
     { title: "Help & Support", icon: HelpCircleIcon },
     { title: "Logout", icon: LogOutIcon, onClick:(e)=>{
       dispatch(clearTokens())
-      onNavigate(RootScreens.SIGN_IN)
     } },
   ];
 
