@@ -21,9 +21,9 @@ export type RootStackParamList = {
 	[RootScreens.SIGN_IN]: undefined;
 	SHOPPING_LIST: undefined;
 	SHOPPING_LIST_DETAIL: { groupId: string };
-	GROUP_DETAIL: { groupId: string, groupName: string, isAdmin: boolean };
+	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
 	GROUP: undefined;
-	GROUP_INFO: { groupId: string, groupName: string, isAdmin: boolean };
+	GROUP_INFO: { groupId: string, isAdmin: boolean };
 	[RootScreens.ACCOUNT_SETTING]: undefined;
 };
 

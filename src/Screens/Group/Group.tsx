@@ -1,7 +1,7 @@
 import { Group, useLazyGetAllGroupQuery } from "@/Services/group";
 import { ChevronRight, Plus } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 
@@ -26,9 +26,15 @@ export const GroupScreen = () => {
           data={data}
           keyExtractor={(item) => item.group_id}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => navigation.navigate("GROUP_DETAIL", { groupId: item.group_id, groupName: item.name, isAdmin: item.is_admin })}>
+            <TouchableOpacity onPress={() => navigation.navigate("GROUP_DETAIL", { groupId: item.group_id, isAdmin: item.is_admin })}>
               <View style={styles.groupItem}>
-                <Text style={styles.itemText}>{item.name}</Text>
+                <View style={styles.leftContent}>
+                  <Image
+                    defaultSource={{ uri: "https://via.placeholder.com/150" }}
+                    style={styles.groupImage}
+                  />
+                  <Text style={styles.itemText}>{item.name}</Text>
+                </View>
                 <ChevronRight size={24} color="#888" />
               </View>
             </TouchableOpacity>
@@ -39,7 +45,7 @@ export const GroupScreen = () => {
           onEndReachedThreshold={0.5}
         />
       ) : (
-        <Text>No shopping lists found.</Text>
+        <Text>No groups found.</Text>
       )}
       <TouchableOpacity style={styles.fab} onPress={() => console.log("Add button pressed!")}>
         <Plus color="white" size={25} />
@@ -52,9 +58,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
   title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
   groupItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 12,
     marginVertical: 8,
     backgroundColor: '#fff',
@@ -86,5 +92,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
+  },
+  groupImage: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    marginLeft: 8,
+    marginRight: 8,
+  },
+  leftContent: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
