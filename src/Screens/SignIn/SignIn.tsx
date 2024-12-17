@@ -243,17 +243,6 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 					<Text>{i18n.t(LocalizationKey.SWITCH_TO_REGISTER)}</Text>
 				</TouchableOpacity>
 			</View>
-			<Button
-				style={styles.btnGetStarted}
-				onPress={() => {
-					Toast.show({
-						description: "Logging in!",
-						placement: "top",
-					});
-				}}
-			>
-				Development skip login
-			</Button>
 		</View>
 	);
 };
