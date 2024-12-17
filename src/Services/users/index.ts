@@ -63,6 +63,12 @@ export const userApi = API
       }),
       invalidatesTags: (result, error) => [{ type: 'User', id:'me' }],
     }),
+    getUserGroup: build.query({
+      query: (id) => `shopping-list/group/${id}`,
+      transformResponse: (response: {groups: any}) => {
+        return response.groups
+      }
+    })
   }),
   overrideExisting: true,
 });
