@@ -42,7 +42,7 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 	const [linkAvatar, setLinkAvatar] = useState(
-		i18n.t(LocalizationKey.LINK_AVATAR_DEFAULT)
+		"https://via.placeholder.com/150"
 	);
 	const [register, { isLoading, error, data }] = userApi.useRegisterMutation();
 	const dispatch=useDispatch<AppDispatch>();
