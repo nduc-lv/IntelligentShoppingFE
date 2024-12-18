@@ -14,7 +14,8 @@ const Tab = createBottomTabNavigator();
 export const MainNavigator = () => {
 
   return (
-    <Tab.Navigator screenOptions={{ popToTopOnBlur: true }}>
+    <Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}
+    >
       <Tab.Screen
         name="Group"
         component={GroupContainer}

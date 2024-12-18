@@ -6,12 +6,11 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import AppData from "@/General/Constants/AppData";
 import { Avatar } from "native-base";
-import { StatusBar } from "expo-status-bar";
 
-export const RecipeScreen = () => {
+export const RecipeListScreen = () => {
     const isLoading = false;
     const isError = false;
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
     // Dữ liệu giả để kiểm tra
     const data = [
         { id: '1', name: 'Sunny Egg & Toast Avocado' },
@@ -92,10 +91,7 @@ export const RecipeScreen = () => {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="auto" />
-            <TouchableOpacity style={[styles.card, { alignItems: "center", flexDirection: "row" }]}
-                onPress={() => { navigation.navigate("RECIPE_LIST") }}
-            >
+            <View style={[styles.card, { alignItems: "center", flexDirection: "row" }]}>
                 <View style={{ flexDirection: "column", gap: 10 }}>
                     <Text style={{
                         fontSize: AppData.fontSizes.medium,
@@ -121,7 +117,7 @@ export const RecipeScreen = () => {
                 }}>
                     <ArrowRight color="white" />
                 </View>
-            </TouchableOpacity>
+            </View>
 
             <View style={{ flex: 1, marginTop: 10 }}>
                 <View style={{
