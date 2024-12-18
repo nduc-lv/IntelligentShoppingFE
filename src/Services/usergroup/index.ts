@@ -7,6 +7,10 @@ export interface UserGroup {
     is_admin: boolean;
     createdAt: Date;
     updatedAt: Date;
+    user: {
+        username: string;
+        name: string;
+    };
 }
 
 const usergroupApi = API.injectEndpoints({

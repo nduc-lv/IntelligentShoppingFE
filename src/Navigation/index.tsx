@@ -10,6 +10,7 @@ import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContai
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { GroupDetailContainer } from "@/Screens/GroupDetail/GroupDetailContainer";
 import { GroupContainer } from "@/Screens/Group/GroupContainer";
+import { UsergroupContainer } from "@/Screens/Usergroup/UsergroupContainer";
 import { AccountSettingsContainer } from "@/Screens/Account";
 import { userApi } from "@/Services";
 import Loading from "@/General/Components/Loading";
@@ -24,6 +25,7 @@ export type RootStackParamList = {
 	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
 	GROUP: undefined;
 	GROUP_INFO: { groupId: string, isAdmin: boolean };
+	USERGROUP: { groupId: string, isAdmin: boolean, groupName: string };
 	[RootScreens.ACCOUNT_SETTING]: undefined;
 };
 
@@ -78,6 +80,9 @@ const ApplicationNavigator = () => {
 				<RootStack.Screen
 					name="GROUP"
 					component={GroupContainer} />
+				<RootStack.Screen
+					name="USERGROUP"
+					component={UsergroupContainer} />
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);

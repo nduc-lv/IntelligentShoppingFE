@@ -6,10 +6,15 @@ export interface Group {
     is_admin: boolean;
 }
 
+export interface CreateGroupPayload {
+    name: string;
+    imageUrl?: string;
+}
+
 export interface UpdateGroupPayload {
     id: string;
     name?: string;
-    iamgeUrl?: string;
+    imageUrl?: string;
 }
 
 const groupApi = API.injectEndpoints({
@@ -26,6 +31,13 @@ const groupApi = API.injectEndpoints({
                 method: "GET",
             })
         }),
+        createGroup: build.mutation<any, CreateGroupPayload>({
+            query: (payload) => ({
+                url: `group`,
+                method: "POST",
+                body: payload,
+            })
+        }),
         updateGroup: build.mutation<any, UpdateGroupPayload>({
             query: ({ id, ...payload }) => ({
                 url: `group/${id}`,
@@ -40,5 +52,6 @@ const groupApi = API.injectEndpoints({
 export const {
     useLazyGetAllGroupQuery,
     useLazyGetGroupInfoQuery,
+    useCreateGroupMutation,
     useUpdateGroupMutation,
 } = groupApi;

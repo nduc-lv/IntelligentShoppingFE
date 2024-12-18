@@ -9,34 +9,33 @@ import { useLazyGetGroupInfoQuery, useUpdateGroupMutation } from "@/Services/gro
 import {
     Toast,
 } from "antd-mobile";
-type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void }
+type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void, disable: boolean }
 type GroupRouteParams = {
-    GroupDetail: { groupId: string, isAdmin: boolean };
+    GroupInfo: { groupId: string, isAdmin: boolean };
 };
 
 const renderSetting = ({ item }: { item: GroupInfoListItem }) => (
-    <TouchableOpacity style={styles.settingItem} onPress={item.onClick}>
+    <TouchableOpacity style={[styles.settingItem, item.disable && {display: "none"}]} onPress={item.onClick}>
         <item.icon size={24} color="#555" />
         <Text style={styles.settingText}>{item.title}</Text>
     </TouchableOpacity>
 );
 
 export const GroupInfoScreen = () => {
-    const route = useRoute<RouteProp<GroupRouteParams, "GroupDetail">>();
+    const route = useRoute<RouteProp<GroupRouteParams, "GroupInfo">>();
     const [newGroupName, setNewGroupName] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-    const [groupName, setGroupName] = useState('');
     const { groupId, isAdmin } = route.params;
 
-    // const [fetchUserGroupList, { data: rows = [], isLoading, isError }] = useLazyGetAllUserGroupQuery();
-    const [fetchGroupInfo, { data, isLoading, isError }] = useLazyGetGroupInfoQuery();
+    
+    const [fetchGroupInfo, { data: info, isLoading: isLoadingInfo, isError: isErrorInfo }] = useLazyGetGroupInfoQuery();
     const [updateGroup] = useUpdateGroupMutation();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const [pagination, setPagination] = useState({ page: 1, per: 10 });
 
     const handleOpenDialog = () => {
-        setModalVisible(true);
+        if(isAdmin) setModalVisible(true);
     };
 
     const handleCloseDialog = () => {
@@ -67,17 +66,17 @@ export const GroupInfoScreen = () => {
         {
             title: "Change Group Name", icon: Pencil, onClick: (e) => {
                 handleOpenDialog();
-            }
+            }, disable: !isAdmin
         },
         {
             title: "Members", icon: UsersRound, onClick: (e) => {
-                console.log("members");
-            }
+                navigation.navigate("USERGROUP", { groupId: groupId, isAdmin: isAdmin, groupName: info.rows[0].group.name ?? "Unknown" })
+            }, disable: false
         },
         {
             title: "Leave Group", icon: LogOut, onClick: (e) => {
                 console.log("leave");
-            }
+            }, disable: isAdmin
         },
     ];
 
@@ -86,10 +85,6 @@ export const GroupInfoScreen = () => {
         fetchGroupInfo({ groupId });
     }, [groupId, pagination, fetchGroupInfo]);
 
-    if (data) {
-        console.log(data);
-    }
-
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -97,13 +92,13 @@ export const GroupInfoScreen = () => {
                     <ArrowLeft size={24} color="#000" />
                 </TouchableOpacity>
             </View>
-            {isLoading ? (
+            {isLoadingInfo ? (
                 <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
-            ) : isError ? (
+            ) : isErrorInfo ? (
                 <View style={styles.centered}>
                     <Text style={styles.errorText}>Failed to load shopping lists.</Text>
                 </View>
-            ) : data ? (
+            ) : info ? (
                 <View>
                     <View style={styles.imageContainer}>
                         <Image
@@ -113,7 +108,7 @@ export const GroupInfoScreen = () => {
                             defaultSource={{ uri: "https://via.placeholder.com/150" }}
                             style={styles.image}
                         />
-                        <Text style={styles.groupName}>{data.rows[0].group.name ?? "Unknown"}</Text>
+                        <Text style={styles.groupName}>{info.rows[0].group.name ?? "Unknown"}</Text>
                     </View>
                     <FlatList
                         data={settings}

@@ -1,17 +1,52 @@
-import { Group, useLazyGetAllGroupQuery } from "@/Services/group";
+import { Group, useCreateGroupMutation, useLazyGetAllGroupQuery } from "@/Services/group";
 import { ChevronRight, Plus } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
+import {
+  Toast,
+} from "antd-mobile";
 
 export const GroupScreen = () => {
   const [fetchGroup, { data = [], isLoading, isError }] = useLazyGetAllGroupQuery();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [createGroup] = useCreateGroupMutation();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const handleOpenDialog = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseDialog = () => {
+    setModalVisible(false);
+    setNewGroupName('');
+  };
+
+  const handleCreate = async () => {
+    try {
+      if (!newGroupName) {
+        Toast.show({ content: "Please fill in new group name.", icon: "fail" });
+        return;
+      }
+      const payload = {
+        name: newGroupName
+      };
+      await createGroup(payload).unwrap();
+      Toast.show({ content: "Group updated successfully!", icon: "success" });
+      fetchGroup();
+      handleCloseDialog();
+    } catch (e) {
+      console.log(e)
+      Toast.show({ content: "Failed to save group infomation.", icon: "fail" });
+    }
+  }
 
   useEffect(() => {
     fetchGroup();
   }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Groups</Text>
@@ -47,9 +82,31 @@ export const GroupScreen = () => {
       ) : (
         <Text>No groups found.</Text>
       )}
-      <TouchableOpacity style={styles.fab} onPress={() => console.log("Add button pressed!")}>
+      <TouchableOpacity style={styles.fab} onPress={() => handleOpenDialog()}>
         <Plus color="white" size={25} />
       </TouchableOpacity>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Enter New Group Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Group Name"
+              value={newGroupName}
+              onChangeText={setNewGroupName}
+            />
+            <View style={styles.buttonContainer}>
+              <Button title="Cancel" onPress={() => handleCloseDialog()} />
+              <Button title="Create" onPress={() => handleCreate()} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -103,5 +160,31 @@ const styles = StyleSheet.create({
   leftContent: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 20,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 16,
+    fontSize: 16,
   },
 });
