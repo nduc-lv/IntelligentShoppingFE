@@ -9,6 +9,7 @@ import {
     Toast,
 } from "antd-mobile";
 import { useSafeArea } from "native-base";
+import { RootScreens } from "..";
 type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void, disable: boolean, color?: string }
 type GroupRouteParams = {
     GroupInfo: { groupId: string, isAdmin: boolean };
@@ -75,6 +76,8 @@ export const GroupInfoScreen = () => {
             if(isAdmin){
                 await deleteGroup(groupId);
                 Toast.show({ content: "Group deleted successfully!", icon: "success" });
+                handleCloseDeleteDialog();
+                navigation.navigate(RootScreens.MAIN);
             }
             else{
                 Toast.show({ content: "You are not group admin!", icon: "fail" });
