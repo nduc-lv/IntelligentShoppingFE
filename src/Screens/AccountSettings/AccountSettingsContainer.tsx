@@ -2,14 +2,14 @@ import { AccountSettings } from "./AccountSettings";
 import React, { useState, useEffect } from "react";
 import { useLazyGetMeQuery } from "@/Services";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/Navigation";
-import { RootScreens } from "..";
+import { UserTabScreens } from "..";
+import { UserTabStackParamList } from "@/Navigation/Main/UserTab";
 type AccountSettingsNavigatorProps = NativeStackScreenProps<
-    RootStackParamList,
-    RootScreens.SIGN_IN
+    UserTabStackParamList,
+    UserTabScreens.ACCOUNT_SETTING
 >;
 export const AccountSettingsContainer = ({navigation}:AccountSettingsNavigatorProps) => {
-  const onNavigate = (screen: RootScreens) => {
+  const onNavigate = (screen: UserTabScreens) => {
     navigation.navigate(screen);
 };
 

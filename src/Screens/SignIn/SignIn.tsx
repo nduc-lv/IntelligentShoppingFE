@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { i18n, LocalizationKey } from "@/Localization";
 import {
 	View,
@@ -11,10 +11,10 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { Button, Toast } from "native-base";
 import { RootScreens } from "..";
-import axios from "axios";
 import { userApi } from "@/Services";
-import { useDispatch } from "react-redux";
-import { setTokens } from "@/Store/reducers";
+import { useDispatch, useSelector } from "react-redux";
+import { AuthState, setTokens } from "@/Store/reducers";
+import { AppDispatch } from "@/Store";
 type SignInAndRegisterProps = {
 	onNavigate: (screen: RootScreens) => void;
 };
@@ -42,10 +42,18 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
 	const [linkAvatar, setLinkAvatar] = useState(
-		i18n.t(LocalizationKey.LINK_AVATAR_DEFAULT)
+		"https://via.placeholder.com/150"
 	);
 	const [register, { isLoading, error, data }] = userApi.useRegisterMutation();
-	const dispatch=useDispatch();
+	const dispatch=useDispatch<AppDispatch>();
+	const accessToken=useSelector((state:{
+		auth:AuthState
+	})=>state.auth.accessToken)
+	useEffect(()=>{
+		if(accessToken){
+			props.onNavigate(RootScreens.MAIN);
+		}
+	},[accessToken])
 	const handleRegister = async () => {
 		try {
 			const response = await register({
@@ -62,7 +70,6 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 				description: i18n.t(LocalizationKey.REGISTER_SUCCESS),
 				placement: "top",
 			});
-			props.onNavigate(RootScreens.MAIN);
 		} catch {
 			Toast.show({
 				description: i18n.t(LocalizationKey.REGISTER_FAILED),
@@ -146,7 +153,6 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 			<Button
 				style={styles.btnGetStarted}
 				onPress={() => {
-					props.onNavigate(RootScreens.MAIN);
 					Toast.show({
 						description: "Skipping registration for development!",
 						placement: "top",
@@ -163,7 +169,15 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [login, { isLoading, error, data }] = userApi.useLoginMutation();
-	const dispatch=useDispatch()
+	const dispatch=useDispatch<AppDispatch>()
+	const accessToken=useSelector((state:{
+		auth:AuthState
+	})=>state.auth.accessToken)
+	useEffect(()=>{
+		if(accessToken){
+			props.onNavigate(RootScreens.MAIN);
+		}
+	},[accessToken])
 	const handleLogin = async () => {
 		try {
 			const response = await login({
@@ -177,7 +191,6 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 				description: i18n.t(LocalizationKey.LOGIN_SUCCESS),
 				placement: "top",
 			});
-			props.onNavigate(RootScreens.MAIN);
 		} catch (error) {
 			console.error(error)
 			Toast.show({
@@ -230,18 +243,6 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 					<Text>{i18n.t(LocalizationKey.SWITCH_TO_REGISTER)}</Text>
 				</TouchableOpacity>
 			</View>
-			<Button
-				style={styles.btnGetStarted}
-				onPress={() => {
-					props.onNavigate(RootScreens.MAIN);
-					Toast.show({
-						description: "Logging in!",
-						placement: "top",
-					});
-				}}
-			>
-				Development skip login
-			</Button>
 		</View>
 	);
 };

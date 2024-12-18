@@ -1,16 +1,20 @@
 import React, { useEffect } from "react";
 import { ActivityIndicator, StatusBar, View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { NavigationContainer } from "@react-navigation/native";
+import { createNavigationContainerRef, NavigationContainer } from "@react-navigation/native";
 import { MainNavigator } from "./Main";
 import { WelcomeContainer } from "@/Screens/Welcome";
 import { RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@/Store";
+import { AuthState, fetchTokens } from "@/Store/reducers";
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { GroupDetailContainer } from "@/Screens/GroupDetail/GroupDetailContainer";
 import { GroupContainer } from "@/Screens/Group/GroupContainer";
-import { AccountSettingsContainer } from "@/Screens/Account";
+import { UsergroupContainer } from "@/Screens/Usergroup/UsergroupContainer";
+import { AccountSettingsContainer } from "@/Screens/AccountSettings";
 import { userApi } from "@/Services";
 import Loading from "@/General/Components/Loading";
 import { GroupInfoContainer } from "@/Screens/GroupInfo/GroupInfoContainer";
@@ -24,22 +28,47 @@ export type RootStackParamList = {
 	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
 	GROUP: undefined;
 	GROUP_INFO: { groupId: string, isAdmin: boolean };
-	[RootScreens.ACCOUNT_SETTING]: undefined;
+	USERGROUP: { groupId: string, isAdmin: boolean, groupName: string };
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
+export const RootNavigationContainerRef = createNavigationContainerRef<RootStackParamList>()
 
 // @refresh reset
-const ApplicationNavigator = () => {
+const ApplicationNavigator=  ()=>{
+	const dispatch = useDispatch<AppDispatch>();
+	const authInitialized = useSelector(
+		(state: { auth: AuthState }) => state.auth.initialized
+	);
+	useEffect(() => {
+		if (!authInitialized) {
+			dispatch(fetchTokens());
+		}
+	}, [authInitialized]);
+	if (!authInitialized) {
+		return <Loading />;
+	}
+	return <_ApplicationNavigator/>
+}
+const _ApplicationNavigator = () => {
+	const accessToken = useSelector(
+		(state: { auth: AuthState }) => state.auth.accessToken
+	);
+	const currentRoute=RootNavigationContainerRef.current?.getCurrentRoute()?.name
+	useEffect(() => {
+		if (!accessToken&&currentRoute!=RootScreens.SIGN_IN) {
+			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
+		}
+	}, [accessToken,currentRoute]);
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
 	useEffect(() => {
 		getMe();
 	}, []);
 	if (isLoading) {
-		return <Loading />
+		return <Loading />;
 	}
 	return (
-		<NavigationContainer>
+		<NavigationContainer ref={RootNavigationContainerRef}>
 			<StatusBar />
 			<RootStack.Navigator
 				initialRouteName={data ? RootScreens.MAIN : RootScreens.WELCOME}
@@ -66,10 +95,6 @@ const ApplicationNavigator = () => {
 					name="SHOPPING_LIST_DETAIL"
 					component={ShoppingListDetailContainer} />
 				<RootStack.Screen
-					name={RootScreens.ACCOUNT_SETTING}
-					component={AccountSettingsContainer}
-				/>
-				<RootStack.Screen
 					name="GROUP_DETAIL"
 					component={GroupDetailContainer} />
 				<RootStack.Screen
@@ -78,6 +103,9 @@ const ApplicationNavigator = () => {
 				<RootStack.Screen
 					name="GROUP"
 					component={GroupContainer} />
+				<RootStack.Screen
+					name="USERGROUP"
+					component={UsergroupContainer} />
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);
