@@ -9,7 +9,7 @@ import {
 } from "antd-mobile";
 
 export const GroupScreen = () => {
-  const [fetchGroup, { data = [], isLoading, isError }] = useLazyGetAllGroupQuery();
+  const [fetchGroup, { data = [], isLoading, isError, error }] = useLazyGetAllGroupQuery();
   const [modalVisible, setModalVisible] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [createGroup] = useCreateGroupMutation();
@@ -47,6 +47,8 @@ export const GroupScreen = () => {
     fetchGroup();
   }, []);
 
+  console.log(data);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Groups</Text>
@@ -54,7 +56,7 @@ export const GroupScreen = () => {
         <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
       ) : isError ? (
         <View style={styles.centered}>
-          <Text style={styles.errorText}>Failed to load shopping lists.</Text>
+          <Text style={styles.errorText}>Failed to load groups.</Text>
         </View>
       ) : data.length > 0 ? (
         <FlatList

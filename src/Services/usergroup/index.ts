@@ -3,7 +3,6 @@ import { API } from "../base";
 export interface UserGroup {
     group_id: string;
     user_id: string;
-    isDeleted: boolean;
     is_admin: boolean;
     createdAt: Date;
     updatedAt: Date;
