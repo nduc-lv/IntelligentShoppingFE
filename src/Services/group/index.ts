@@ -25,8 +25,8 @@ const groupApi = API.injectEndpoints({
                 method: "GET",
             })
         }),
-        getGroupInfo: build.query<any, {groupId: string}>({
-            query: ({groupId}) => ({
+        getGroupInfo: build.query<any, { groupId: string }>({
+            query: ({ groupId }) => ({
                 url: `group/${groupId}`,
                 method: "GET",
             })
@@ -45,6 +45,12 @@ const groupApi = API.injectEndpoints({
                 body: payload,
             })
         }),
+        deleteGroup: build.mutation<any, string>({
+            query: (id) => ({
+                url: `group/${id}`,
+                method: "DELETE",
+            }),
+        }),
     }),
     overrideExisting: true,
 });
@@ -54,4 +60,5 @@ export const {
     useLazyGetGroupInfoQuery,
     useCreateGroupMutation,
     useUpdateGroupMutation,
+    useDeleteGroupMutation
 } = groupApi;

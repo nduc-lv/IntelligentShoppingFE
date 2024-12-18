@@ -1,46 +1,54 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, Image, GestureResponderEvent, FlatList, Modal, TextInput, Button, ActivityIndicator } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
-import { useLazyGetAllUserGroupQuery } from "@/Services/usergroup";
-import { ArrowLeft, Info, LogOut, LucideIcon, Pencil, UsersRound } from "lucide-react-native";
+import { ArrowLeft, LogOut, LucideIcon, Pencil, Trash, UsersRound } from "lucide-react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
-import { useLazyGetGroupInfoQuery, useUpdateGroupMutation } from "@/Services/group";
+import { useDeleteGroupMutation, useLazyGetGroupInfoQuery, useUpdateGroupMutation } from "@/Services/group";
 import {
     Toast,
 } from "antd-mobile";
-type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void, disable: boolean }
+import { useSafeArea } from "native-base";
+type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void, disable: boolean, color?: string }
 type GroupRouteParams = {
     GroupInfo: { groupId: string, isAdmin: boolean };
 };
 
 const renderSetting = ({ item }: { item: GroupInfoListItem }) => (
-    <TouchableOpacity style={[styles.settingItem, item.disable && {display: "none"}]} onPress={item.onClick}>
-        <item.icon size={24} color="#555" />
-        <Text style={styles.settingText}>{item.title}</Text>
+    <TouchableOpacity style={[styles.settingItem, item.disable && { display: "none" }]} onPress={item.onClick}>
+        <item.icon size={24} color={item.color ? item.color : "#555"} />
+        <Text style={[styles.settingText, item.color ? { color: item.color } : { color: "#333" }]}>{item.title}</Text>
     </TouchableOpacity>
 );
 
 export const GroupInfoScreen = () => {
     const route = useRoute<RouteProp<GroupRouteParams, "GroupInfo">>();
     const [newGroupName, setNewGroupName] = useState('');
-    const [modalVisible, setModalVisible] = useState(false);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const { groupId, isAdmin } = route.params;
 
-    
+
     const [fetchGroupInfo, { data: info, isLoading: isLoadingInfo, isError: isErrorInfo }] = useLazyGetGroupInfoQuery();
     const [updateGroup] = useUpdateGroupMutation();
+    const [deleteGroup] = useDeleteGroupMutation();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-    const [pagination, setPagination] = useState({ page: 1, per: 10 });
-
-    const handleOpenDialog = () => {
-        if(isAdmin) setModalVisible(true);
+    const handleOpenEditDialog = () => {
+        if (isAdmin) setEditModalVisible(true);
     };
 
-    const handleCloseDialog = () => {
-        setModalVisible(false);
+    const handleCloseEditDialog = () => {
+        setEditModalVisible(false);
         setNewGroupName('');
+    };
+
+    const handleOpenDeleteDialog = () => {
+        if (isAdmin) setDeleteModalVisible(true);
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setDeleteModalVisible(false);
     };
 
     const handleSave = async () => {
@@ -55,17 +63,32 @@ export const GroupInfoScreen = () => {
             await updateGroup({ id: groupId, ...payload }).unwrap();
             Toast.show({ content: "Group updated successfully!", icon: "success" });
             fetchGroupInfo({ groupId });
-            handleCloseDialog();
+            handleCloseEditDialog();
         } catch (e) {
             console.log(e)
             Toast.show({ content: "Failed to save group infomation.", icon: "fail" });
         }
     }
 
+    const handleDelete = async () => {
+        try {
+            if(isAdmin){
+                await deleteGroup(groupId);
+                Toast.show({ content: "Group deleted successfully!", icon: "success" });
+            }
+            else{
+                Toast.show({ content: "You are not group admin!", icon: "fail" });
+            }
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Failed to delete group.", icon: "fail" });
+        }
+    }
+
     const settings: Array<GroupInfoListItem> = [
         {
             title: "Change Group Name", icon: Pencil, onClick: (e) => {
-                handleOpenDialog();
+                handleOpenEditDialog();
             }, disable: !isAdmin
         },
         {
@@ -76,14 +99,18 @@ export const GroupInfoScreen = () => {
         {
             title: "Leave Group", icon: LogOut, onClick: (e) => {
                 console.log("leave");
-            }, disable: isAdmin
+            }, disable: isAdmin, color: "red"
+        },
+        {
+            title: "Delete Group", icon: Trash, onClick: (e) => {
+                handleOpenDeleteDialog();
+            }, disable: !isAdmin, color: "red"
         },
     ];
 
     useEffect(() => {
-        // fetchUserGroupList({ groupId, ...pagination });
         fetchGroupInfo({ groupId });
-    }, [groupId, pagination, fetchGroupInfo]);
+    }, [groupId, fetchGroupInfo]);
 
     return (
         <View style={styles.container}>
@@ -117,10 +144,10 @@ export const GroupInfoScreen = () => {
                         contentContainerStyle={styles.settingsList}
                     />
                     <Modal
-                        animationType="slide"
+                        animationType="fade"
                         transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={() => setModalVisible(false)}
+                        visible={editModalVisible}
+                        onRequestClose={() => handleCloseEditDialog()}
                     >
                         <View style={styles.modalOverlay}>
                             <View style={styles.modalContent}>
@@ -132,15 +159,34 @@ export const GroupInfoScreen = () => {
                                     onChangeText={setNewGroupName}
                                 />
                                 <View style={styles.buttonContainer}>
-                                    <Button title="Cancel" onPress={() => handleCloseDialog()} />
+                                    <Button title="Cancel" onPress={() => handleCloseEditDialog()} />
                                     <Button title="Save" onPress={() => handleSave()} />
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={deleteModalVisible}
+                        onRequestClose={() => handleCloseDeleteDialog()}
+                    >
+                        <View style={styles.modalOverlay}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.modalTitle}>Confirm Delete</Text>
+                                <Text style={styles.modalMessage}>
+                                    Are you sure you want to delete this group? This action cannot be undone.
+                                </Text>
+                                <View style={styles.buttonContainer}>
+                                    <Button title="Cancel" onPress={() => handleCloseDeleteDialog()} />
+                                    <Button title="Delete" onPress={() => handleDelete()} color="red" />
                                 </View>
                             </View>
                         </View>
                     </Modal>
                 </View>
             ) : (
-<               Text>No info found.</Text>
+                <Text>No info found.</Text>
             )}
         </View>
     );
@@ -203,7 +249,7 @@ const styles = StyleSheet.create({
     settingText: {
         marginLeft: 16,
         fontSize: 16,
-        color: "#333",
+        // color: "#333",
     },
     settingsList: {
         marginTop: 16,
@@ -239,5 +285,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-    errorText: { color: "red" },  
+    errorText: { color: "red" },
+    modalMessage: {
+        fontSize: 14,
+        color: "#555",
+        marginBottom: 20,
+    },
 });

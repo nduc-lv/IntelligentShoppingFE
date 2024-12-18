@@ -86,7 +86,7 @@ export const GroupScreen = () => {
         <Plus color="white" size={25} />
       </TouchableOpacity>
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
