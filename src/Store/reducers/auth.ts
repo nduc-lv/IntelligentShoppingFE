@@ -1,40 +1,60 @@
 // slices/authSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface AuthState {
-  accessToken: string | null;
-  // refreshToken: string | null;
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+export interface AuthState {
+  initialized:boolean;
+	accessToken: string | null;
+	// refreshToken: string | null;
 }
 
 const initialState: AuthState = {
-  accessToken: localStorage.getItem('accessToken'), // Load from localStorage
-  // refreshToken: localStorage.getItem('refreshToken'),
+  initialized:false,
+	accessToken: null, 
 };
 
-const authSlice = createSlice({
-  name: 'auth',
-  initialState,
-  reducers: {
-    setTokens: (state, action: PayloadAction<{ accessToken: string; 
-      // refreshToken: string
-     }>) => {
-      state.accessToken = action.payload.accessToken;
-      // state.refreshToken = action.payload.refreshToken;
-      localStorage.setItem('accessToken', action.payload.accessToken);
-      // localStorage.setItem('refreshToken', action.payload.refreshToken);
-    },
-    clearTokens: (state) => {
-      state.accessToken = null;
-      // state.refreshToken = null;
-      localStorage.removeItem('accessToken');
-      // localStorage.removeItem('refreshToken');
-    },
-  },
+export const setTokens = createAsyncThunk(
+	"auth/setTokens",
+	async (value: {
+    accessToken: string;
+    // refreshToken: string
+  }) => {
+		await AsyncStorage.setItem("accessToken", value.accessToken);
+    return value
+	}
+);
+
+export const clearTokens = createAsyncThunk("auth/clearTokens", async () => {
+	await AsyncStorage.removeItem("accessToken");
 });
 
-export const { setTokens, clearTokens } = authSlice.actions;
+export const fetchTokens = createAsyncThunk("auth/fetchTokens", async () => {
+	return {
+    accessToken: await AsyncStorage.getItem("accessToken")
+  }
+});
 
-export const selectAccessToken = (state: { auth: AuthState }) => state.auth.accessToken;
+
+const authSlice = createSlice({
+	name: "auth",
+	initialState,
+	reducers: {
+	},
+  extraReducers:(builder)=>{
+    builder.addCase(setTokens.fulfilled, (state, action) => {
+      state.accessToken=action.payload.accessToken
+    })
+    builder.addCase(clearTokens.fulfilled, (state, action) => {
+      state.accessToken=null
+    })
+    builder.addCase(fetchTokens.fulfilled, (state, action) => {
+      state.accessToken=action.payload.accessToken
+      state.initialized=true
+    })
+  }
+});
+
+export const selectAccessToken = (state: { auth: AuthState }) =>
+	state.auth.accessToken;
 // export const selectRefreshToken = (state: { auth: AuthState }) => state.auth.refreshToken;
 
-export const authReducer= authSlice.reducer;
+export const authReducer = authSlice.reducer;

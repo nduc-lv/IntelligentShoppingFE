@@ -1,10 +1,10 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeContainer } from "@/Screens/Home";
+import { UserTabNavigation } from "./UserTab";
 import { GroupContainer } from "@/Screens/Group";
 import { Home, User, Users } from "lucide-react-native"; // Import các icon từ Lucide
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
-import { UserTabContainer } from "@/Screens/UserTab/UserTabContainer";
 
 const Tab = createBottomTabNavigator();
 
@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 export const MainNavigator = () => {
 
   return (
-    <Tab.Navigator>
+    <Tab.Navigator screenOptions={{popToTopOnBlur:true}}>
       <Tab.Screen
         name="Group"
         component={GroupContainer}
@@ -35,8 +35,9 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="User"
-        component={UserTabContainer}
+        component={UserTabNavigation}
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <User color={color} size={size} />
           ),
