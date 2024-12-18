@@ -18,6 +18,8 @@ import { AccountSettingsContainer } from "@/Screens/AccountSettings";
 import { userApi } from "@/Services";
 import Loading from "@/General/Components/Loading";
 import { GroupInfoContainer } from "@/Screens/GroupInfo/GroupInfoContainer";
+import { RecipeContainer } from "@/Screens/Recipe/RecipeContainer";
+import { RecipeListContainer } from "@/Screens/RecipeList/RecipeListCointainer";
 
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
@@ -29,13 +31,16 @@ export type RootStackParamList = {
 	GROUP: undefined;
 	GROUP_INFO: { groupId: string, isAdmin: boolean };
 	USERGROUP: { groupId: string, isAdmin: boolean, groupName: string };
+	RECIPE: undefined;
+	RECIPE_DETAIL: { recipeId: string };
+	RECIPE_LIST: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 export const RootNavigationContainerRef = createNavigationContainerRef<RootStackParamList>()
 
 // @refresh reset
-const ApplicationNavigator=  ()=>{
+const ApplicationNavigator = () => {
 	const dispatch = useDispatch<AppDispatch>();
 	const authInitialized = useSelector(
 		(state: { auth: AuthState }) => state.auth.initialized
@@ -48,18 +53,18 @@ const ApplicationNavigator=  ()=>{
 	if (!authInitialized) {
 		return <Loading />;
 	}
-	return <_ApplicationNavigator/>
+	return <_ApplicationNavigator />
 }
 const _ApplicationNavigator = () => {
 	const accessToken = useSelector(
 		(state: { auth: AuthState }) => state.auth.accessToken
 	);
-	const currentRoute=RootNavigationContainerRef.current?.getCurrentRoute()?.name
+	const currentRoute = RootNavigationContainerRef.current?.getCurrentRoute()?.name
 	useEffect(() => {
-		if (!accessToken&&currentRoute!=RootScreens.SIGN_IN) {
+		if (!accessToken && currentRoute != RootScreens.SIGN_IN) {
 			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
 		}
-	}, [accessToken,currentRoute]);
+	}, [accessToken, currentRoute]);
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
 	useEffect(() => {
 		getMe();
@@ -72,7 +77,7 @@ const _ApplicationNavigator = () => {
 			<StatusBar />
 			<RootStack.Navigator
 				initialRouteName={data ? RootScreens.MAIN : RootScreens.WELCOME}
-				screenOptions={{ headerShown: false }}
+				screenOptions={{ headerShown: true }}
 			>
 				<RootStack.Screen
 					name={RootScreens.WELCOME}
@@ -106,6 +111,14 @@ const _ApplicationNavigator = () => {
 				<RootStack.Screen
 					name="USERGROUP"
 					component={UsergroupContainer} />
+				<RootStack.Screen
+					name="RECIPE"
+					component={RecipeContainer}
+				/>
+				<RootStack.Screen
+					name="RECIPE_LIST"
+					component={RecipeListContainer}
+				/>
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);

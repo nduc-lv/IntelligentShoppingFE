@@ -45,15 +45,15 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 		"https://via.placeholder.com/150"
 	);
 	const [register, { isLoading, error, data }] = userApi.useRegisterMutation();
-	const dispatch=useDispatch<AppDispatch>();
-	const accessToken=useSelector((state:{
-		auth:AuthState
-	})=>state.auth.accessToken)
-	useEffect(()=>{
-		if(accessToken){
+	const dispatch = useDispatch<AppDispatch>();
+	const accessToken = useSelector((state: {
+		auth: AuthState
+	}) => state.auth.accessToken)
+	useEffect(() => {
+		if (accessToken) {
 			props.onNavigate(RootScreens.MAIN);
 		}
-	},[accessToken])
+	}, [accessToken])
 	const handleRegister = async () => {
 		try {
 			const response = await register({
@@ -63,8 +63,8 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 				name,
 				link_avatar: linkAvatar,
 			}).unwrap();
-			if (response?.accessToken){
-				dispatch(setTokens({accessToken:(response.accessToken as string)}))
+			if (response?.accessToken) {
+				dispatch(setTokens({ accessToken: (response.accessToken as string) }))
 			}
 			Toast.show({
 				description: i18n.t(LocalizationKey.REGISTER_SUCCESS),
@@ -157,6 +157,7 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 						description: "Skipping registration for development!",
 						placement: "top",
 					});
+					props.onNavigate(RootScreens.MAIN);
 				}}
 			>
 				Development skip registration
@@ -169,23 +170,23 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [login, { isLoading, error, data }] = userApi.useLoginMutation();
-	const dispatch=useDispatch<AppDispatch>()
-	const accessToken=useSelector((state:{
-		auth:AuthState
-	})=>state.auth.accessToken)
-	useEffect(()=>{
-		if(accessToken){
+	const dispatch = useDispatch<AppDispatch>()
+	const accessToken = useSelector((state: {
+		auth: AuthState
+	}) => state.auth.accessToken)
+	useEffect(() => {
+		if (accessToken) {
 			props.onNavigate(RootScreens.MAIN);
 		}
-	},[accessToken])
+	}, [accessToken])
 	const handleLogin = async () => {
 		try {
 			const response = await login({
 				email,
 				password,
 			}).unwrap();
-			if (response?.accessToken){
-				dispatch(setTokens({accessToken:(response.accessToken as string)}))
+			if (response?.accessToken) {
+				dispatch(setTokens({ accessToken: (response.accessToken as string) }))
 			}
 			Toast.show({
 				description: i18n.t(LocalizationKey.LOGIN_SUCCESS),
