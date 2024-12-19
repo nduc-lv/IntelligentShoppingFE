@@ -7,12 +7,98 @@ import { Heart, Home, User, Users } from "lucide-react-native"; // Import các i
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { UserTabContainer } from "@/Screens/UserTab/UserTabContainer";
 import { RecipeContainer } from "@/Screens/Recipe/RecipeContainer";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { RecipeListContainer } from "@/Screens/RecipeList/RecipeListCointainer";
+import { GroupDetailContainer } from "@/Screens/GroupDetail";
+import { GroupInfoContainer } from "@/Screens/GroupInfo";
+import { UsergroupContainer } from "@/Screens/Usergroup";
+import { RootStack, RootStackParamList } from "..";
+import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
+import { RecipeDetailContainer } from "@/Screens/RecipeDetail/RecipeDetailContainer";
+
 
 const Tab = createBottomTabNavigator();
 
+const GroupStack = () => (
+  <RootStack.Navigator>
+    <RootStack.Screen
+      name="GROUP_DETAIL"
+      component={GroupDetailContainer}
+      options={() => ({
+        headerTitle: `Danh sách món ăn`,
+      })}
+    />
+    <RootStack.Screen
+      name="GROUP_INFO"
+      component={GroupInfoContainer}
+      options={() => ({
+        headerTitle: `Món ngon hàng ngày`,
+      })}
+    />
+    <RootStack.Screen
+      name="GROUP"
+      component={GroupContainer}
+      options={() => ({
+        headerTitle: `Danh sách món ăn`,
+      })}
+    />
+    <RootStack.Screen
+      name="USERGROUP"
+      component={UsergroupContainer}
+      options={() => ({
+        headerTitle: `Món ngon hàng ngày`,
+      })}
+    />
+  </RootStack.Navigator>
+);
+
+const ShoppingListStack = () => (
+  <RootStack.Navigator>
+    <RootStack.Screen
+      name={'SHOPPING_LIST'}
+      component={ShoppingListContainer}
+      options={() => ({
+        headerTitle: `Danh sách món ăn`,
+      })}
+    />
+    <RootStack.Screen
+      name="SHOPPING_LIST_DETAIL"
+      component={ShoppingListDetailContainer}
+      options={() => ({
+        headerTitle: `Món ngon hàng ngày`,
+      })}
+    />
+  </RootStack.Navigator>
+);
+
+const RecipeStack = () => (
+  <RootStack.Navigator>
+    <RootStack.Screen
+      name="RECIPE"
+      component={RecipeContainer}
+      options={() => ({
+        headerTitle: `Danh sách món ăn`,
+      })}
+    />
+    <RootStack.Screen
+      name="RECIPE_LIST"
+      component={RecipeListContainer}
+      options={() => ({
+        headerTitle: `Món ngon hàng ngày`,
+      })}
+    />
+    <RootStack.Screen
+      name="RECIPE_DETAIL"
+      component={RecipeDetailContainer}
+      options={({ route }) => ({
+        headerShown: false
+      })}
+    />
+  </RootStack.Navigator>
+);
+
 // @refresh reset
 export const MainNavigator = () => {
-
   return (
     <Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}
     >
@@ -38,7 +124,7 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="Recipe"
-        component={RecipeContainer}
+        component={RecipeStack}
         options={{
           tabBarIcon: ({ color, size }) => (
             <Heart color={color} size={size} />

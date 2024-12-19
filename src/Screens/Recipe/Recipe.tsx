@@ -27,7 +27,7 @@ export const RecipeScreen = () => {
     ];
 
     const renderItem = ({ item }: { item: any }) => (
-        <View style={[styles.card,
+        <TouchableOpacity style={[styles.card,
         {
             width: "47%",
             height: 200,
@@ -36,7 +36,9 @@ export const RecipeScreen = () => {
             padding: 10,
             gap: 10,
             marginBottom: 10
-        }]}>
+        }]}
+            onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id })}
+        >
             <View style={{ position: "relative" }}>
                 <Image
                     style={{
@@ -68,12 +70,13 @@ export const RecipeScreen = () => {
                 fontSize: AppData.fontSizes.default,
                 fontWeight: "500",
                 color: AppData.colors.text[900],
-                marginLeft: 'auto'
+                marginLeft: 'auto',
+                textAlign: 'center'
             }}>
                 {item.name}
             </Text>
 
-            <View style={{ flexDirection: 'row', marginTop: 'auto', marginBottom: 8 }}>
+            <View style={{ flexDirection: 'row', marginTop: 'auto', marginBottom: 8, }}>
                 <Avatar
                     source={{ uri: "https://i.pinimg.com/736x/a8/68/32/a86832051be6aa81cdf163e4d03919dd.jpg" }}
                     size="xs"
@@ -87,7 +90,7 @@ export const RecipeScreen = () => {
                     {'Nguyễn Huy'}
                 </Text>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 
     return (
@@ -131,7 +134,7 @@ export const RecipeScreen = () => {
                 }}>
                     <Text style={{
                         fontSize: AppData.fontSizes.large,
-                        fontWeight: "bold",
+                        fontWeight: "500",
                         color: AppData.colors.text[900],
                     }}>
                         {'Công thức đã lưu'}
@@ -165,7 +168,7 @@ export const RecipeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+    container: { flex: 1, padding: 16, backgroundColor: "#fff", gap: 10 },
     title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
     card: {
         backgroundColor: "#fff",
