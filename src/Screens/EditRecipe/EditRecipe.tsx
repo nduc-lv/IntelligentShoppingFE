@@ -239,13 +239,15 @@ export const EditRecipeScreen = () => {
 
             <Actionsheet isOpen={isOpenActionSheet}
                 onClose={() => setIsOpenActionSheet(false)}
-                hideDragIndicator>
-                <Actionsheet.Content borderTopRadius="0">
-                    <Actionsheet.Item>Delete</Actionsheet.Item>
-                    <Actionsheet.Item>Share</Actionsheet.Item>
-                    <Actionsheet.Item>Play</Actionsheet.Item>
-                    <Actionsheet.Item>Favourite</Actionsheet.Item>
-                    <Actionsheet.Item>Cancel</Actionsheet.Item>
+                hideDragIndicator
+
+            >
+                <Actionsheet.Content borderTopRadius={32}
+                    style={{
+                        height: 300
+                    }}
+                >
+
                 </Actionsheet.Content>
             </Actionsheet>
         </View>

@@ -1,11 +1,12 @@
 import { Group, useLazyGetAllGroupQuery } from "@/Services/group";
 import { ArrowRight, Clock, Clock5, Heart, Notebook, NotebookText, Search } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, ImageBackground } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, ImageBackground, ScrollView } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import AppData from "@/General/Constants/AppData";
 import { Avatar, Input } from "native-base";
+import App from "App";
 
 
 export const RecipeListScreen = () => {
@@ -96,6 +97,7 @@ export const RecipeListScreen = () => {
 
     const renderIngredientItem = ({ item }: { item: any }) => (
         <View style={{
+            width: 200,
             marginRight: 16,
         }}>
             <ImageBackground
@@ -118,10 +120,10 @@ export const RecipeListScreen = () => {
     );
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Input
-                    w={{ base: "77%", md: "25%" }}
+                    flex={1}
                     InputLeftElement={<Search style={{ marginLeft: 15 }} size={28} color={AppData.colors.primary} />}
                     placeholder="Tìm kiếm"
                     size={"xl"}
@@ -144,7 +146,7 @@ export const RecipeListScreen = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: 16,
-                    marginLeft: 'auto',
+                    marginLeft: 16,
                 }}>
                     <ArrowRight color="white" />
                 </View>
@@ -163,7 +165,7 @@ export const RecipeListScreen = () => {
             </View>
 
             <View>
-                <Text style={styles.title}>{'Nguyên liệu'}</Text>
+                <Text style={styles.title}>{'Thực phẩm'}</Text>
                 <FlatList
                     data={data}
                     renderItem={renderIngredientItem}
@@ -173,13 +175,18 @@ export const RecipeListScreen = () => {
                     showsHorizontalScrollIndicator={false}
                 />
             </View>
-        </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 16, backgroundColor: "#fff", gap: 30 },
-    title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
+    title: {
+        fontSize: AppData.fontSizes.large,
+        fontWeight: "500",
+        color: AppData.colors.text[900],
+        marginBottom: 16
+    },
     card: {
         backgroundColor: "#fff",
         padding: 16,

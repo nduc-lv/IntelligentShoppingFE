@@ -1,17 +1,15 @@
-import { Group, useLazyGetAllGroupQuery } from "@/Services/group";
-import { ArrowRight, Heart, Plus } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image, ScrollView } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
-import AppData from "@/General/Constants/AppData";
 import { Avatar } from "native-base";
 import { StatusBar } from "expo-status-bar";
+import { ArrowRight, Heart, Plus } from "lucide-react-native";
+import AppData from "@/General/Constants/AppData";
 
 export const RecipeScreen = () => {
-    const isLoading = false;
-    const isError = false;
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
     // Dữ liệu giả để kiểm tra
     const data = [
         { id: '1', name: 'Sunny Egg & Toast Avocado' },
@@ -26,17 +24,18 @@ export const RecipeScreen = () => {
         { id: '10', name: 'Chicken Tacos' },
     ];
 
-    const renderItem = ({ item }: { item: any }) => (
-        <TouchableOpacity style={[styles.card,
-        {
-            width: "47%",
-            height: 200,
-            borderWidth: 1,
-            borderColor: '#FBFBFB',
-            padding: 10,
-            gap: 10,
-            marginBottom: 10
-        }]}
+    const renderItem = (item: { id: string; name: string }) => (
+        <TouchableOpacity
+            style={[styles.card, {
+                width: "47%",
+                maxWidth: 200,
+                height: 200,
+                borderWidth: 1,
+                borderColor: '#FBFBFB',
+                padding: 10,
+                gap: 10,
+                marginBottom: 10,
+            }]}
             onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id })}
         >
             <View style={{ position: "relative" }}>
@@ -65,18 +64,15 @@ export const RecipeScreen = () => {
                     <Heart color={AppData.colors.primary} fill={AppData.colors.primary} />
                 </View>
             </View>
-
             <Text style={{
                 fontSize: AppData.fontSizes.default,
                 fontWeight: "500",
                 color: AppData.colors.text[900],
-                marginLeft: 'auto',
-                textAlign: 'center'
+                textAlign: 'center',
             }}>
                 {item.name}
             </Text>
-
-            <View style={{ flexDirection: 'row', marginTop: 'auto', marginBottom: 8, }}>
+            <View style={{ flexDirection: 'row', marginTop: 'auto', marginBottom: 8 }}>
                 <Avatar
                     source={{ uri: "https://i.pinimg.com/736x/a8/68/32/a86832051be6aa81cdf163e4d03919dd.jpg" }}
                     size="xs"
@@ -85,7 +81,7 @@ export const RecipeScreen = () => {
                     fontSize: AppData.fontSizes.default,
                     fontWeight: "500",
                     color: AppData.colors.text[500],
-                    marginLeft: 10
+                    marginLeft: 10,
                 }}>
                     {'Nguyễn Huy'}
                 </Text>
@@ -97,7 +93,7 @@ export const RecipeScreen = () => {
         <View style={styles.container}>
             <StatusBar style="auto" />
             <TouchableOpacity style={[styles.card, { alignItems: "center", flexDirection: "row" }]}
-                onPress={() => { navigation.navigate("RECIPE_LIST") }}
+                onPress={() => navigation.navigate("RECIPE_LIST")}
             >
                 <View style={{ flexDirection: "column", gap: 10 }}>
                     <Text style={{
@@ -111,7 +107,6 @@ export const RecipeScreen = () => {
                         {'Xem thêm nhiều công thức nấu ăn hơn'}
                     </Text>
                 </View>
-
                 <View style={{
                     height: 40,
                     width: 40,
@@ -125,8 +120,7 @@ export const RecipeScreen = () => {
                     <ArrowRight color="white" />
                 </View>
             </TouchableOpacity>
-
-            <View style={{ flex: 1, marginTop: 10 }}>
+            <View style={{ flex: 1, marginTop: 10, gap: 10 }}>
                 <View style={{
                     width: "100%",
                     flexDirection: "row",
@@ -139,31 +133,29 @@ export const RecipeScreen = () => {
                     }}>
                         {'Công thức đã lưu'}
                     </Text>
-
                     <Text style={{
                         fontSize: AppData.fontSizes.default,
                         fontWeight: "bold",
                         color: AppData.colors.primary,
-                        marginLeft: 'auto'
+                        marginLeft: 'auto',
                     }}>
                         {'Xem thêm'}
                     </Text>
                 </View>
-
-                <FlatList
-                    data={data}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
-                    numColumns={2}
-                    columnWrapperStyle={{ justifyContent: 'space-around' }}
-                    contentContainerStyle={{ marginTop: 10, paddingBottom: 5 }}
-                    showsHorizontalScrollIndicator={false}
+                <ScrollView
                     showsVerticalScrollIndicator={false}
-                    style={{ backgroundColor: "#fff", }}
-                // ListEmptyComponent={() => isLoading ? <ActivityIndicator /> : null}
-                />
+                    contentContainerStyle={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                        marginTop: 10,
+                        gap: 10,
+                    }}
+                >
+                    {data.map((item) => renderItem(item))}
+                </ScrollView>
             </View>
-            <TouchableOpacity style={styles.fab} onPress={() => { navigation.navigate("EDIT_RECIPE", { recipeId: '' }) }}>
+            <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("EDIT_RECIPE", { recipeId: '' })}>
                 <Plus color="white" size={25} />
             </TouchableOpacity>
         </View>
@@ -172,7 +164,6 @@ export const RecipeScreen = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, padding: 16, backgroundColor: "#fff", gap: 10 },
-    title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
     card: {
         backgroundColor: "#fff",
         padding: 16,
