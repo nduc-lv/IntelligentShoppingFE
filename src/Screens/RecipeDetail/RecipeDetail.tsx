@@ -5,6 +5,7 @@ import React from "react";
 import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
+import UploadImage from "@/General/Components/UploadImage";
 
 export const RecipeDetailScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -207,6 +208,8 @@ export const RecipeDetailScreen = () => {
                         )}
 
                     </View>
+
+                    <UploadImage />
 
                     <TouchableOpacity style={{
                         padding: 16,
