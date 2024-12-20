@@ -1,5 +1,5 @@
 import { Group, useLazyGetAllGroupQuery } from "@/Services/group";
-import { ArrowRight, Heart } from "lucide-react-native";
+import { ArrowRight, Heart, Plus } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
@@ -163,6 +163,9 @@ export const RecipeScreen = () => {
                 // ListEmptyComponent={() => isLoading ? <ActivityIndicator /> : null}
                 />
             </View>
+            <TouchableOpacity style={styles.fab} onPress={() => { navigation.navigate("EDIT_RECIPE", { recipeId: '' }) }}>
+                <Plus color="white" size={25} />
+            </TouchableOpacity>
         </View>
     );
 };
@@ -176,5 +179,22 @@ const styles = StyleSheet.create({
         width: "100%",
         borderRadius: 16,
         boxShadow: '0px 2px 16px 0px #0633361A',
+    },
+    fab: {
+        position: 'absolute',
+        bottom: 35,
+        right: 25,
+        width: 60,
+        height: 60,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        backgroundColor: AppData.colors.primary,
+        display: "flex",
+        borderRadius: 16,
     },
 });

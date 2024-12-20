@@ -1,13 +1,16 @@
 import AppData from "@/General/Constants/AppData";
-import { ArrowLeft, Heart, Plus, ShoppingCart } from "lucide-react-native";
-import { TextArea } from "native-base";
-import React from "react";
+import { ArrowLeft, ChevronDown, Heart, Minus, Plus, ShoppingCart } from "lucide-react-native";
+import { Actionsheet, Input, TextArea } from "native-base";
+import React, { useState } from "react";
 import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 
-export const RecipeDetailScreen = () => {
+export const EditRecipeScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [isOpenActionSheet, setIsOpenActionSheet] = useState(false);
+
+
     return (
         <View style={styles.container}>
             {/* Background image with absolute position */}
@@ -55,53 +58,32 @@ export const RecipeDetailScreen = () => {
 
                         }}
                     >
-                        <ShoppingCart size={24} color={AppData.colors.primary} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={{
-                            height: 48,
-                            width: 48,
-                            backgroundColor: AppData.colors.background,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderRadius: 16,
-
-                        }}
-                        onPress={() => {
-
-                        }}
-                    >
                         <Heart size={24} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
                     </TouchableOpacity>
                 </View>
             </ImageBackground>
             {/* Content of your screen */}
             <View style={styles.content}>
-                <ScrollView contentContainerStyle={{ gap: 20, }}
+                <ScrollView contentContainerStyle={{ gap: 20, padding: 1, }}
                     showsVerticalScrollIndicator={false}
                 >
                     <View style={{
                         flexDirection: "row",
                     }}>
-                        <Text style={{
-                            fontSize: AppData.fontSizes.large,
-                            fontWeight: "600",
-                            color: AppData.colors.text[900],
-                            width: "70%"
-                        }}>
-                            {'Sunny Egg & Toast Avocado'}
-                        </Text>
-
-                        <Text style={{
-                            fontSize: AppData.fontSizes.default,
-                            fontWeight: "400",
-                            color: AppData.colors.text[500],
-                            marginLeft: "auto"
-                        }}>
-                            {'Tác giả'}
-                        </Text>
+                        <Input
+                            w={{ base: "100%", md: "25%" }}
+                            placeholder="Nhập tên công thức"
+                            size={"xl"}
+                            height={12}
+                            bgColor="white"
+                            borderRadius={8}
+                            borderColor={AppData.colors.text[400]}
+                            borderWidth={0.3}
+                            _focus={{
+                                borderColor: AppData.colors.primary,
+                                backgroundColor: "white",
+                            }}
+                        />
                     </View>
 
 
@@ -114,14 +96,20 @@ export const RecipeDetailScreen = () => {
                             {'Mô tả'}
                         </Text>
 
-                        <Text style={{
-                            fontSize: AppData.fontSizes.default,
-                            fontWeight: "400",
-                            color: AppData.colors.text[800],
-                            textAlign: 'justify'
-                        }}>
-                            {'Salad bắp cải tím sốt mayonnaise là một món ăn giàu chất xơ tốt cho sức khoẻ và có thể ăn kèm với nhiều món ăn khác nhau. Cùng Bách hoá XANH vào bếp và học cách chế biến món salad siêu hấp dẫn này ngay thôi nào.'}
-                        </Text>
+                        <TextArea
+                            w={{ base: "100%", md: "25%" }}
+                            placeholder="Nhập mô tả"
+                            size={AppData.fontSizes.small}
+                            totalLines={4}
+                            bgColor="white"
+                            borderRadius={8}
+                            borderColor={AppData.colors.text[400]}
+                            borderWidth={0.3}
+                            _focus={{
+                                borderColor: AppData.colors.primary,
+                                backgroundColor: "white",
+                            }}
+                        />
                     </View>
 
                     <View style={{ gap: 10 }}>
@@ -133,24 +121,43 @@ export const RecipeDetailScreen = () => {
                             {'Hướng dẫn'}
                         </Text>
 
-                        <Text style={{
-                            fontSize: AppData.fontSizes.default,
-                            fontWeight: "400",
-                            color: AppData.colors.text[800],
-                            textAlign: 'justify'
-                        }}>
-                            {"Bước 1: Sơ chế nguyên liệu\n- Rửa sạch các nguyên liệu như rau, thịt và gia vị.\n- Cắt thịt thành những miếng nhỏ vừa ăn.\n\nBước 2: Nấu nước dùng\n- Đun sôi nước, cho xương vào nấu trong khoảng 30 phút.\n- Thêm gia vị như muối, tiêu, hành, tỏi vào để tạo hương vị.\n\nBước 3: Nấu món ăn\n- Cho thịt vào nồi, nấu cho đến khi thịt chín mềm.\n- Thêm rau củ vào nấu cùng, tiếp tục đun cho đến khi tất cả chín đều.\n\nBước 4: Trình bày và thưởng thức\n- Xếp món ăn ra đĩa, rắc một ít gia vị và thưởng thức ngay khi còn nóng."}
-                        </Text>
+                        <TextArea
+                            w={{ base: "100%", md: "25%" }}
+                            h={200}
+                            placeholder="Nhập hướng dẫn"
+                            size={AppData.fontSizes.small}
+                            bgColor="white"
+                            borderRadius={8}
+                            borderColor={AppData.colors.text[400]}
+
+                            borderWidth={0.3}
+                            _focus={{
+                                borderColor: AppData.colors.primary,
+                                backgroundColor: "white",
+                            }}
+                        />
                     </View>
 
                     <View style={{ gap: 10 }}>
-                        <Text style={{
-                            fontSize: AppData.fontSizes.medium,
-                            fontWeight: "500",
-                            color: AppData.colors.text[900],
+                        <View style={{
+                            flexDirection: "row",
+                            alignItems: "center",
                         }}>
-                            {'Nguyên liệu'}
-                        </Text>
+                            <Text style={{
+                                fontSize: AppData.fontSizes.medium,
+                                fontWeight: "500",
+                                color: AppData.colors.text[900],
+                            }}>
+                                {'Nguyên liệu'}
+                            </Text>
+
+                            <TouchableOpacity style={{ marginLeft: 'auto' }}
+                                onPress={() => setIsOpenActionSheet(true)}
+                            >
+                                <Plus size={26} color={AppData.colors.primary} />
+                            </TouchableOpacity>
+                        </View>
+
                         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) =>
                             <View key={index} style={[styles.card, { flexDirection: "row", gap: 16, alignItems: "center" }]}>
                                 <View
@@ -194,14 +201,15 @@ export const RecipeDetailScreen = () => {
                                     style={{
                                         height: 48,
                                         width: 48,
-                                        backgroundColor: AppData.colors.primary,
+                                        backgroundColor: AppData.colors.danger,
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
                                         borderRadius: 16,
+
                                     }}
                                 >
-                                    <Plus size={24} color={AppData.colors.text[100]} fill={AppData.colors.text[100]} />
+                                    <Minus size={24} color={AppData.colors.text[100]} fill={AppData.colors.text[100]} />
                                 </TouchableOpacity>
                             </View>
                         )}
@@ -220,12 +228,26 @@ export const RecipeDetailScreen = () => {
                             fontSize: AppData.fontSizes.medium,
                             fontWeight: "500",
                             color: AppData.colors.text[100],
+                            minWidth: 200,
+                            textAlign: 'center'
                         }}>
-                            {'Thêm vào danh sách mua'}
+                            {'Lưu thay đổi'}
                         </Text>
                     </TouchableOpacity>
                 </ScrollView >
             </View>
+
+            <Actionsheet isOpen={isOpenActionSheet}
+                onClose={() => setIsOpenActionSheet(false)}
+                hideDragIndicator>
+                <Actionsheet.Content borderTopRadius="0">
+                    <Actionsheet.Item>Delete</Actionsheet.Item>
+                    <Actionsheet.Item>Share</Actionsheet.Item>
+                    <Actionsheet.Item>Play</Actionsheet.Item>
+                    <Actionsheet.Item>Favourite</Actionsheet.Item>
+                    <Actionsheet.Item>Cancel</Actionsheet.Item>
+                </Actionsheet.Content>
+            </Actionsheet>
         </View>
 
     );

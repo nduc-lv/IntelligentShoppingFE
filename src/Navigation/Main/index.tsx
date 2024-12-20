@@ -15,6 +15,7 @@ import { UsergroupContainer } from "@/Screens/Usergroup";
 import { RootStack, RootStackParamList } from "..";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { RecipeDetailContainer } from "@/Screens/RecipeDetail/RecipeDetailContainer";
+import { EditRecipeContainer } from "@/Screens/EditRecipe/EditRecipeContainer";
 
 
 const Tab = createBottomTabNavigator();
@@ -90,6 +91,13 @@ const RecipeStack = () => (
     <RootStack.Screen
       name="RECIPE_DETAIL"
       component={RecipeDetailContainer}
+      options={({ route }) => ({
+        headerShown: false
+      })}
+    />
+    <RootStack.Screen
+      name="EDIT_RECIPE"
+      component={EditRecipeContainer}
       options={({ route }) => ({
         headerShown: false
       })}

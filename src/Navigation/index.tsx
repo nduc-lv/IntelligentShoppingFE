@@ -34,6 +34,7 @@ export type RootStackParamList = {
 	RECIPE: undefined;
 	RECIPE_DETAIL: { recipeId: string };
 	RECIPE_LIST: undefined;
+	EDIT_RECIPE: { recipeId: string };
 };
 
 export const RootStack = createNativeStackNavigator<RootStackParamList>();

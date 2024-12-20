@@ -16,7 +16,7 @@ const AppData = {
     colors: {
         primary: "#53B175",
         secondary: "",
-        danger: "#e74c3c",
+        danger: "#FF5653",
         warning: "#f1c40f",
         success: "#2ecc71",
         background: "#fff",
