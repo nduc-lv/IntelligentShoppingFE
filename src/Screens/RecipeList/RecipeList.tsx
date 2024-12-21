@@ -7,93 +7,138 @@ import { RootStackParamList } from "@/Navigation";
 import AppData from "@/General/Constants/AppData";
 import { Avatar, Input } from "native-base";
 import App from "App";
+import Globals from "@/General/Constants/Globals";
+import { useLazyGetRecipeListQuery, useSaveRecipeMutation } from "@/Services/recipe";
+import { Toast } from "antd-mobile";
 
 
 export const RecipeListScreen = () => {
+    const [filters, setFilters] = useState(Globals.gFilterRecipeList);
+    const [fetchRecipe, { data: recipes, isLoading, isError, error }] = useLazyGetRecipeListQuery();
+    const [saveRecipe, { data: savedRecipe }] = useSaveRecipeMutation();
+    const [food_recipes, setFoodRecipes] = useState<any>([]);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const isLoading = false;
-    const isError = false;
+    const [search, setSearch] = useState("");
 
-    // Dữ liệu giả để kiểm tra
-    const data = [
-        { id: '1', name: 'Sunny Egg & Toast Avocado' },
-        { id: '2', name: 'Pasta with Tomato Sauce' },
-        { id: '3', name: 'Grilled Chicken Salad' },
-        { id: '4', name: 'Vegan Burrito' },
-        { id: '5', name: 'Vegetable Stir Fry' },
-        { id: '6', name: 'Chicken Tacos' },
-    ];
+    useEffect(() => {
+        fetchRecipe(filters);
+    }, [filters]);
 
-    const renderRecipeItem = ({ item }: { item: any }) => (
-        <TouchableOpacity style={[styles.card, { width: 250, height: 270 }]}
-            onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id })}
-        >
-            <ImageBackground
-                source={{ uri: 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
-                style={StyleSheet.absoluteFillObject}
-                imageStyle={{ borderRadius: 16 }}
+    useEffect(() => {
+        if (recipes)
+            setFoodRecipes(recipes[0]?.food_recipes);
+    }, [recipes]);
+
+    const handleSaveRecipe = async (recipeId: string) => {
+        try {
+            await saveRecipe({ recipe_id: recipeId }).unwrap();
+            fetchRecipe(filters);
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Failed to save recipe.", icon: "fail" });
+        }
+    }
+
+    const renderRecipeItem = ({ item }: { item: any }) => {
+        return (
+            <TouchableOpacity style={[styles.card, { width: 250, height: 270 }]}
+                onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id })}
             >
-                <View
-                    style={{
-                        height: 52,
-                        width: 52,
-                        backgroundColor: AppData.colors.background,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: 16,
-                        position: "absolute",
-                        top: 16,
-                        right: 16,
-                    }}
+                <ImageBackground
+                    source={{ uri: item?.image_url || "https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg" }}
+                    style={StyleSheet.absoluteFillObject}
+                    imageStyle={{ borderRadius: 16 }}
                 >
-                    <Heart size={32} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
-                </View>
+                    <TouchableOpacity
+                        style={{
+                            height: 52,
+                            width: 52,
+                            backgroundColor: AppData.colors.background,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: 16,
+                            position: "absolute",
+                            top: 16,
+                            left: 16,
+                        }}
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            setFoodRecipes(item?.food_recipes);
+                        }}
+                    >
+                        <Heart size={32} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            height: 52,
+                            width: 52,
+                            backgroundColor: AppData.colors.background,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: 16,
+                            position: "absolute",
+                            top: 16,
+                            right: 16,
+                        }}
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            handleSaveRecipe(item.id);
+                        }}
+                    >
+                        {item?.isSaved
+                            ? <Heart size={32} color={AppData.colors.primary} fill={AppData.colors.primary} />
+                            : <Heart size={32} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
+                        }
 
-                <View
-                    style={{
-                        marginTop: 'auto',
-                        padding: 16,
-                        gap: 10,
-                    }}
-                >
-                    <Text style={{
-                        fontSize: AppData.fontSizes.large,
-                        fontWeight: "600",
-                        color: AppData.colors.text[100],
-                    }}>
-                        {item.name}
-                    </Text>
+                    </TouchableOpacity>
 
-                    <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Clock5 size={20} color={AppData.colors.text[400]} />
-                            <Text style={{
-                                fontSize: AppData.fontSizes.default,
-                                fontWeight: "400",
-                                color: AppData.colors.text[400],
-                                marginLeft: 5
-                            }}>
-                                {'40 min'}
-                            </Text>
-                        </View>
+                    <View
+                        style={{
+                            marginTop: 'auto',
+                            padding: 16,
+                            gap: 10,
+                        }}
+                    >
+                        <Text style={{
+                            fontSize: AppData.fontSizes.large,
+                            fontWeight: "600",
+                            color: AppData.colors.text[100],
+                        }}>
+                            {item.name}
+                        </Text>
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <NotebookText size={20} color={AppData.colors.text[400]} />
-                            <Text style={{
-                                fontSize: AppData.fontSizes.default,
-                                fontWeight: "400",
-                                color: AppData.colors.text[400],
-                                marginLeft: 5
-                            }}>
-                                {'12'}
-                            </Text>
+                        <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Clock5 size={20} color={AppData.colors.text[400]} />
+                                <Text style={{
+                                    fontSize: AppData.fontSizes.default,
+                                    fontWeight: "400",
+                                    color: AppData.colors.text[400],
+                                    marginLeft: 5
+                                }}>
+                                    {'40 min'}
+                                </Text>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <NotebookText size={20} color={AppData.colors.text[400]} />
+                                <Text style={{
+                                    fontSize: AppData.fontSizes.default,
+                                    fontWeight: "400",
+                                    color: AppData.colors.text[400],
+                                    marginLeft: 5
+                                }}>
+                                    {item?.food_recipes?.length}
+                                </Text>
+                            </View>
                         </View>
                     </View>
-                </View>
-            </ImageBackground>
-        </TouchableOpacity>
-    );
+                </ImageBackground>
+            </TouchableOpacity>
+        )
+    };
 
     const renderIngredientItem = ({ item }: { item: any }) => (
         <View style={{
@@ -101,7 +146,7 @@ export const RecipeListScreen = () => {
             marginRight: 16,
         }}>
             <ImageBackground
-                source={{ uri: 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
+                source={{ uri: item?.food?.image_url || 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
                 style={{
                     width: "100%",
                     height: 150,
@@ -113,8 +158,9 @@ export const RecipeListScreen = () => {
                 fontWeight: "600",
                 color: AppData.colors.text[900],
                 marginTop: 8,
+                textAlign: 'center'
             }}>
-                {item.name}
+                {item?.food?.name}
             </Text>
         </View>
     );
@@ -137,8 +183,10 @@ export const RecipeListScreen = () => {
                         backgroundColor: "white",
                     }}
                     shadow={1}
+                    value={search}
+                    onChangeText={setSearch}
                 />
-                <View style={{
+                <TouchableOpacity style={{
                     height: 64,
                     width: 64,
                     backgroundColor: AppData.colors.primary,
@@ -147,27 +195,30 @@ export const RecipeListScreen = () => {
                     justifyContent: "center",
                     borderRadius: 16,
                     marginLeft: 16,
-                }}>
+                }}
+                    onPress={() => { setFilters({ ...filters, search: search }) }}
+                >
                     <ArrowRight color="white" />
-                </View>
+                </TouchableOpacity>
             </View>
 
             <View>
                 <Text style={styles.title}>{'Đề xuất món ăn'}</Text>
                 <FlatList
-                    data={data}
+                    data={recipes}
                     renderItem={renderRecipeItem}
                     horizontal
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={{ gap: 16 }}
                     showsHorizontalScrollIndicator={false}
+
                 />
             </View>
 
             <View>
                 <Text style={styles.title}>{'Thực phẩm'}</Text>
                 <FlatList
-                    data={data}
+                    data={food_recipes}
                     renderItem={renderIngredientItem}
                     horizontal
                     keyExtractor={(item) => item.id}

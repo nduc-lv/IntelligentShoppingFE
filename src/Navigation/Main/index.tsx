@@ -20,58 +20,6 @@ import { EditRecipeContainer } from "@/Screens/EditRecipe/EditRecipeContainer";
 
 const Tab = createBottomTabNavigator();
 
-const GroupStack = () => (
-  <RootStack.Navigator>
-    <RootStack.Screen
-      name="GROUP_DETAIL"
-      component={GroupDetailContainer}
-      options={() => ({
-        headerTitle: `Danh sách món ăn`,
-      })}
-    />
-    <RootStack.Screen
-      name="GROUP_INFO"
-      component={GroupInfoContainer}
-      options={() => ({
-        headerTitle: `Món ngon hàng ngày`,
-      })}
-    />
-    <RootStack.Screen
-      name="GROUP"
-      component={GroupContainer}
-      options={() => ({
-        headerTitle: `Danh sách món ăn`,
-      })}
-    />
-    <RootStack.Screen
-      name="USERGROUP"
-      component={UsergroupContainer}
-      options={() => ({
-        headerTitle: `Món ngon hàng ngày`,
-      })}
-    />
-  </RootStack.Navigator>
-);
-
-const ShoppingListStack = () => (
-  <RootStack.Navigator>
-    <RootStack.Screen
-      name={'SHOPPING_LIST'}
-      component={ShoppingListContainer}
-      options={() => ({
-        headerTitle: `Danh sách món ăn`,
-      })}
-    />
-    <RootStack.Screen
-      name="SHOPPING_LIST_DETAIL"
-      component={ShoppingListDetailContainer}
-      options={() => ({
-        headerTitle: `Món ngon hàng ngày`,
-      })}
-    />
-  </RootStack.Navigator>
-);
-
 const RecipeStack = () => (
   <RootStack.Navigator>
     <RootStack.Screen
@@ -109,6 +57,7 @@ const RecipeStack = () => (
 export const MainNavigator = () => {
   return (
     <Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}
+
     >
       <Tab.Screen
         name="Group"

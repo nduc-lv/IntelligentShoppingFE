@@ -54,26 +54,45 @@ export interface Recipe {
     id: string,
     name: string,
     description: string,
-    user_id: string
+    user_id: string,
+    image_url: string,
+    food_recipes: any[],
+    instructions: string,
+    foods: any,
+    user: any,
+    isSaved: boolean
 }
 
 
 const recipeAPI = API.injectEndpoints({
     endpoints: (build) => ({
-        getRecipeList: build.query<Recipe[], { per: number; page: number; query: string }>({
-            query: ({ per, page, query }) => ({
+        getRecipeList: build.query<Recipe[], { per: number; page: number; search: string }>({
+            query: ({ per, page, search }) => ({
                 url: "recipe",
                 method: "GET",
-                params: { per, page, query },
+                params: { per, page, search },
             }),
             transformResponse: (response: { rows: Recipe[] }, meta, arg) => response.rows,
         }),
-        getRecipe: build.query<Recipe[], { recipeId: string }>({
+        getRecipe: build.query<Recipe, { recipeId: string }>({
             query: ({ recipeId }) => ({
                 url: `recipe/${recipeId}`,
                 method: "GET",
             }),
-            transformResponse: (response: { recipe: Recipe[] }, meta, arg) => response.recipe
+        }),
+        getSavedRecipe: build.query<Recipe[], void>({
+            query: () => ({
+                url: `recipe/user`,
+                method: "GET",
+            }),
+            transformResponse: (response: { rows: Recipe[] }, meta, arg) => response.rows,
+        }),
+        saveRecipe: build.mutation<any, { recipe_id: string }>({
+            query: (recipe_id) => ({
+                url: `recipe/save`,
+                method: "POST",
+                body: recipe_id,
+            }),
         }),
         createRecipe: build.mutation<Recipe, CreateShoppingPayload>({
             query: (payload) => ({
@@ -106,8 +125,10 @@ const recipeAPI = API.injectEndpoints({
 });
 
 export const {
-    useGetRecipeListQuery,
-    useGetRecipeQuery,
+    useLazyGetRecipeListQuery,
+    useLazyGetSavedRecipeQuery,
+    useLazyGetRecipeQuery,
+    useSaveRecipeMutation,
     useCreateRecipeMutation,
     useUpdateRecipeMutation,
     useDeleteRecipeMutation,

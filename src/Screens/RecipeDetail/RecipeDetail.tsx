@@ -1,19 +1,40 @@
 import AppData from "@/General/Constants/AppData";
 import { ArrowLeft, Heart, Plus, ShoppingCart } from "lucide-react-native";
 import { TextArea } from "native-base";
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import UploadImage from "@/General/Components/UploadImage";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useLazyGetRecipeQuery, useSaveRecipeMutation } from "@/Services/recipe";
+import { Toast } from "antd-mobile";
 
-export const RecipeDetailScreen = () => {
+export const RecipeDetailScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [fetchRecipe, { data: recipe, isLoading, isError, error }] = useLazyGetRecipeQuery();
+    const recipeId = route.params.recipeId;
+    const [saveRecipe, { data: savedRecipe }] = useSaveRecipeMutation();
+    useEffect(() => {
+        fetchRecipe({ recipeId });
+    }, [recipeId]);
+
+    console.log(recipe)
+    const handleSaveRecipe = async (recipeId: string) => {
+        try {
+            await saveRecipe({ recipe_id: recipeId }).unwrap();
+            fetchRecipe({ recipeId });
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Failed to save recipe.", icon: "fail" });
+        }
+    }
+
     return (
         <View style={styles.container}>
             {/* Background image with absolute position */}
             <ImageBackground
-                source={{ uri: 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
+                source={{ uri: recipe?.image_url || 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
                 style={styles.backgroundImage}
             >
                 <View style={{
@@ -68,13 +89,15 @@ export const RecipeDetailScreen = () => {
                             alignItems: "center",
                             justifyContent: "center",
                             borderRadius: 16,
-
                         }}
                         onPress={() => {
-
+                            handleSaveRecipe(recipeId)
                         }}
                     >
-                        <Heart size={24} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
+                        {recipe?.isSaved
+                            ? <Heart size={32} color={AppData.colors.primary} fill={AppData.colors.primary} />
+                            : <Heart size={32} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
+                        }
                     </TouchableOpacity>
                 </View>
             </ImageBackground>
@@ -92,7 +115,7 @@ export const RecipeDetailScreen = () => {
                             color: AppData.colors.text[900],
                             width: "70%"
                         }}>
-                            {'Sunny Egg & Toast Avocado'}
+                            {recipe?.name}
                         </Text>
 
                         <Text style={{
@@ -101,7 +124,7 @@ export const RecipeDetailScreen = () => {
                             color: AppData.colors.text[500],
                             marginLeft: "auto"
                         }}>
-                            {'Tác giả'}
+                            {recipe?.user?.name}
                         </Text>
                     </View>
 
@@ -121,7 +144,7 @@ export const RecipeDetailScreen = () => {
                             color: AppData.colors.text[800],
                             textAlign: 'justify'
                         }}>
-                            {'Salad bắp cải tím sốt mayonnaise là một món ăn giàu chất xơ tốt cho sức khoẻ và có thể ăn kèm với nhiều món ăn khác nhau. Cùng Bách hoá XANH vào bếp và học cách chế biến món salad siêu hấp dẫn này ngay thôi nào.'}
+                            {recipe?.description || "Chưa cập nhật"}
                         </Text>
                     </View>
 
@@ -140,7 +163,7 @@ export const RecipeDetailScreen = () => {
                             color: AppData.colors.text[800],
                             textAlign: 'justify'
                         }}>
-                            {"Bước 1: Sơ chế nguyên liệu\n- Rửa sạch các nguyên liệu như rau, thịt và gia vị.\n- Cắt thịt thành những miếng nhỏ vừa ăn.\n\nBước 2: Nấu nước dùng\n- Đun sôi nước, cho xương vào nấu trong khoảng 30 phút.\n- Thêm gia vị như muối, tiêu, hành, tỏi vào để tạo hương vị.\n\nBước 3: Nấu món ăn\n- Cho thịt vào nồi, nấu cho đến khi thịt chín mềm.\n- Thêm rau củ vào nấu cùng, tiếp tục đun cho đến khi tất cả chín đều.\n\nBước 4: Trình bày và thưởng thức\n- Xếp món ăn ra đĩa, rắc một ít gia vị và thưởng thức ngay khi còn nóng."}
+                            {recipe?.instructions || "Chưa cập nhật"}
                         </Text>
                     </View>
 
@@ -152,8 +175,8 @@ export const RecipeDetailScreen = () => {
                         }}>
                             {'Nguyên liệu'}
                         </Text>
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) =>
-                            <View key={index} style={[styles.card, { flexDirection: "row", gap: 16, alignItems: "center" }]}>
+                        {recipe?.foods?.rows.map((item: any) =>
+                            <View key={item.id} style={[styles.card, { flexDirection: "row", gap: 16, alignItems: "center" }]}>
                                 <View
                                     style={{
                                         height: 48,
@@ -179,7 +202,7 @@ export const RecipeDetailScreen = () => {
                                     fontWeight: "500",
                                     color: AppData.colors.text[900],
                                 }}>
-                                    {'Cà tím'}
+                                    {item?.food?.name}
                                 </Text>
 
                                 <Text style={{
@@ -188,7 +211,7 @@ export const RecipeDetailScreen = () => {
                                     color: AppData.colors.text[900],
                                     marginLeft: 'auto'
                                 }}>
-                                    {'400g'}
+                                    {item?.quantity + " " + item?.unit?.name}
                                 </Text>
 
                                 <TouchableOpacity

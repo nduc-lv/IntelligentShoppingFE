@@ -1,30 +1,26 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image, ScrollView } from "react-native";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { NavigationProp, useFocusEffect, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import { Avatar } from "native-base";
 import { StatusBar } from "expo-status-bar";
 import { ArrowRight, Heart, Plus } from "lucide-react-native";
 import AppData from "@/General/Constants/AppData";
+import { useLazyGetSavedRecipeQuery } from "@/Services/recipe";
 
 export const RecipeScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const [fetchSavedRecipe, { data: recipes, isLoading, isError, error }] = useLazyGetSavedRecipeQuery();
+    const hasFetchedRef = useRef(false);
+    useFocusEffect(() => {
+        if (!hasFetchedRef.current) {
+            fetchSavedRecipe();
+            hasFetchedRef.current = true;
+        }
 
-    // Dữ liệu giả để kiểm tra
-    const data = [
-        { id: '1', name: 'Sunny Egg & Toast Avocado' },
-        { id: '2', name: 'Pasta with Tomato Sauce' },
-        { id: '3', name: 'Grilled Chicken Salad' },
-        { id: '4', name: 'Vegan Burrito' },
-        { id: '5', name: 'Vegetable Stir Fry' },
-        { id: '6', name: 'Chicken Tacos' },
-        { id: '7', name: 'Chicken Tacos' },
-        { id: '8', name: 'Chicken Tacos' },
-        { id: '9', name: 'Chicken Tacos' },
-        { id: '10', name: 'Chicken Tacos' },
-    ];
+    })
 
-    const renderItem = (item: { id: string; name: string }) => (
+    const renderItem = (item: any) => (
         <TouchableOpacity
             style={[styles.card, {
                 width: "47%",
@@ -45,7 +41,7 @@ export const RecipeScreen = () => {
                         height: 90,
                         borderRadius: 16,
                     }}
-                    source={{ uri: "https://i.pinimg.com/736x/a8/68/32/a86832051be6aa81cdf163e4d03919dd.jpg" }}
+                    source={{ uri: item?.image_url || "https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg" }}
                 />
                 <View
                     style={{
@@ -74,7 +70,7 @@ export const RecipeScreen = () => {
             </Text>
             <View style={{ flexDirection: 'row', marginTop: 'auto', marginBottom: 8 }}>
                 <Avatar
-                    source={{ uri: "https://i.pinimg.com/736x/a8/68/32/a86832051be6aa81cdf163e4d03919dd.jpg" }}
+                    source={{ uri: item?.user?.avatar || "https://i.pinimg.com/736x/a8/68/32/a86832051be6aa81cdf163e4d03919dd.jpg" }}
                     size="xs"
                 />
                 <Text style={{
@@ -83,7 +79,7 @@ export const RecipeScreen = () => {
                     color: AppData.colors.text[500],
                     marginLeft: 10,
                 }}>
-                    {'Nguyễn Huy'}
+                    {item?.user?.name}
                 </Text>
             </View>
         </TouchableOpacity>
@@ -152,7 +148,7 @@ export const RecipeScreen = () => {
                         gap: 10,
                     }}
                 >
-                    {data.map((item) => renderItem(item))}
+                    {recipes && recipes.map((item: any) => renderItem(item))}
                 </ScrollView>
             </View>
             <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("EDIT_RECIPE", { recipeId: '' })}>
