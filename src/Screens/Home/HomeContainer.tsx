@@ -1,16 +1,15 @@
 import { Home } from "./Home";
 import React, { useState, useEffect } from "react";
-import { useLazyGetUserQuery } from "@/Services";
+import { useLazyGetMeQuery } from "@/Services";
 
 export const HomeContainer = () => {
-  const [userId, setUserId] = useState("9");
 
-  const [fetchOne, { data, isSuccess, isLoading, isFetching, error }] =
-    useLazyGetUserQuery();
+  const [getMe, { data, isSuccess, isUninitialized, isFetching, error }] =
+    useLazyGetMeQuery();
 
   useEffect(() => {
-    fetchOne(userId);
-  }, [fetchOne, userId]);
+    getMe()
+  }, [getMe]);
 
-  return <Home data={data} isLoading={isLoading} />;
+  return <Home data={data} isLoading={isUninitialized} />;
 };

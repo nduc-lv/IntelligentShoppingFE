@@ -3,7 +3,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { HStack, Spinner, Heading } from "native-base";
-import { User } from "@/Services";
+import { User } from "@/Store/types";
 import { Button } from "react-native";
 import { RootScreens } from '@/Screens';
 import { RootStackParamList } from "@/Navigation";

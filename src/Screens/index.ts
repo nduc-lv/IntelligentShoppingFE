@@ -3,3 +3,7 @@ export enum RootScreens {
   WELCOME = "Welcome",
   SIGN_IN = "SignIn",
 }
+export enum UserTabScreens {
+  USER_TAB_MAIN = "User",
+  ACCOUNT_SETTING = "Account Settings",
+}

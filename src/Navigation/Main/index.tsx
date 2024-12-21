@@ -1,8 +1,12 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeContainer } from "@/Screens/Home";
-import { Home, User } from "lucide-react-native"; // Import các icon từ Lucide
+import { UserTabNavigation } from "./UserTab";
+import { GroupContainer } from "@/Screens/Group";
+import { Heart, Home, User, Users } from "lucide-react-native"; // Import các icon từ Lucide
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
+import { UserTabContainer } from "@/Screens/UserTab/UserTabContainer";
+import { RecipeContainer } from "@/Screens/Recipe/RecipeContainer";
 
 const Tab = createBottomTabNavigator();
 
@@ -10,7 +14,18 @@ const Tab = createBottomTabNavigator();
 export const MainNavigator = () => {
 
   return (
-    <Tab.Navigator>
+    <Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}
+    >
+      <Tab.Screen
+        name="Group"
+        component={GroupContainer}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Users color={color} size={size} />
+          ),
+          tabBarLabelPosition: "below-icon",
+        }}
+      />
       <Tab.Screen
         name="Home"
         component={HomeContainer}
@@ -22,9 +37,20 @@ export const MainNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="User"
-        component={HomeContainer}
+        name="Recipe"
+        component={RecipeContainer}
         options={{
+          tabBarIcon: ({ color, size }) => (
+            <Heart color={color} size={size} />
+          ),
+          tabBarLabelPosition: "below-icon",
+        }}
+      />
+      <Tab.Screen
+        name="User"
+        component={UserTabNavigation}
+        options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <User color={color} size={size} />
           ),
