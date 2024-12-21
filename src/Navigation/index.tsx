@@ -20,11 +20,15 @@ import Loading from "@/General/Components/Loading";
 import { GroupInfoContainer } from "@/Screens/GroupInfo/GroupInfoContainer";
 import { RecipeContainer } from "@/Screens/Recipe/RecipeContainer";
 import { RecipeListContainer } from "@/Screens/RecipeList/RecipeListCointainer";
+import { ManageContainer } from "@/Screens/Manage";
+import { ManageAccountContainer } from "@/Screens/ManageAccount";
+import { AdminNavigator } from "./Admin";
 
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
 	[RootScreens.SIGN_IN]: undefined;
+	[RootScreens.ADMIN]: undefined;
 	SHOPPING_LIST: undefined;
 	SHOPPING_LIST_DETAIL: { groupId: string };
 	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
@@ -34,6 +38,10 @@ export type RootStackParamList = {
 	RECIPE: undefined;
 	RECIPE_DETAIL: { recipeId: string };
 	RECIPE_LIST: undefined;
+	MANAGE: undefined;
+	MANAGE_ACCOUNT: undefined;
+	MANAGE_UNIT: undefined;
+	MANAGE_FOOD: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -79,7 +87,7 @@ const _ApplicationNavigator = () => {
 			<StatusBar />
 			<RootStack.Navigator
 				initialRouteName={data ? RootScreens.MAIN : RootScreens.WELCOME}
-				screenOptions={{ headerShown: true }}
+				screenOptions={{ headerShown: false }}
 			>
 				<RootStack.Screen
 					name={RootScreens.WELCOME}
@@ -93,6 +101,11 @@ const _ApplicationNavigator = () => {
 				<RootStack.Screen
 					name={RootScreens.SIGN_IN}
 					component={SignInContainer}
+				/>
+				<RootStack.Screen
+					name={RootScreens.ADMIN}
+					component={AdminNavigator}
+					options={{}}
 				/>
 				<RootStack.Screen
 					name={'SHOPPING_LIST'}
@@ -120,6 +133,22 @@ const _ApplicationNavigator = () => {
 				<RootStack.Screen
 					name="RECIPE_LIST"
 					component={RecipeListContainer}
+				/>
+				<RootStack.Screen
+					name={"MANAGE"}
+					component={ManageContainer}
+				/>
+				<RootStack.Screen
+					name={"MANAGE_ACCOUNT"}
+					component={ManageAccountContainer}
+				/>
+				<RootStack.Screen
+					name={"MANAGE_FOOD"}
+					component={ManageAccountContainer}
+				/>
+				<RootStack.Screen
+					name={"MANAGE_UNIT"}
+					component={ManageAccountContainer}
 				/>
 			</RootStack.Navigator>
 		</NavigationContainer>
