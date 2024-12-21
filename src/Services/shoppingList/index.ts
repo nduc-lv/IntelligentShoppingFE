@@ -28,7 +28,8 @@ export interface AddItemToFridgePayload {
   group_id: string,
   unit_id: string,
   shopping_id: string,
-  quantity: string,
+  id: string | undefined,
+  quantity: number,
   expired_at: string
 }
 
@@ -76,7 +77,8 @@ export interface ItemByShoppingIdResponse {
   quantity: number,
   shopping: {
     date: string,
-    id: string
+    id: string,
+    name: string
   },
   task: {
     user_id: string
@@ -148,6 +150,14 @@ const shoppingListAPI = API.injectEndpoints({
       }),
       transformResponse: (response: { data: void }, meta, arg) => response.data,
     }),
+
+    deleteShoppingItemById: build.mutation<void, string>({
+      query: (id) => ({
+        url: `shopping-list/shopping-item/${id}`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: { data: void }, meta, arg) => response.data,
+    }),
     addShoppingItemToFridge: build.mutation<any, AddItemToFridgePayload>({
       query: (payload) => ({
         url: 'shopping-list/fridge/add',
@@ -161,6 +171,12 @@ const shoppingListAPI = API.injectEndpoints({
         method: "POST",
         body: payload
       })
+    }),
+    getUserGroup: build.query({
+      query: (id) => `shopping-list/group/${id}`,
+      transformResponse: (response: {groups: any}) => {
+        return response.groups
+      }
     })
 
   }),
@@ -178,5 +194,7 @@ export const {
   useLazyGetAllFoodQuery,
   useLazyGetAllUnitQuery,
   useLazyGetAllUserQuery,
-  useLazyGetItemByShoppingListIdQuery
+  useLazyGetItemByShoppingListIdQuery,
+  useLazyGetUserGroupQuery,
+  useDeleteShoppingItemByIdMutation
 } = shoppingListAPI;

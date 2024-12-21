@@ -1,30 +1,48 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { useLazyGetUserGroupQuery } from "@/Services";  // Assuming this is set up in your API slice
+import { useLazyGetUserGroupQuery } from "@/Services/shoppingList";
 import { Button, Spinner } from "native-base";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
+import { useLazyGetMeQuery } from "@/Services";
 // Type definition for Group
 interface Group {
   id: string;
   name: string;
 }
 
-const mockUserId = '84ef5319-acef-4d19-b048-fdf00ff3e386';
+// const userInfo.id = '67ecf6e5-c4aa-461f-930f-e03fe0f8f6b2';
 
 export const ShoppingListScreen: React.FC = () => {
   // Lazy loading the groups with user ID
   const [fetchGroups, { data, isLoading, isError, currentData }] = useLazyGetUserGroupQuery();
+  const [getMe, {data: userInfo}] = useLazyGetMeQuery();
+  const [userId, setUserId] = useState<string>("");
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     // Fetch groups when the component mounts
-    fetchGroups(mockUserId);
-  }, [fetchGroups]);
+    if (userInfo) {
+      fetchGroups(userInfo.id);
+    }
+    // fetchGroups(userInfo.id);
+  }, [fetchGroups, userInfo]);
 
   useEffect(() => {
+    getMe()
+  }, [getMe])
+  useEffect(() => {
+    console.log("data",data)
   }, [data])
 
+  if (!userInfo) {
+    return (
+      <View style={styles.centered}>
+        <Spinner />
+        <Text>Loading groups...</Text>
+      </View>
+    )
+  }
   // Loading state
   if (isLoading) {
     return (
@@ -40,7 +58,7 @@ export const ShoppingListScreen: React.FC = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>Failed to load groups. Please try again.</Text>
-        <Button onPress={() => fetchGroups(mockUserId)}>
+        <Button onPress={() => fetchGroups(userInfo.id)}>
           Retry
         </Button>
       </View>

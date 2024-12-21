@@ -28,6 +28,7 @@ export type RootStackParamList = {
 	[RootScreens.SIGN_IN]: undefined;
 	SHOPPING_LIST: undefined;
 	SHOPPING_LIST_DETAIL: { groupId: string };
+	SHOPPING_LIST_BY_ID: {groupId: string, shoppingId: string};
 	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
 	GROUP: undefined;
 	GROUP_INFO: { groupId: string, isAdmin: boolean };

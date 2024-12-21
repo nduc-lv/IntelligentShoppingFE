@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ScrollView, // Import ScrollView
 } from "react-native";
+import { useSelector } from "react-redux";
 import {
   Popup,
   Input,
@@ -38,8 +39,9 @@ type ShoppingListRouteParams = {
 };
 
 export const ShoppingListDetail: React.FC = () => {
-  const mockUserId = "84ef5319-acef-4d19-b048-fdf00ff3e386";
   const route = useRoute<RouteProp<ShoppingListRouteParams, "ShoppingListDetail">>();
+  const userData = useSelector((state:any) => state?.userApi?.queries[`getMe`]?.data);
+  const mockUserId = userData?.id;
   const { groupId } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [fetchShoppingList, { data: rows = [], isLoading, isError }] = useLazyGetShoppingListQuery();
@@ -61,6 +63,9 @@ export const ShoppingListDetail: React.FC = () => {
   useEffect(() => {
     fetchShoppingList({ groupId, ...pagination });
   }, [groupId, pagination, fetchShoppingList]);
+  useEffect(() => {
+    fetchShoppingList({ groupId, ...pagination });
+  }, [])
 
   const [items, setItems] = useState([{ food: "", unit: "", assignee: "", quantity: 0 }]);
 
@@ -125,17 +130,17 @@ export const ShoppingListDetail: React.FC = () => {
   const saveShoppingList = async () => {
     try {
       // Validate the items fields
-      let isValid = true;
-      for (const item of items) {
-        if (!item.food || !item.unit || !item.assignee) {
-          isValid = false;
-          break;
-        }
-      }
-      if (!isValid) {
-        Toast.show({ content: "Please fill in all fields for each item.", icon: "fail" });
-        return;
-      }
+      // let isValid = true;
+      // for (const item of items) {
+      //   if (!item.food || !item.unit || !item.assignee) {
+      //     isValid = false;
+      //     break;
+      //   }
+      // }
+      // if (!isValid) {
+      //   Toast.show({ content: "Please fill in all fields for each item.", icon: "fail" });
+      //   return;
+      // }
 
       const values = await form.validateFields();
       // {name, date, groupId, foods: [{food_id, quantity, user_id, unit_id}]}
@@ -143,22 +148,15 @@ export const ShoppingListDetail: React.FC = () => {
         groupId: groupId,
         date: values.date,
         name: "Default",
-        foods: items.map(item => {
-          return {
-            food_id: item.food,
-            quantity: item.quantity,
-            user_id: item.assignee,
-            unit_id: item.unit
-          }
-        })
+        foods:[]
       }
-      if (currentAction === "create") {
-        await createShoppingList(payload).unwrap();
-        Toast.show({ content: "Shopping list created successfully!", icon: "success" });
-      } else if (currentAction === "edit" && selectedItem) {
-        await updateShoppingList({ id: selectedItem.id, ...payload }).unwrap();
-        Toast.show({ content: "Shopping list updated successfully!", icon: "success" });
-      }
+      await createShoppingList(payload).unwrap();
+      Toast.show({ content: "Shopping list created successfully!", icon: "success" });
+      // if (currentAction === "create") {
+      // } else if (currentAction === "edit" && selectedItem) {
+      //   await updateShoppingList({ id: selectedItem.id, ...payload }).unwrap();
+      //   Toast.show({ content: "Shopping list updated successfully!", icon: "success" });
+      // }
       fetchShoppingList({ groupId, ...pagination });
       handleModalClose();
     } catch (e) {
@@ -255,7 +253,7 @@ export const ShoppingListDetail: React.FC = () => {
             </Form.Item>
 
             {/* Scrollable Items */}
-            <ScrollView style={styles.itemsContainer} keyboardShouldPersistTaps="handled">
+            {/* <ScrollView style={styles.itemsContainer} keyboardShouldPersistTaps="handled">
               {items.map((item, index) => (
                 <View key={index} style={styles.itemRow}>
                   <FormControl isInvalid={!item.food}>
@@ -304,7 +302,7 @@ export const ShoppingListDetail: React.FC = () => {
                     onChange={(value) => updateItem(index, "assignee", value)}
                   /> */}
 
-                  <FormControl isInvalid={!item.assignee}>
+                  {/* <FormControl isInvalid={!item.assignee}>
                     <Select
                       minWidth="200"
                       placeholder="Select Assignee"
@@ -324,7 +322,7 @@ export const ShoppingListDetail: React.FC = () => {
                     </FormControl.ErrorMessage>
                   </FormControl>
 
-                  <FormControl isInvalid={!item.food}>
+                  <FormControl isInvalid={!item.food}> */}
                     {/* <Select
                       minWidth="200"
                       placeholder="Choose Quantity"
@@ -339,29 +337,29 @@ export const ShoppingListDetail: React.FC = () => {
                         <Select.Item key={food.id} label={food.name} value={food.id} />
                       ))}
                     </Select> */}
-                    <Input type="number" placeholder="Choose Quantity" onChange={(value => updateItem(index, "quantity", value))} defaultValue={`${item.quantity || 0}`}></Input>
+                    {/* <Input type="number" placeholder="Choose Quantity" onChange={(value => updateItem(index, "quantity", value))} defaultValue={`${item.quantity || 0}`}></Input>
                     <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
                       Please select food quantity!
                     </FormControl.ErrorMessage>
-                  </FormControl>
+                  </FormControl> */}
 
                   {/* Remove Button */}
-                  <Button onPress={() => removeItem(index)} color="danger" size="small">
+                  {/* <Button onPress={() => removeItem(index)} color="danger" size="small">
                     Remove
-                  </Button>
+                  </Button> */}
 
                   {/* Add to fridge button */}
-                  <Button onPress={() => setShowModal(true)} color="danger" size="small">
+                  {/* <Button onPress={() => setShowModal(true)} color="danger" size="small">
                     Add To Fridge
-                  </Button>
-                </View>
+                  </Button> */}
+                {/* </View>
               ))}
-            </ScrollView>
+            </ScrollView> */} 
 
             {/* Add Button */}
-            <Button onPress={addItem}>
+            {/* <Button onPress={addItem}>
               Add Item
-            </Button>
+            </Button> */}
 
             {/* Save Button */}
             <Button onPress={saveShoppingList}>
