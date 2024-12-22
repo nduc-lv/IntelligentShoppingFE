@@ -60,16 +60,18 @@ const _ApplicationNavigator = () => {
 	const accessToken = useSelector(
 		(state: { auth: AuthState }) => state.auth.accessToken
 	);
-	const currentRoute = RootNavigationContainerRef.current?.getCurrentRoute()?.name
-	useEffect(() => {
-		if (!accessToken && currentRoute != RootScreens.SIGN_IN) {
-			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
-		}
-	}, [accessToken, currentRoute]);
+	const currentRoute=RootNavigationContainerRef.current?.getCurrentRoute()?.name
+
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
 	useEffect(() => {
 		getMe();
 	}, []);
+	useEffect(() => {
+		if (currentRoute!=RootScreens.SIGN_IN&&(!accessToken||(!isLoading&&(!data||error)))) {
+			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
+		}
+	}, [accessToken,currentRoute,isLoading,data,error]);
+
 	if (isLoading) {
 		return <Loading />;
 	}
