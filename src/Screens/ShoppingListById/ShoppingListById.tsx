@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useCallback } from "react";
 import moment from "moment";
 import lodash from "lodash";
+import { Dropdown } from 'react-native-searchable-dropdown-kj'
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import {
     View,
     Text,
-    FlatList,
     StyleSheet,
     ActivityIndicator,
     TouchableOpacity,
     ScrollView,
 } from "react-native";
-import { Toast, DatePicker, Form, Input } from "antd-mobile";
-import { FormControl, Select, WarningOutlineIcon, CheckIcon, Modal, Button } from "native-base";
-import { useSelector } from "react-redux";
+import { Toast, Form, Input } from "@ant-design/react-native";
+import { FormControl, Select, WarningOutlineIcon, CheckIcon, Modal, Button, Image } from "native-base";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import {
     useLazyGetItemByShoppingListIdQuery,
@@ -52,87 +52,177 @@ const ItemRow: React.FC<{
     setAction: any;
     setIsModalVisible: any;
     setSelectedItem: any;
-}> = React.memo(({ index, item, foods, units, users, onUpdate, onRemove, setIsModalVisible, setAction, setSelectedItem }) => (
-    <ScrollView style={styles.itemRow}>
-        <FormControl isInvalid={!item.food}>
-            <Select
-                placeholder="Select Food"
-                selectedValue={item.food}
-                onValueChange={(value) => onUpdate(index, "food", value)}
-                _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-            >
-                {foods.map((food) => (
-                    <Select.Item key={food.id} label={food.name} value={food.id} />
-                ))}
-            </Select>
-            <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                Please select a food item!
-            </FormControl.ErrorMessage>
-        </FormControl>
+}> = React.memo(({ index, item, foods, units, users, onUpdate, onRemove, setIsModalVisible, setAction, setSelectedItem }) => {
+    const [isFocus, setIsFocus] = useState(false);
+    const onSaveToFridge = () => { setIsModalVisible(true); setSelectedItem(curr => item); setAction(curr => 'delete') };
+    const onDelete = () => { setIsModalVisible(true); setSelectedItem(curr => item); setAction(curr => 'delete') }
+    return (
+        <View style={styles.itemContainer}>
+            <Image
+                source={{
+                    uri: item.id
+                        ? "https://wallpaperaccess.com/full/317501.jpg"
+                        : "https://wallpaperaccess.com/full/317501.jpg",
+                }}
+                alt="Image description"
+                size={"xl"}
+            />
+            <View style={{flexGrow: 1}}>
+                {!item.id &&
+                    <FormControl isInvalid={!item.food}>
+                        <Dropdown
+                            style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+                            placeholderStyle={styles.placeholderStyle}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            iconStyle={styles.iconStyle}
+                            data={foods.map(item => ({
+                                label: item.name,
+                                value: item.id
+                            }))}
+                            search
+                            maxHeight={300}
+                            placeholder={!isFocus ? 'Select Food' : '...'}
+                            labelField="label"
+                            valueField="value"
+                            searchPlaceholder="Search..."
+                            value={item.food}
+                            onFocus={() => setIsFocus(true)}
+                            onBlur={() => setIsFocus(false)}
+                            onChange={item => {
+                                onUpdate(index, "food", item.value)
+                                setIsFocus(false)
+                            }}
+                        />
+                        <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+                            Please select a food item!
+                        </FormControl.ErrorMessage>
+                    </FormControl>
+                }
+                {item.id &&
 
-        <FormControl isInvalid={!item.unit}>
-            <Select
-                placeholder="Select Unit"
-                selectedValue={item.unit}
-                onValueChange={(value) => onUpdate(index, "unit", value)}
-                _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-            >
-                {units.map((unit) => (
-                    <Select.Item key={unit.id} label={unit.name} value={unit.id} />
-                ))}
-            </Select>
-            <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                Please select a unit!
-            </FormControl.ErrorMessage>
-        </FormControl>
+                    <View style={styles.textContainer}>
+                        <Text style={styles.itemName}>{lodash.find(foods, food => food.id === item.food)?.name}</Text>
+                    </View>
+                }
+                <Input
+                    type="number"
+                    placeholder="Enter Quantity"
+                    // keyboardType="numeric"
+                    value={`${item.quantity}`}
+                    onChange={(value) => onUpdate(index, "quantity", Number(value))}
+                />
+                <FormControl isInvalid={!item.unit}>
+                    {/* <Select
+                    placeholder="Select Unit"
+                    selectedValue={item.unit}
+                    onValueChange={(value) => onUpdate(index, "unit", value)}
+                    _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
+                >
+                    {units.map((unit) => (
+                        <Select.Item key={unit.id} label={unit.name} value={unit.id} />
+                        ))}
+                        </Select> */}
+                    <Dropdown
+                        style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={units.map(item => ({
+                            label: item.name,
+                            value: item.id
+                        }))}
+                        search
+                        maxHeight={300}
+                        placeholder={!isFocus ? 'Select Unit' : '...'}
+                        labelField="label"
+                        valueField="value"
+                        searchPlaceholder="Search..."
+                        value={item.unit}
+                        onFocus={() => setIsFocus(true)}
+                        onBlur={() => setIsFocus(false)}
+                        onChange={item => {
+                            onUpdate(index, "unit", item.value)
+                            setIsFocus(false)
+                        }}
+                    />
+                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+                        Please select a unit!
+                    </FormControl.ErrorMessage>
+                </FormControl>
 
-        <FormControl isInvalid={!item.assignee}>
-            <Select
-                placeholder="Select Assignee"
-                selectedValue={item.assignee}
-                onValueChange={(value) => onUpdate(index, "assignee", value)}
-                _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-            >
-                {users.map((user) => (
-                    <Select.Item key={user.id} label={user.name} value={user.id} />
-                ))}
-            </Select>
-            <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                Please select an assignee!
-            </FormControl.ErrorMessage>
-        </FormControl>
+                <FormControl isInvalid={!item.assignee}>
+                    {/* <Select
+                    placeholder="Select Assignee"
+                    selectedValue={item.assignee}
+                    onValueChange={(value) => onUpdate(index, "assignee", value)}
+                    _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
+                >
+                    {users.map((user) => (
+                        <Select.Item key={user.id} label={user.name} value={user.id} />
+                    ))}
+                </Select> */}
+                    <Dropdown
+                        style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={users.map(item => ({
+                            label: item.name,
+                            value: item.id
+                        }))}
+                        search
+                        maxHeight={300}
+                        placeholder={!isFocus ? 'Select Asignee' : '...'}
+                        labelField="label"
+                        valueField="value"
+                        searchPlaceholder="Search..."
+                        value={item.assignee}
+                        onFocus={() => setIsFocus(true)}
+                        onBlur={() => setIsFocus(false)}
+                        onChange={item => {
+                            onUpdate(index, "assignee", item.value)
+                            setIsFocus(false)
+                        }}
+                    />
+                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+                        Please select an assignee!
+                    </FormControl.ErrorMessage>
+                </FormControl>
+                {!item.id && <Button onPress={onRemove} colorScheme="danger" size="sm">
+                    Remove
+                </Button>}
+                {item.id &&
+                    <Button onPress={() => { setIsModalVisible(true); setSelectedItem(curr => item); setAction(curr => 'delete') }}>
+                        Delete
+                    </Button>
+                }
+                {
+                    item.id &&
+                    <Button onPress={() => { setIsModalVisible(true); setSelectedItem(curr => item); setAction(curr => 'addToFridge') }}>
+                        Save To Fridge
+                    </Button>
+                }
+            </View>
 
-        <Input
-            type="number"
-            placeholder="Enter Quantity"
-            // keyboardType="numeric"
-            value={`${item.quantity}`}
-            onChange={(value) => onUpdate(index, "quantity", Number(value))}
-        />
-        {!item.id && <Button onPress={onRemove} colorScheme="danger" size="sm">
-            Remove
-        </Button>}
-        {item.id &&
-            <Button onPress={() => { setIsModalVisible(true); setSelectedItem(curr => item); setAction(curr => 'delete') }}>
-                Delete
-            </Button>
-        }
-        {
-            item.id &&
-            <Button onPress={() => { setIsModalVisible(true); setSelectedItem(curr => item); setAction(curr => 'addToFridge') }}>
-                Save To Fridge
-            </Button>
-        }
-
-        {/* {item.id && <Button onPress={dele}} */}
-        {/* TODO: DELETE ITEM + ADD TO THE FRIDGE + BUILD INFINITYES */}
-    </ScrollView>
-));
+            {/* {item.id && <Button onPress={dele}} */}
+            {/* TODO: DELETE ITEM + ADD TO THE FRIDGE + BUILD INFINITYES */}
+        </View>
+    )
+});
 
 // const mockerUserId = '67ecf6e5-c4aa-461f-930f-e03fe0f8f6b2'
 export const ShoppingListById: React.FC = () => {
     const route = useRoute<RouteProp<ShoppingListRouteParams, "ShoppingListById">>();
     // const userData = useSelector((state:any) => state?.userApi?.queries[`getMe`]?.data);
+    const [date, setDate] = useState(new Date());
+
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
     const [getMe, { data: userInfo }] = useLazyGetMeQuery();
     // const mockerUserId = userData?.id;
     const { groupId, shoppingId } = route.params;
@@ -266,6 +356,21 @@ export const ShoppingListById: React.FC = () => {
             console.log(e);
         }
     };
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate;
+        console.log(currentDate)
+        setDate(currentDate)
+        formAddFridge.setFieldValue("date", moment(currentDate).format("YYYY-MM-DD"))
+    };
+
+    const showMode = (currentMode) => {
+        DateTimePickerAndroid.open({
+            value: date,
+            onChange,
+            mode: currentMode,
+            is24Hour: true,
+        });
+    };
     const saveItemToFridge = async (record: any) => {
         try {
             await addItemToFridge(record);
@@ -300,8 +405,9 @@ export const ShoppingListById: React.FC = () => {
                     </Button>
                 </ScrollView>
             ) : (
-                <Form form={form}>
-                    <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
+                <View style={{ flexGrow: 1 }}>
+                    <Form form={form}>
+                        {/* <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
                     >
                         <Input
                             readOnly
@@ -332,28 +438,32 @@ export const ShoppingListById: React.FC = () => {
                             value={form.getFieldValue('name')}
                             defaultValue={form.getFieldValue('name')}
                         />
-                    </Form.Item>
-                    <ScrollView>
-                        {items.map((item, index) => (
-                            <ItemRow
-                                key={index}
-                                index={index}
-                                item={item}
-                                foods={foods}
-                                units={units}
-                                users={users}
-                                onUpdate={updateItem}
-                                onRemove={() => removeItem(index)}
-                                setIsModalVisible={setIsModalVisible}
-                                setSelectedItem={setSelectedItem}
-                                setAction={setAction}
-                            />
-                        ))}
-                        <Button onPress={addItem}>Add Item</Button>
-                        <Button onPress={saveShoppingList}>Save Shopping List</Button>
-                    </ScrollView>
-                </Form>
-            )}
+                    </Form.Item> */}
+                        <View style={{ flex: 1 }}>
+                            {items.map((item, index) => (
+                                <ItemRow
+                                    key={index}
+                                    index={index}
+                                    item={item}
+                                    foods={foods}
+                                    units={units}
+                                    users={users}
+                                    onUpdate={updateItem}
+                                    onRemove={() => removeItem(index)}
+                                    setIsModalVisible={setIsModalVisible}
+                                    setSelectedItem={setSelectedItem}
+                                    setAction={setAction}
+                                />
+                            ))}
+                        </View>
+                    </Form>
+                    {/* <TouchableOpacity style={styles.addToCartButton} onPress={addItem}>
+                        <Text style={styles.addToCartText}>Add New</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.addToCartButton} onPress={saveShoppingList}>
+                        <Text style={styles.addToCartText}>Save</Text>
+                    </TouchableOpacity> */}
+                </View>)}
             <Modal
                 isOpen={isModalVisible}
                 onClose={() => setIsModalVisible(false)}
@@ -368,6 +478,7 @@ export const ShoppingListById: React.FC = () => {
                             <Modal.Body>
                                 <Form form={formAddFridge}>
                                     <FormControl isInvalid={!selectedItem.food}>
+
                                         <Select
                                             placeholder="Select Food"
                                             selectedValue={selectedItem.food}
@@ -428,27 +539,13 @@ export const ShoppingListById: React.FC = () => {
                                     </FormControl>
                                     <Form.Item name="date" label="Expired Date" rules={[{ required: true, message: "Please select a date" }]}
                                     >
-                                        <Input
-                                            readOnly
-                                            value={formAddFridge.getFieldValue('date')}
-                                        />
-                                        <Button onPress={() => setShowCalendar(true)}>
-                                            Choose Date
-                                        </Button>
-                                        <DatePicker
-                                            title='Choose Date'
-                                            visible={showCalendar}
-                                            confirmText="Confirm"
-                                            cancelText="Cancle"
-                                            onClose={() => {
-                                                setShowCalendar(false);
-                                            }}
-                                            onConfirm={val => {
-                                                Toast.show(val.toDateString())
-                                                formAddFridge.setFieldValue('date', val)
-                                            }}
-                                        />
+                                        <Text>
+                                           {moment(date).format("YYYY-DD-MM")}
+                                        </Text>
                                     </Form.Item>
+                                    <Button onPress={() => showDatepicker()}>
+                                        Choose Date
+                                    </Button>
                                 </Form>
                             </Modal.Body>
                             <Modal.Footer>
@@ -504,13 +601,91 @@ export const ShoppingListById: React.FC = () => {
                         </>}
                 </Modal.Content>
             </Modal>
+            <TouchableOpacity style={styles.addToCartButton} onPress={addItem}>
+                <Text style={styles.addToCartText}>Add New</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.addToCartButton} onPress={saveShoppingList}>
+                <Text style={styles.addToCartText}>Save</Text>
+            </TouchableOpacity>
         </ScrollView>
 
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
+    container: {
+        flex: 1,
+        backgroundColor: '#f9f9f9',
+        padding: 20,
+        display: 'flex',
+        flexDirection: "column"
+    },
+    header: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    subHeader: {
+        fontSize: 14,
+        color: '#888',
+        marginBottom: 20,
+    },
+    list: {
+        marginBottom: 20,
+    },
+    itemContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: "space-around",
+        backgroundColor: '#fff',
+        padding: 15,
+        marginBottom: 10,
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    textContainer: {
+        padding: 10,
+        flex: 1,
+    },
+    itemName: {
+        fontSize: 25,
+        fontWeight: "bold"
+    },
+    quantityContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    button: {
+        width: 30,
+        height: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#eee',
+        borderRadius: 15,
+    },
+    buttonText: {
+        fontSize: 20,
+        color: '#333',
+    },
+    quantity: {
+        marginHorizontal: 10,
+        fontSize: 20,
+    },
+    addToCartButton: {
+        backgroundColor: '#00b894',
+        paddingVertical: 15,
+        alignItems: 'center',
+        borderRadius: 8,
+        marginBottom: 20
+    },
+    addToCartText: {
+        fontSize: 16,
+        color: '#fff',
+        fontWeight: 'bold',
+    },
     title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
     itemRow: { marginBottom: 16, padding: 10, backgroundColor: "#fff", borderRadius: 8 },
     errorText: { color: "red", textAlign: "center", marginVertical: 10 },
@@ -518,5 +693,28 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+    },
+    dropdown: {
+        margin: 16,
+        height: 50,
+        borderBottomColor: 'gray',
+        borderBottomWidth: 0.5,
+    },
+    icon: {
+        marginRight: 5,
+    },
+    placeholderStyle: {
+        fontSize: 16,
+    },
+    selectedTextStyle: {
+        fontSize: 16,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
+    inputSearchStyle: {
+        height: 40,
+        fontSize: 16,
     },
 });

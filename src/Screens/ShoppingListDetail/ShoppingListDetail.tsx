@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import SwipeRow from '@nghinv/react-native-swipe-row'
 import moment from "moment"
 import {
   View,
@@ -11,18 +12,14 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import {
-  Popup,
-  Input,
   Form,
-  Space,
-  Calendar,
   Toast,
-  CalendarPicker,
   DatePicker
-} from "antd-mobile";
+} from "@ant-design/react-native";
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
-import { Select, FormControl, WarningOutlineIcon, CheckIcon, Modal, Button } from "native-base";
+import { Select, FormControl, WarningOutlineIcon, CheckIcon, Modal, Button, Input } from "native-base";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { Shopping, useLazyGetAllUserQuery } from "@/Services/shoppingList";
 import {
@@ -33,14 +30,14 @@ import {
   useLazyGetAllUnitQuery,
   useLazyGetAllFoodQuery,
 } from "@/Services/shoppingList";
-
+import { useToast } from 'react-native-toast-notifications'
 type ShoppingListRouteParams = {
   ShoppingListDetail: { groupId: string };
 };
 
 export const ShoppingListDetail: React.FC = () => {
   const route = useRoute<RouteProp<ShoppingListRouteParams, "ShoppingListDetail">>();
-  const userData = useSelector((state:any) => state?.userApi?.queries[`getMe`]?.data);
+  const userData = useSelector((state: any) => state?.userApi?.queries[`getMe`]?.data);
   const mockUserId = userData?.id;
   const { groupId } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -126,6 +123,25 @@ export const ShoppingListDetail: React.FC = () => {
     setIsModalVisible(false);
     setSelectedItem(null);
   };
+  const [date, setDate] = useState(new Date());
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    console.log(currentDate)
+    setDate(currentDate)
+    form.setFieldValue("date", moment(currentDate).format("YYYY-MM-DD"))
+  };
+  const showMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: date,
+      onChange,
+      mode: currentMode,
+      is24Hour: true,
+    });
+  };
+  const toast = useToast();
+  const showDatepicker = () => {
+    showMode('date');
+  };
   // Save shopping list (create or update)
   const saveShoppingList = async () => {
     try {
@@ -143,15 +159,14 @@ export const ShoppingListDetail: React.FC = () => {
       // }
 
       const values = await form.validateFields();
-      // {name, date, groupId, foods: [{food_id, quantity, user_id, unit_id}]}
       const payload = {
         groupId: groupId,
         date: values.date,
-        name: "Default",
-        foods:[]
+        name: values.name,
+        foods: []
       }
       await createShoppingList(payload).unwrap();
-      Toast.show({ content: "Shopping list created successfully!", icon: "success" });
+      toast.show("Shopping list created successfully!", {placement:"top", type: "success" });
       // if (currentAction === "create") {
       // } else if (currentAction === "edit" && selectedItem) {
       //   await updateShoppingList({ id: selectedItem.id, ...payload }).unwrap();
@@ -161,7 +176,7 @@ export const ShoppingListDetail: React.FC = () => {
       handleModalClose();
     } catch (e) {
       console.log(e)
-      Toast.show({ content: "Failed to save shopping list.", icon: "fail" });
+      toast.show("Failed to save shopping list", {placement:"top", type: "warning" });
     }
   };
 
@@ -170,11 +185,11 @@ export const ShoppingListDetail: React.FC = () => {
     if (selectedItem) {
       try {
         await deleteShoppingList(selectedItem.id).unwrap();
-        Toast.show({ content: "Shopping list deleted successfully!", icon: "success" });
+        toast.show("Shopping list deleted successfully!", {placement:"top", type: "success" });
         fetchShoppingList({ groupId, ...pagination });
         handleModalClose();
       } catch {
-        Toast.show({ content: "Failed to delete shopping list.", icon: "fail" });
+        toast.show("Failed to delete shopping list", { placement:"top", type: "warning" });
       }
     }
   };
@@ -195,14 +210,27 @@ export const ShoppingListDetail: React.FC = () => {
           data={rows}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={styles.groupItem}>
-              <Text>{moment(item.date).format("MM-DD-YY")}</Text>
-              <Text>{item.name}</Text>
-              <View style={styles.buttonContainer}>
-                <Button onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id })}}>Edit</Button>
-                <Button onPress={() => { handleModalOpen("delete", item); }}>Delete</Button>
-              </View>
-            </View>
+            <SwipeRow
+            left={[
+              { title: 'Delete', 
+                backgroundColor: 'tomato', 
+                icon: {name: 'delete'},
+                onPress: () => { handleModalOpen("delete", item)
+              }
+            },
+            ]}
+            >
+              <TouchableOpacity style={styles.groupItem} onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>
+                <View>
+                  <Text>{moment(item.date).format("MM-DD-YY")}</Text>
+                  <Text>{item.name}</Text>
+                </View>
+                <View style={styles.buttonContainer}>
+                  {/* <Button onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>Edit</Button> */}
+                  <Button onPress={() => { handleModalOpen("delete", item); }}>Delete</Button>
+                </View>
+              </TouchableOpacity>
+            </SwipeRow>
           )}
           // onEndReached={() =>
           //   setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
@@ -213,191 +241,60 @@ export const ShoppingListDetail: React.FC = () => {
         <Text>No shopping lists found.</Text>
       )}
 
-      <Popup
-        visible={isModalVisible}
-        onMaskClick={handleModalClose}
-        position="bottom"
-        destroyOnClose
-      >
-        {currentAction === "delete" ? (
-          <View style={styles.modalButtons}>
-            <Button onPress={confirmDelete}>Confirm Delete</Button>
-            <Button onPress={handleModalClose}>Cancel</Button>
-          </View>
-        ) : (
-          <Form form={form} layout="vertical">
-            {/* Date Field */}
-            <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
-            >
-              <Input
-                readOnly
-                value={moment(form.getFieldValue("date")).format("MM-DD-YY")}
-                onClick={() => setShowCalendar(true)}
-              />
-              <Button onPress={() => setShowCalendar(true)}>
-                Choose Date
-              </Button>
-              <DatePicker
-                title='Choose Date'
-                visible={showCalendar}
-                confirmText="Confirm"
-                cancelText="Cancle"
-                onClose={() => {
-                  setShowCalendar(false);
-                }}
-                onConfirm={val => {
-                  form.setFieldValue("date", moment(val).format("MM-DD-YYYY"))
-                  Toast.show(val.toDateString())
-                }}
-              />
-            </Form.Item>
-
-            {/* Scrollable Items */}
-            {/* <ScrollView style={styles.itemsContainer} keyboardShouldPersistTaps="handled">
-              {items.map((item, index) => (
-                <View key={index} style={styles.itemRow}>
-                  <FormControl isInvalid={!item.food}>
-                    <Select
-                      minWidth="200"
-                      placeholder="Select Food"
-                      defaultValue={item.food || undefined}
-                      _selectedItem={{
-                        bg: 'teal.600',
-                        endIcon: <CheckIcon size={5} />,
-                      }}
-                      onValueChange={(value: any) => updateItem(index, "food", value)}
+      <Modal isOpen={isModalVisible} onClose={() => setIsModalVisible(false)}>
+        <Modal.Content>
+          {currentAction == 'delete' && (
+            <>
+              <Modal.CloseButton />
+              <Modal.Header>Delete</Modal.Header>
+              <Modal.Body>
+                <Text> Are you sure you want to delete this?</Text>
+                <Modal.Footer>
+                  <Button.Group space={2}>
+                    <Button onPress={confirmDelete}>Confirm Delete</Button>
+                    <Button onPress={handleModalClose}>Cancel</Button>
+                  </Button.Group>
+                </Modal.Footer>
+              </Modal.Body>
+            </>
+          )}
+          {
+            currentAction == 'create' && (
+              <>
+                <Modal.CloseButton />
+                <Modal.Header>Create</Modal.Header>
+                <Modal.Body>
+                  <Form form={form}>
+                    <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
                     >
-                      {foods.map((food) => (
-                        <Select.Item key={food.id} label={food.name} value={food.id} />
-                      ))}
-                    </Select>
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                      Please select a food item!
-                    </FormControl.ErrorMessage>
-                  </FormControl>
+                      <Text>
+                          Date: {moment(date).format("YYYY-MM-DD")}
+                      </Text>
+                      <Button onPress={() => showDatepicker()}>
+                        Choose Date
+                      </Button>
+                    </Form.Item>
 
-                  <FormControl isInvalid={!item.unit}>
-                    <Select
-                      minWidth="200"
-                      placeholder="Select Unit"
-                      defaultValue={item.unit || undefined}
-                      _selectedItem={{
-                        bg: 'teal.600',
-                        endIcon: <CheckIcon size={5} />,
-                      }}
-                      onValueChange={(value: any) => updateItem(index, "unit", value)}
-                    >
-                      {units.map((unit) => (
-                        <Select.Item key={unit.id} label={unit.name} value={unit.id} />
-                      ))}
-                    </Select>
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                      Please select a unit!
-                    </FormControl.ErrorMessage>
-                  </FormControl>
-
-                  {/* <Input
-                    placeholder="Enter Assignee"
-                    value={item.assignee}
-                    onChange={(value) => updateItem(index, "assignee", value)}
-                  /> */}
-
-                  {/* <FormControl isInvalid={!item.assignee}>
-                    <Select
-                      minWidth="200"
-                      placeholder="Select Assignee"
-                      defaultValue={item.assignee || undefined}
-                      _selectedItem={{
-                        bg: 'teal.600',
-                        endIcon: <CheckIcon size={5} />,
-                      }}
-                      onValueChange={(value: any) => updateItem(index, "assignee", value)}
-                    >
-                      {users.map((user) => (
-                        <Select.Item key={user.id} label={user.name} value={user.id} />
-                      ))}
-                    </Select>
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                      Please select an assignee!
-                    </FormControl.ErrorMessage>
-                  </FormControl>
-
-                  <FormControl isInvalid={!item.food}> */}
-                    {/* <Select
-                      minWidth="200"
-                      placeholder="Choose Quantity"
-                      defaultValue={item.food || undefined}
-                      _selectedItem={{
-                        bg: 'teal.600',
-                        endIcon: <CheckIcon size={5} />,
-                      }}
-                      onValueChange={(value: any) => updateItem(index, "food", value)}
-                    >
-                      {foods.map((food) => (
-                        <Select.Item key={food.id} label={food.name} value={food.id} />
-                      ))}
-                    </Select> */}
-                    {/* <Input type="number" placeholder="Choose Quantity" onChange={(value => updateItem(index, "quantity", value))} defaultValue={`${item.quantity || 0}`}></Input>
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                      Please select food quantity!
-                    </FormControl.ErrorMessage>
-                  </FormControl> */}
-
-                  {/* Remove Button */}
-                  {/* <Button onPress={() => removeItem(index)} color="danger" size="small">
-                    Remove
-                  </Button> */}
-
-                  {/* Add to fridge button */}
-                  {/* <Button onPress={() => setShowModal(true)} color="danger" size="small">
-                    Add To Fridge
-                  </Button> */}
-                {/* </View>
-              ))}
-            </ScrollView> */} 
-
-            {/* Add Button */}
-            {/* <Button onPress={addItem}>
-              Add Item
-            </Button> */}
-
-            {/* Save Button */}
-            <Button onPress={saveShoppingList}>
-              Save Shopping List
-            </Button>
-          </Form>
-        )}
-      </Popup>
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-        <Modal.Content maxWidth="400px">
-          <Modal.CloseButton />
-          <Modal.Header>Contact Us</Modal.Header>
-          <Modal.Body>
-            <FormControl>
-              <FormControl.Label>Name</FormControl.Label>
-              <Input />
-            </FormControl>
-            <FormControl mt="3">
-              <FormControl.Label>Email</FormControl.Label>
-              <Input />
-            </FormControl>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button.Group space={2}>
-              <Button variant="ghost" colorScheme="blueGray" onPress={() => {
-                setShowModal(false);
-              }}>
-                Cancel
-              </Button>
-              <Button onPress={() => {
-                setShowModal(false);
-              }}>
-                Save
-              </Button>
-            </Button.Group>
-          </Modal.Footer>
+                    <Form.Item name="name" label="name" rules={[{ required: true, message: "Please select a date" }]}>
+                      <Input mx="3" placeholder="Input" w="100%" onChangeText={(value) => form.setFieldValue('name', value)} />
+                    </Form.Item>
+                    {/* Save Button */}
+                  </Form>
+                  <Modal.Footer>
+                    <Button.Group space={2}>
+                      <Button onPress={saveShoppingList}>
+                        Save Shopping List
+                      </Button>
+                      <Button onPress={handleModalClose}>Cancel</Button>
+                    </Button.Group>
+                  </Modal.Footer>
+                </Modal.Body>
+              </>
+            )
+          }
         </Modal.Content>
       </Modal>
+
     </View>
   );
 };
