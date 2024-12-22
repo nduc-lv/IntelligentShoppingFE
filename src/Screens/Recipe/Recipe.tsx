@@ -6,20 +6,31 @@ import { Avatar } from "native-base";
 import { StatusBar } from "expo-status-bar";
 import { ArrowRight, Heart, Plus } from "lucide-react-native";
 import AppData from "@/General/Constants/AppData";
-import { useLazyGetSavedRecipeQuery } from "@/Services/recipe";
+import { useLazyGetSavedRecipeQuery, useUnsaveRecipeMutation } from "@/Services/recipe";
+import { Toast } from "antd-mobile";
 
 export const RecipeScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [fetchSavedRecipe, { data: recipes, isLoading, isError, error }] = useLazyGetSavedRecipeQuery();
-    const hasFetchedRef = useRef(false);
-    useFocusEffect(() => {
-        if (!hasFetchedRef.current) {
+
+
+    useEffect(() => {
+        const unsubscribeFocus = navigation.addListener('focus', () => {
             fetchSavedRecipe();
-            hasFetchedRef.current = true;
+        });
+        return unsubscribeFocus;
+    }, []);
+
+    const [unSavedRecipe, { data: unsavedRecipe }] = useUnsaveRecipeMutation();
+    const handleUnSavedRecipe = async (recipeId: string) => {
+        try {
+            await unSavedRecipe({ recipe_id: recipeId }).unwrap();
+            fetchSavedRecipe();
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
         }
-
-    })
-
+    }
     const renderItem = (item: any) => (
         <TouchableOpacity
             style={[styles.card, {
@@ -43,7 +54,7 @@ export const RecipeScreen = () => {
                     }}
                     source={{ uri: item?.image_url || "https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg" }}
                 />
-                <View
+                <TouchableOpacity
                     style={{
                         height: 35,
                         width: 35,
@@ -56,9 +67,13 @@ export const RecipeScreen = () => {
                         top: 5,
                         right: 5,
                     }}
+                    onPress={(e) => {
+                        e.stopPropagation();
+                        handleUnSavedRecipe(item.id);
+                    }}
                 >
                     <Heart color={AppData.colors.primary} fill={AppData.colors.primary} />
-                </View>
+                </TouchableOpacity>
             </View>
             <Text style={{
                 fontSize: AppData.fontSizes.default,
@@ -151,7 +166,7 @@ export const RecipeScreen = () => {
                     {recipes && recipes.map((item: any) => renderItem(item))}
                 </ScrollView>
             </View>
-            <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("EDIT_RECIPE", { recipeId: '' })}>
+            <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("EDIT_RECIPE", { recipeId: 'create' })}>
                 <Plus color="white" size={25} />
             </TouchableOpacity>
         </View>

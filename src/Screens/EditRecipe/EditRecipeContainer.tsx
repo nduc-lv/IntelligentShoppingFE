@@ -7,5 +7,5 @@ import { Text } from "react-native";
 
 
 export const EditRecipeContainer = ({ route }: NativeStackScreenProps<RootStackParamList, "EDIT_RECIPE">) => {
-    return <EditRecipeScreen />
+    return <EditRecipeScreen route={route} />
 };

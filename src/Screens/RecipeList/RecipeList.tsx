@@ -1,5 +1,5 @@
 import { Group, useLazyGetAllGroupQuery } from "@/Services/group";
-import { ArrowRight, Clock, Clock5, Heart, Notebook, NotebookText, Search } from "lucide-react-native";
+import { ArrowRight, Clock, Clock5, Heart, Notebook, NotebookText, ScrollText, Search } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, ImageBackground, ScrollView } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
@@ -8,7 +8,7 @@ import AppData from "@/General/Constants/AppData";
 import { Avatar, Input } from "native-base";
 import App from "App";
 import Globals from "@/General/Constants/Globals";
-import { useLazyGetRecipeListQuery, useSaveRecipeMutation } from "@/Services/recipe";
+import { useLazyGetRecipeListQuery, useSaveRecipeMutation, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
 
 
@@ -16,6 +16,7 @@ export const RecipeListScreen = () => {
     const [filters, setFilters] = useState(Globals.gFilterRecipeList);
     const [fetchRecipe, { data: recipes, isLoading, isError, error }] = useLazyGetRecipeListQuery();
     const [saveRecipe, { data: savedRecipe }] = useSaveRecipeMutation();
+    const [unSavedRecipe, { data: unsavedRecipe }] = useUnsaveRecipeMutation();
     const [food_recipes, setFoodRecipes] = useState<any>([]);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [search, setSearch] = useState("");
@@ -36,6 +37,16 @@ export const RecipeListScreen = () => {
         } catch (e) {
             console.log(e)
             Toast.show({ content: "Failed to save recipe.", icon: "fail" });
+        }
+    }
+
+    const handleUnSavedRecipe = async (recipeId: string) => {
+        try {
+            await unSavedRecipe({ recipe_id: recipeId }).unwrap();
+            fetchRecipe(filters);
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
         }
     }
 
@@ -67,7 +78,7 @@ export const RecipeListScreen = () => {
                             setFoodRecipes(item?.food_recipes);
                         }}
                     >
-                        <Heart size={32} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
+                        <ScrollText size={32} color={AppData.colors.primary} />
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={{
@@ -84,7 +95,10 @@ export const RecipeListScreen = () => {
                         }}
                         onPress={(e) => {
                             e.stopPropagation();
-                            handleSaveRecipe(item.id);
+                            if (item?.isSaved)
+                                handleUnSavedRecipe(item.id);
+                            else
+                                handleSaveRecipe(item.id);
                         }}
                     >
                         {item?.isSaved

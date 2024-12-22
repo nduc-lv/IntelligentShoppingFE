@@ -6,10 +6,16 @@ import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity }
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 
-export const EditRecipeScreen = () => {
+export const EditRecipeScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [isOpenActionSheet, setIsOpenActionSheet] = useState(false);
+    const recipeId = route.params.recipeId;
+    const [recipeName, setRecipeName] = useState('');
+    const [recipeDescription, setRecipeDescription] = useState('');
+    const [recipeInstructions, setRecipeInstructions] = useState('');
+    const [recipeIngredients, setRecipeIngredients] = useState([]);
 
+    console.log(route.params);
 
     return (
         <View style={styles.container}>

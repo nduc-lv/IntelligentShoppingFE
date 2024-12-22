@@ -94,6 +94,12 @@ const recipeAPI = API.injectEndpoints({
                 body: recipe_id,
             }),
         }),
+        unsaveRecipe: build.mutation<any, { recipe_id: string }>({
+            query: ({ recipe_id }) => ({
+                url: `recipe/unsaved/${recipe_id}`,
+                method: "DELETE",
+            }),
+        }),
         createRecipe: build.mutation<Recipe, CreateShoppingPayload>({
             query: (payload) => ({
                 url: "recipe",
@@ -132,4 +138,5 @@ export const {
     useCreateRecipeMutation,
     useUpdateRecipeMutation,
     useDeleteRecipeMutation,
+    useUnsaveRecipeMutation
 } = recipeAPI;
