@@ -43,8 +43,18 @@ export type RootStackParamList = {
 	RECIPE_DETAIL: { recipeId: string };
 	RECIPE_LIST: undefined;
 	EDIT_RECIPE: { recipeId: string };
+	MANAGE: undefined;
+	MANAGE_ACCOUNT: undefined;
+	MANAGE_FOOD: undefined;
+	MANAGE_UNIT: undefined;
 };
+const PublicScreens:Set<string|undefined>=new Set(
+	[
+		RootScreens.SIGN_IN,
+		RootScreens.WELCOME
+	]
 
+)
 export const RootStack = createNativeStackNavigator<RootStackParamList>();
 export const RootNavigationContainerRef = createNavigationContainerRef<RootStackParamList>()
 
@@ -74,14 +84,13 @@ const _ApplicationNavigator = () => {
 	const { type, isConnected } = useNetInfo();
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
 	useEffect(() => {
-		if (currentRoute != RootScreens.SIGN_IN && isConnected) {
+		if (!PublicScreens.has(currentRoute) && isConnected) {
 			console.log("tried")
 			getMe();
 		}
 	}, [isConnected]);
 	useEffect(() => {
-		if (currentRoute != RootScreens.SIGN_IN && (!accessToken || (!isLoading && (!data || error)))) {
-			dispatch(clearTokens())
+		if (!PublicScreens.has(currentRoute) && (!accessToken || (!isLoading && (!data || error)))) {
 			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
 		}
 	}, [accessToken, currentRoute, isLoading, data, error]);
