@@ -15,28 +15,15 @@ const Tab = createBottomTabNavigator();
 // @refresh reset
 export const AdminNavigator = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [getMe] = userApi.useLazyGetMeQuery();
+  const [getMe,getMeState] = userApi.useLazyGetMeQuery();
   const accessToken = useSelector(
     (state: { auth: AuthState }) => state.auth.accessToken
   );
-  useEffect(() => {
-    var resp: any;
-    const fetchMe = async () => {
-      try {
-        resp = await getMe();
-      }
-      catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        if (resp.data.user_role.role.name != 'admin') {
-          navigation.navigate(RootScreens.MAIN);
-        }
-      }
+  useEffect(()=>{
+    if(getMeState.data?.user_role?.role?.name!='admin'){
+      navigation.navigate(RootScreens.MAIN);
     }
-    if (accessToken) {
-      fetchMe();
-    }
-  }, [accessToken]);
+  },[getMeState.data])
 
   return (
     <Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}
