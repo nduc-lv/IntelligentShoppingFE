@@ -8,7 +8,7 @@ import { RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/Store";
-import { AuthState, fetchTokens } from "@/Store/reducers";
+import { AuthState, clearTokens, fetchTokens } from "@/Store/reducers";
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { GroupDetailContainer } from "@/Screens/GroupDetail/GroupDetailContainer";
@@ -60,23 +60,26 @@ const ApplicationNavigator = () => {
 	return <_ApplicationNavigator />
 }
 const _ApplicationNavigator = () => {
+	const dispatch = useDispatch<AppDispatch>()
 	const accessToken = useSelector(
 		(state: { auth: AuthState }) => state.auth.accessToken
 	);
-	const currentRoute=RootNavigationContainerRef.current?.getCurrentRoute()?.name
+	const currentRoute = RootNavigationContainerRef.current?.getCurrentRoute()?.name
 
 	const { type, isConnected } = useNetInfo();
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
 	useEffect(() => {
-		if(isConnected){
+		if (currentRoute != RootScreens.SIGN_IN && isConnected) {
+			console.log("tried")
 			getMe();
 		}
 	}, [isConnected]);
 	useEffect(() => {
-		if (currentRoute!=RootScreens.SIGN_IN&&(!accessToken||(!isLoading&&(!data||error)))) {
+		if (currentRoute != RootScreens.SIGN_IN && (!accessToken || (!isLoading && (!data || error)))) {
+			dispatch(clearTokens())
 			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
 		}
-	}, [accessToken,currentRoute,isLoading,data,error]);
+	}, [accessToken, currentRoute, isLoading, data, error]);
 
 	if (isLoading) {
 		return <Loading />;
@@ -84,7 +87,7 @@ const _ApplicationNavigator = () => {
 	return (
 		<NavigationContainer ref={RootNavigationContainerRef}>
 			<StatusBar />
-			<WarningBanner hidden={!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)}/>
+			<WarningBanner hidden={!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)} />
 			<RootStack.Navigator
 				initialRouteName={data ? RootScreens.MAIN : RootScreens.WELCOME}
 				screenOptions={{ headerShown: false }}
