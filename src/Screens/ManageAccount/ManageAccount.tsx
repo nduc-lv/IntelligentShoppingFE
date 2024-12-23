@@ -89,7 +89,6 @@ export const ManageAccountScreen = () => {
 
     const renderUserItem = (item: UserRoleResponse) => (
         <TouchableOpacity style={styles.userItem} onPress={() => handleUserPress(item)}>
-            <Image source={{ uri: item.link_avatar }} style={styles.avatar} />
             <View style={styles.userInfo}>
                 <Text style={styles.userName}>{item.name}</Text>
                 <Text style={styles.userEmail}>{item.email}</Text>
