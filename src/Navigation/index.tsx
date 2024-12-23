@@ -20,6 +20,11 @@ import Loading from "@/General/Components/Loading";
 import { GroupInfoContainer } from "@/Screens/GroupInfo/GroupInfoContainer";
 import { RecipeContainer } from "@/Screens/Recipe/RecipeContainer";
 import { RecipeListContainer } from "@/Screens/RecipeList/RecipeListCointainer";
+import { ManageContainer } from "@/Screens/Manage";
+import { ManageAccountContainer } from "@/Screens/ManageAccount";
+import { AdminNavigator } from "./Admin";
+import { ManageFoodContainer } from "@/Screens/ManageFood";
+import { ManageUnitContainer } from "@/Screens/ManageUnit";
 import WarningBanner from "@/General/Components/WarningBanner";
 import { i18n, LocalizationKey } from "@/Localization";
 import { useNetInfo } from "@react-native-community/netinfo";
@@ -38,8 +43,18 @@ export type RootStackParamList = {
 	RECIPE_DETAIL: { recipeId: string };
 	RECIPE_LIST: undefined;
 	EDIT_RECIPE: { recipeId: string };
+	MANAGE: undefined;
+	MANAGE_ACCOUNT: undefined;
+	MANAGE_FOOD: undefined;
+	MANAGE_UNIT: undefined;
 };
+const PublicScreens:Set<string|undefined>=new Set(
+	[
+		RootScreens.SIGN_IN,
+		RootScreens.WELCOME
+	]
 
+)
 export const RootStack = createNativeStackNavigator<RootStackParamList>();
 export const RootNavigationContainerRef = createNavigationContainerRef<RootStackParamList>()
 
@@ -69,14 +84,13 @@ const _ApplicationNavigator = () => {
 	const { type, isConnected } = useNetInfo();
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
 	useEffect(() => {
-		if (currentRoute != RootScreens.SIGN_IN && isConnected) {
+		if (!PublicScreens.has(currentRoute) && isConnected) {
 			console.log("tried")
 			getMe();
 		}
 	}, [isConnected]);
 	useEffect(() => {
-		if (currentRoute != RootScreens.SIGN_IN && (!accessToken || (!isLoading && (!data || error)))) {
-			dispatch(clearTokens())
+		if (!PublicScreens.has(currentRoute) && (!accessToken || (!isLoading && (!data || error)))) {
 			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
 		}
 	}, [accessToken, currentRoute, isLoading, data, error]);
@@ -124,7 +138,30 @@ const _ApplicationNavigator = () => {
 				<RootStack.Screen
 					name="USERGROUP"
 					component={UsergroupContainer} />
-
+				<RootStack.Screen
+					name="RECIPE"
+					component={RecipeContainer}
+				/>
+				<RootStack.Screen
+					name="RECIPE_LIST"
+					component={RecipeListContainer}
+				/>
+				<RootStack.Screen
+					name={"MANAGE"}
+					component={ManageContainer}
+				/>
+				<RootStack.Screen
+					name={"MANAGE_ACCOUNT"}
+					component={ManageAccountContainer}
+				/>
+				<RootStack.Screen
+					name={"MANAGE_FOOD"}
+					component={ManageFoodContainer}
+				/>
+				<RootStack.Screen
+					name={"MANAGE_UNIT"}
+					component={ManageUnitContainer}
+				/>
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);
