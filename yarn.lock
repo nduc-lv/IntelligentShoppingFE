@@ -2204,7 +2204,14 @@
   dependencies:
     merge-options "^3.0.4"
 
-"@react-native-community/netinfo@11.4.1":
+"@react-native-community/netinfo@^11.4.1":
+"@react-native-community/datetimepicker@^8.2.0":
+  version "8.2.0"
+  resolved "https://registry.npmjs.org/@react-native-community/datetimepicker/-/datetimepicker-8.2.0.tgz"
+  integrity sha512-qrUPhiBvKGuG9Y+vOqsc56RPFcHa1SU2qbAMT0hfGkoFIj3FodE0VuPVrEa8fgy7kcD5NQmkZIKgHOBLV0+hWg==
+  dependencies:
+    invariant "^2.2.4"
+
   version "11.4.1"
   resolved "https://registry.npmjs.org/@react-native-community/netinfo/-/netinfo-11.4.1.tgz"
   integrity sha512-B0BYAkghz3Q2V09BF88RA601XursIEA111tnc2JOaN7axJWmNefmfjZqw/KdSxKZp7CZUuPpjBmz/WCR9uaHYg==
@@ -4616,7 +4623,7 @@ expo-web-browser@~14.0.1:
   resolved "https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-14.0.1.tgz"
   integrity sha512-QM9F3ie+UyIOoBvqFmT6CZojb1vMc2H+7ZlMT5dEu1PL2jtYyOeK2hLfbt/EMt7CBm/w+P29H9W9Y9gdebOkuQ==
 
-expo@*, expo@~52.0.11:
+expo@*, expo@>=50.0.0, expo@~52.0.11:
   version "52.0.11"
   resolved "https://registry.npmjs.org/expo/-/expo-52.0.11.tgz"
   integrity sha512-flUffjURDVufsMpoHrgsp+QDvR6xG/hjeMbzeSyFUcPP64uh3Av1/EJ4uUXhmHYV6/8YbHMwEgUbmko85vBtKQ==
@@ -5673,10 +5680,15 @@ lighthouse-logger@^1.0.0:
     debug "^2.6.9"
     marky "^1.2.2"
 
-lightningcss-win32-x64-msvc@1.27.0:
+lightningcss-linux-x64-gnu@1.27.0:
   version "1.27.0"
-  resolved "https://registry.npmjs.org/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.27.0.tgz"
-  integrity sha512-/OJLj94Zm/waZShL8nB5jsNj3CfNATLCTyFxZyouilfTmSoLDX7VlVAmhPHoZWVFp4vdmoiEbPEYC8HID3m6yw==
+  resolved "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.27.0.tgz"
+  integrity sha512-Dk/jovSI7qqhJDiUibvaikNKI2x6kWPN79AQiD/E/KeQWMjdGe9kw51RAgoWFDi0coP4jinaH14Nrt/J8z3U4A==
+
+lightningcss-linux-x64-musl@1.27.0:
+  version "1.27.0"
+  resolved "https://registry.npmjs.org/lightningcss-linux-x64-musl/-/lightningcss-linux-x64-musl-1.27.0.tgz"
+  integrity sha512-QKjTxXm8A9s6v9Tg3Fk0gscCQA1t/HMoF7Woy1u68wCk5kS4fR+q3vXa1p3++REW784cRAtkYKrPy6JKibrEZA==
 
 lightningcss@~1.27.0:
   version "1.27.0"
@@ -6948,6 +6960,11 @@ react-native-helmet-async@2.0.4:
     invariant "^2.2.4"
     react-fast-compare "^3.2.2"
     shallowequal "^1.1.0"
+
+react-native-image-picker@^7.2.3:
+  version "7.2.3"
+  resolved "https://registry.npmjs.org/react-native-image-picker/-/react-native-image-picker-7.2.3.tgz"
+  integrity sha512-zKIZUlQNU3EtqizsXSH92zPeve4vpUrsqHu2kkpCxWE9TZhJFZBb+irDsBOY8J21k0+Edgt06TMQGJ+iPUIXyA==
 
 react-native-is-edge-to-edge@^1.1.6:
   version "1.1.6"

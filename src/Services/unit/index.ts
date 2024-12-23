@@ -1,36 +1,44 @@
 import { API } from "../base";
-
-export interface UnitResponse {
+export interface Unit {
     id: string;
     name: string;
-};
+    description: string;
+}
 
-export interface UpdateUnitRequest {
+export interface CreateUnitPayload {
+    name: string;
+    imageUrl?: string;
+}
+
+export interface UpdateUnitPayload {
     id: string;
-    name: string;
-};
-
-export interface CreateUnitRequest {
-    name: string;
-};
+    name?: string;
+    imageUrl?: string;
+}
 
 const unitApi = API.injectEndpoints({
     endpoints: (build) => ({
-        getUnit: build.query<UnitResponse[], void>({
+        getAllUnit: build.query<Unit[], void>({
             query: () => ({
                 url: `unit`,
                 method: "GET",
             }),
-            transformResponse: (response: { rows: UnitResponse[] }, meta, arg) => response.rows,
+            transformResponse: (response: { rows: Unit[] }, meta, arg) => response.rows,
         }),
-        createUnit: build.mutation<any, CreateUnitRequest>({
+        getUnitInfo: build.query<any, { unitId: string }>({
+            query: ({ unitId }) => ({
+                url: `unit/${unitId}`,
+                method: "GET",
+            })
+        }),
+        createUnit: build.mutation<any, CreateUnitPayload>({
             query: (payload) => ({
                 url: `unit`,
                 method: "POST",
                 body: payload,
             })
         }),
-        updateUnit: build.mutation<any, UpdateUnitRequest>({
+        updateUnit: build.mutation<any, UpdateUnitPayload>({
             query: ({ id, ...payload }) => ({
                 url: `unit/${id}`,
                 method: "PUT",
@@ -48,5 +56,9 @@ const unitApi = API.injectEndpoints({
 });
 
 export const {
-    useLazyGetUnitQuery, useCreateUnitMutation, useUpdateUnitMutation, useDeleteUnitMutation
+    useLazyGetAllUnitQuery,
+    useLazyGetUnitInfoQuery,
+    useCreateUnitMutation,
+    useUpdateUnitMutation,
+    useDeleteUnitMutation
 } = unitApi;
