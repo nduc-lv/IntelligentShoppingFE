@@ -34,9 +34,10 @@ export type RootStackParamList = {
 	RECIPE: undefined;
 	RECIPE_DETAIL: { recipeId: string };
 	RECIPE_LIST: undefined;
+	EDIT_RECIPE: { recipeId: string };
 };
 
-const RootStack = createNativeStackNavigator<RootStackParamList>();
+export const RootStack = createNativeStackNavigator<RootStackParamList>();
 export const RootNavigationContainerRef = createNavigationContainerRef<RootStackParamList>()
 
 // @refresh reset
@@ -79,7 +80,7 @@ const _ApplicationNavigator = () => {
 			<StatusBar />
 			<RootStack.Navigator
 				initialRouteName={data ? RootScreens.MAIN : RootScreens.WELCOME}
-				screenOptions={{ headerShown: true }}
+				screenOptions={{ headerShown: false }}
 			>
 				<RootStack.Screen
 					name={RootScreens.WELCOME}
@@ -113,14 +114,7 @@ const _ApplicationNavigator = () => {
 				<RootStack.Screen
 					name="USERGROUP"
 					component={UsergroupContainer} />
-				<RootStack.Screen
-					name="RECIPE"
-					component={RecipeContainer}
-				/>
-				<RootStack.Screen
-					name="RECIPE_LIST"
-					component={RecipeListContainer}
-				/>
+
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);

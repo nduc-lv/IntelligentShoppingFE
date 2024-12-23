@@ -2,10 +2,10 @@ import React from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "..";
-import { RecipeDetailScreen } from "./RecipeDetail";
+import { EditRecipeScreen } from "./EditRecipe";
 import { Text } from "react-native";
 
 
-export const RecipeDetailContainer = ({ route }: NativeStackScreenProps<RootStackParamList, "RECIPE_DETAIL">) => {
-    return <RecipeDetailScreen route={route} />
+export const EditRecipeContainer = ({ route }: NativeStackScreenProps<RootStackParamList, "EDIT_RECIPE">) => {
+    return <EditRecipeScreen route={route} />
 };

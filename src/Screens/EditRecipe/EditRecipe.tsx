@@ -1,50 +1,27 @@
 import AppData from "@/General/Constants/AppData";
-import { ArrowLeft, Heart, Plus, ShoppingCart } from "lucide-react-native";
-import { TextArea } from "native-base";
-import React, { useEffect } from "react";
+import { ArrowLeft, ChevronDown, Heart, Minus, Plus, ShoppingCart } from "lucide-react-native";
+import { Actionsheet, Input, TextArea } from "native-base";
+import React, { useState } from "react";
 import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
-import UploadImage from "@/General/Components/UploadImage";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useLazyGetRecipeQuery, useSaveRecipeMutation, useUnsaveRecipeMutation } from "@/Services/recipe";
-import { Toast } from "antd-mobile";
 
-export const RecipeDetailScreen = ({ route }: any) => {
+export const EditRecipeScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const [fetchRecipe, { data: recipe, isLoading, isError, error }] = useLazyGetRecipeQuery();
-    const [unSavedRecipe, { data: unsavedRecipe }] = useUnsaveRecipeMutation();
+    const [isOpenActionSheet, setIsOpenActionSheet] = useState(false);
     const recipeId = route.params.recipeId;
-    const [saveRecipe, { data: savedRecipe }] = useSaveRecipeMutation();
-    useEffect(() => {
-        fetchRecipe({ recipeId });
-    }, [recipeId]);
+    const [recipeName, setRecipeName] = useState('');
+    const [recipeDescription, setRecipeDescription] = useState('');
+    const [recipeInstructions, setRecipeInstructions] = useState('');
+    const [recipeIngredients, setRecipeIngredients] = useState([]);
 
-    console.log(recipe)
-    const handleSaveRecipe = async (recipeId: string) => {
-        try {
-            await saveRecipe({ recipe_id: recipeId }).unwrap();
-            fetchRecipe({ recipeId });
-        } catch (e) {
-            console.log(e)
-            Toast.show({ content: "Failed to save recipe.", icon: "fail" });
-        }
-    }
-    const handleUnSavedRecipe = async (recipeId: string) => {
-        try {
-            await unSavedRecipe({ recipe_id: recipeId }).unwrap();
-            fetchRecipe(filters);
-        } catch (e) {
-            console.log(e)
-            Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
-        }
-    }
+    console.log(route.params);
 
     return (
         <View style={styles.container}>
             {/* Background image with absolute position */}
             <ImageBackground
-                source={{ uri: recipe?.image_url || 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
+                source={{ uri: 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
                 style={styles.backgroundImage}
             >
                 <View style={{
@@ -87,58 +64,32 @@ export const RecipeDetailScreen = ({ route }: any) => {
 
                         }}
                     >
-                        <ShoppingCart size={24} color={AppData.colors.primary} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={{
-                            height: 48,
-                            width: 48,
-                            backgroundColor: AppData.colors.background,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderRadius: 16,
-                        }}
-                        onPress={() => {
-                            if (recipe?.isSaved) {
-                                handleUnSavedRecipe(recipeId)
-                            } else
-                                handleSaveRecipe(recipeId)
-                        }}
-                    >
-                        {recipe?.isSaved
-                            ? <Heart size={32} color={AppData.colors.primary} fill={AppData.colors.primary} />
-                            : <Heart size={32} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
-                        }
+                        <Heart size={24} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
                     </TouchableOpacity>
                 </View>
             </ImageBackground>
             {/* Content of your screen */}
             <View style={styles.content}>
-                <ScrollView contentContainerStyle={{ gap: 20, }}
+                <ScrollView contentContainerStyle={{ gap: 20, padding: 1, }}
                     showsVerticalScrollIndicator={false}
                 >
                     <View style={{
                         flexDirection: "row",
                     }}>
-                        <Text style={{
-                            fontSize: AppData.fontSizes.large,
-                            fontWeight: "600",
-                            color: AppData.colors.text[900],
-                            width: "70%"
-                        }}>
-                            {recipe?.name}
-                        </Text>
-
-                        <Text style={{
-                            fontSize: AppData.fontSizes.default,
-                            fontWeight: "400",
-                            color: AppData.colors.text[500],
-                            marginLeft: "auto"
-                        }}>
-                            {recipe?.user?.name}
-                        </Text>
+                        <Input
+                            w={{ base: "100%" }}
+                            placeholder="Nhập tên công thức"
+                            size={"xl"}
+                            height={12}
+                            bgColor="white"
+                            borderRadius={8}
+                            borderColor={AppData.colors.text[400]}
+                            borderWidth={0.3}
+                            _focus={{
+                                borderColor: AppData.colors.primary,
+                                backgroundColor: "white",
+                            }}
+                        />
                     </View>
 
 
@@ -151,14 +102,20 @@ export const RecipeDetailScreen = ({ route }: any) => {
                             {'Mô tả'}
                         </Text>
 
-                        <Text style={{
-                            fontSize: AppData.fontSizes.default,
-                            fontWeight: "400",
-                            color: AppData.colors.text[800],
-                            textAlign: 'justify'
-                        }}>
-                            {recipe?.description || "Chưa cập nhật"}
-                        </Text>
+                        <TextArea
+                            w={{ base: "100%", md: "25%" }}
+                            placeholder="Nhập mô tả"
+                            size={AppData.fontSizes.small}
+                            totalLines={4}
+                            bgColor="white"
+                            borderRadius={8}
+                            borderColor={AppData.colors.text[400]}
+                            borderWidth={0.3}
+                            _focus={{
+                                borderColor: AppData.colors.primary,
+                                backgroundColor: "white",
+                            }}
+                        />
                     </View>
 
                     <View style={{ gap: 10 }}>
@@ -170,26 +127,45 @@ export const RecipeDetailScreen = ({ route }: any) => {
                             {'Hướng dẫn'}
                         </Text>
 
-                        <Text style={{
-                            fontSize: AppData.fontSizes.default,
-                            fontWeight: "400",
-                            color: AppData.colors.text[800],
-                            textAlign: 'justify'
-                        }}>
-                            {recipe?.instructions || "Chưa cập nhật"}
-                        </Text>
+                        <TextArea
+                            w={{ base: "100%", md: "25%" }}
+                            h={200}
+                            placeholder="Nhập hướng dẫn"
+                            size={AppData.fontSizes.small}
+                            bgColor="white"
+                            borderRadius={8}
+                            borderColor={AppData.colors.text[400]}
+
+                            borderWidth={0.3}
+                            _focus={{
+                                borderColor: AppData.colors.primary,
+                                backgroundColor: "white",
+                            }}
+                        />
                     </View>
 
                     <View style={{ gap: 10 }}>
-                        <Text style={{
-                            fontSize: AppData.fontSizes.medium,
-                            fontWeight: "500",
-                            color: AppData.colors.text[900],
+                        <View style={{
+                            flexDirection: "row",
+                            alignItems: "center",
                         }}>
-                            {'Nguyên liệu'}
-                        </Text>
-                        {recipe?.foods?.rows.map((item: any) =>
-                            <View key={item.id} style={[styles.card, { flexDirection: "row", gap: 16, alignItems: "center" }]}>
+                            <Text style={{
+                                fontSize: AppData.fontSizes.medium,
+                                fontWeight: "500",
+                                color: AppData.colors.text[900],
+                            }}>
+                                {'Nguyên liệu'}
+                            </Text>
+
+                            <TouchableOpacity style={{ marginLeft: 'auto' }}
+                                onPress={() => setIsOpenActionSheet(true)}
+                            >
+                                <Plus size={26} color={AppData.colors.primary} />
+                            </TouchableOpacity>
+                        </View>
+
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) =>
+                            <View key={index} style={[styles.card, { flexDirection: "row", gap: 16, alignItems: "center" }]}>
                                 <View
                                     style={{
                                         height: 48,
@@ -215,7 +191,7 @@ export const RecipeDetailScreen = ({ route }: any) => {
                                     fontWeight: "500",
                                     color: AppData.colors.text[900],
                                 }}>
-                                    {item?.food?.name}
+                                    {'Cà tím'}
                                 </Text>
 
                                 <Text style={{
@@ -224,28 +200,27 @@ export const RecipeDetailScreen = ({ route }: any) => {
                                     color: AppData.colors.text[900],
                                     marginLeft: 'auto'
                                 }}>
-                                    {item?.quantity + " " + item?.unit?.name}
+                                    {'400g'}
                                 </Text>
 
                                 <TouchableOpacity
                                     style={{
                                         height: 48,
                                         width: 48,
-                                        backgroundColor: AppData.colors.primary,
+                                        backgroundColor: AppData.colors.danger,
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
                                         borderRadius: 16,
+
                                     }}
                                 >
-                                    <Plus size={24} color={AppData.colors.text[100]} fill={AppData.colors.text[100]} />
+                                    <Minus size={24} color={AppData.colors.text[100]} fill={AppData.colors.text[100]} />
                                 </TouchableOpacity>
                             </View>
                         )}
 
                     </View>
-
-                    <UploadImage />
 
                     <TouchableOpacity style={{
                         padding: 16,
@@ -259,12 +234,28 @@ export const RecipeDetailScreen = ({ route }: any) => {
                             fontSize: AppData.fontSizes.medium,
                             fontWeight: "500",
                             color: AppData.colors.text[100],
+                            minWidth: 200,
+                            textAlign: 'center'
                         }}>
-                            {'Thêm vào danh sách mua'}
+                            {'Lưu thay đổi'}
                         </Text>
                     </TouchableOpacity>
                 </ScrollView >
             </View>
+
+            <Actionsheet isOpen={isOpenActionSheet}
+                onClose={() => setIsOpenActionSheet(false)}
+                hideDragIndicator
+
+            >
+                <Actionsheet.Content borderTopRadius={32}
+                    style={{
+                        height: 300
+                    }}
+                >
+
+                </Actionsheet.Content>
+            </Actionsheet>
         </View>
 
     );
