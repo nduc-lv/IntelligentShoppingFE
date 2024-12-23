@@ -33,6 +33,7 @@ export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
 	[RootScreens.SIGN_IN]: undefined;
+	[RootScreens.ADMIN]: undefined;
 	SHOPPING_LIST: undefined;
 	SHOPPING_LIST_DETAIL: { groupId: string };
 	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
@@ -84,13 +85,13 @@ const _ApplicationNavigator = () => {
 	const { type, isConnected } = useNetInfo();
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
 	useEffect(() => {
-		if (!PublicScreens.has(currentRoute) && isConnected) {
-			console.log("tried")
+		if (isConnected) {
 			getMe();
 		}
 	}, [isConnected]);
 	useEffect(() => {
-		if (!PublicScreens.has(currentRoute) && (!accessToken || (!isLoading && (!data || error)))) {
+		console.log(data)
+		if (!PublicScreens.has(currentRoute) && (!isLoading && !data)) {
 			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
 		}
 	}, [accessToken, currentRoute, isLoading, data, error]);

@@ -1,3 +1,8 @@
+export interface UserRole{
+	role:{
+		name:string
+	}
+}
 export interface User {
 	id: string;
 	email: string;
@@ -9,4 +14,5 @@ export interface User {
 	is_confirmed: boolean;
 	createdAt: string;
 	updatedAt: string;
+	user_role?: UserRole;
   }
