@@ -7,12 +7,13 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import UploadImage from "@/General/Components/UploadImage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useLazyGetRecipeQuery, useSaveRecipeMutation } from "@/Services/recipe";
+import { useLazyGetRecipeQuery, useSaveRecipeMutation, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
 
 export const RecipeDetailScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [fetchRecipe, { data: recipe, isLoading, isError, error }] = useLazyGetRecipeQuery();
+    const [unSavedRecipe, { data: unsavedRecipe }] = useUnsaveRecipeMutation();
     const recipeId = route.params.recipeId;
     const [saveRecipe, { data: savedRecipe }] = useSaveRecipeMutation();
     useEffect(() => {
@@ -27,6 +28,15 @@ export const RecipeDetailScreen = ({ route }: any) => {
         } catch (e) {
             console.log(e)
             Toast.show({ content: "Failed to save recipe.", icon: "fail" });
+        }
+    }
+    const handleUnSavedRecipe = async (recipeId: string) => {
+        try {
+            await unSavedRecipe({ recipe_id: recipeId }).unwrap();
+            fetchRecipe(filters);
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
         }
     }
 
@@ -91,7 +101,10 @@ export const RecipeDetailScreen = ({ route }: any) => {
                             borderRadius: 16,
                         }}
                         onPress={() => {
-                            handleSaveRecipe(recipeId)
+                            if (recipe?.isSaved) {
+                                handleUnSavedRecipe(recipeId)
+                            } else
+                                handleSaveRecipe(recipeId)
                         }}
                     >
                         {recipe?.isSaved

@@ -77,7 +77,7 @@ export const EditRecipeScreen = ({ route }: any) => {
                         flexDirection: "row",
                     }}>
                         <Input
-                            w={{ base: "100%", md: "25%" }}
+                            w={{ base: "100%" }}
                             placeholder="Nhập tên công thức"
                             size={"xl"}
                             height={12}
