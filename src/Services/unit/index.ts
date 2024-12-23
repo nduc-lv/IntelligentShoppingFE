@@ -19,7 +19,7 @@ export interface UpdateUnitPayload {
 
 const unitApi = API.injectEndpoints({
     endpoints: (build) => ({
-        getAllUnit: build.query<Unit[], void>({
+        getUnits: build.query<Unit[], void>({
             query: () => ({
                 url: `unit`,
                 method: "GET",
@@ -57,7 +57,7 @@ const unitApi = API.injectEndpoints({
 });
 
 export const {
-    useLazyGetAllUnitQuery,
+    useLazyGetUnitsQuery,
     useLazyGetUnitInfoQuery,
     useCreateUnitMutation,
     useUpdateUnitMutation,

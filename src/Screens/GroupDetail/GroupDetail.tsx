@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView, ImageBackground } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView, ImageBackground, Pressable } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { ArrowLeft, ArrowRight, Clock5, Heart, Info, NotebookText, Plus, Search } from "lucide-react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
@@ -11,7 +11,7 @@ import { Actionsheet, Avatar, Input } from "native-base";
 import { FlatList } from "react-native";
 import { useLazyGetAllCategoryQuery } from "@/Services/category";
 import { useLazyGetAllFoodByCategoryQuery } from "@/Services/foodGroup";
-import { useLazyGetAllUnitQuery } from "@/Services/unit";
+import { useLazyGetUnitsQuery } from "@/Services/unit";
 import SearchableDropdown from "@/General/Components/SearchableDropdown";
 import { DatePicker } from "antd-mobile";
 import DateTimePickerInput from "@/General/Components/DateTimePicker";
@@ -26,11 +26,15 @@ export const GroupDetailScreen = () => {
     const [fetchGroupInfo, { data, isLoading, isError }] = useLazyGetGroupInfoQuery();
     const [fetchAllCategory, { data: allCategory, isLoading: isLoadingAllCategory, isError: isErrorAllCategory }] = useLazyGetAllCategoryQuery();
     const [fetchFoodByCategory, { data: foods, isLoading: isLoadingFoodByCategory, isError: isErrorFoodByCategory }] = useLazyGetAllFoodByCategoryQuery();
-    const [fetchAllUnit, { data: allUnit, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetAllUnitQuery();
+    const [fetchAllUnit, { data: allUnit, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetUnitsQuery();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [isOpenActionSheet, setIsOpenActionSheet] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
-
+    const [formCategory, setFormCategory] = useState<string>('');
+    const [formUnit, setFormUnit] = useState<string>('');
+    const [formFood, setFormFood] = useState<string>('');
+    const [formExpiredate, setFormExpiredate] = useState<any>('');
+    const [formQuantity, setFormQuantity] = useState<string>('');
     useEffect(() => {
         fetchAllCategory();
         fetchAllUnit();
@@ -102,7 +106,7 @@ export const GroupDetailScreen = () => {
     );
 
     const renderItem = (item: any) => (
-        <TouchableOpacity
+        <View
             key={item.id}
             style={[styles.card, {
                 width: "47%",
@@ -114,7 +118,7 @@ export const GroupDetailScreen = () => {
                 gap: 10,
                 marginBottom: 10,
             }]}
-            onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id })}
+
         >
             <ImageBackground
                 source={{ uri: 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
@@ -153,7 +157,7 @@ export const GroupDetailScreen = () => {
                     {'Còn 7 ngày'}
                 </Text>
             </ImageBackground>
-        </TouchableOpacity>
+        </View>
     );
 
     const data1 = [
@@ -214,125 +218,127 @@ export const GroupDetailScreen = () => {
                             <Info size={24} color="#000" />
                         </TouchableOpacity>
                     </View>
-
-                    <ScrollView contentContainerStyle={styles.content}>
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            <Input
-                                flex={1}
-                                InputLeftElement={<Search style={{ marginLeft: 15 }} size={28} color={AppData.colors.primary} />}
-                                placeholder="Tìm kiếm"
-                                size={"xl"}
-                                height={16}
-                                bgColor="white"
-                                borderRadius={16}
-                                borderColor={'#fff'}
-                                borderWidth={0.3}
-                                _focus={{
-                                    borderColor: AppData.colors.primary,
-                                    backgroundColor: "white",
-                                }}
-                                shadow={1}
-                            />
-                            <View style={{
-                                height: 64,
-                                width: 64,
-                                backgroundColor: AppData.colors.primary,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                borderRadius: 16,
-                                marginLeft: 16,
-                            }}>
-                                <ArrowRight color="white" />
-                            </View>
-                        </View>
-
-                        <View>
-                            <Text style={{
-                                fontSize: AppData.fontSizes.large,
-                                fontWeight: "500",
-                                color: AppData.colors.text[900],
-                                marginBottom: 16
-                            }}>{'Đề xuất món ăn'}</Text>
-                            <FlatList
-                                data={data1}
-                                renderItem={renderRecipeItem}
-                                horizontal
-                                keyExtractor={(item) => item.id}
-                                contentContainerStyle={{ gap: 16 }}
-                                showsHorizontalScrollIndicator={false}
-                            />
-                        </View>
-
-                        <View style={{ gap: 10 }}>
-                            <Text style={{
-                                fontSize: AppData.fontSizes.large,
-                                fontWeight: "500",
-                                color: AppData.colors.text[900],
-                                marginBottom: 16,
-                            }}>{'Nguyên liệu'}</Text>
-
-                            <ScrollView horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={{ gap: 10 }}
-                            >
-                                <TouchableOpacity style={{
-                                    padding: 10,
-                                    alignSelf: 'center',
-                                    backgroundColor: selectedCategory === 'all' ? AppData.colors.primary : AppData.colors.background,
+                    <View style={styles.content}>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <Input
+                                    flex={1}
+                                    InputLeftElement={<Search style={{ marginLeft: 15 }} size={28} color={AppData.colors.primary} />}
+                                    placeholder="Tìm kiếm"
+                                    size={"xl"}
+                                    height={16}
+                                    bgColor="white"
+                                    borderRadius={16}
+                                    borderColor={'#fff'}
+                                    borderWidth={0.3}
+                                    _focus={{
+                                        borderColor: AppData.colors.primary,
+                                        backgroundColor: "white",
+                                    }}
+                                    shadow={1}
+                                />
+                                <View style={{
+                                    height: 64,
+                                    width: 64,
+                                    backgroundColor: AppData.colors.primary,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                     borderRadius: 16,
-                                    alignItems: 'center',
-                                    boxShadow: '0px 2px 2px 0px #0633361A',
-                                }}
-                                    onPress={() => setSelectedCategory('all')}
-                                >
-                                    <Text style={{
-                                        fontSize: AppData.fontSizes.medium,
-                                        fontWeight: "500",
-                                        color: selectedCategory === 'all' ? AppData.colors.text[100] : AppData.colors.text[500],
-                                    }}>
-                                        {'Tất cả'}
-                                    </Text>
-                                </TouchableOpacity>
-                                {
-                                    allCategory && allCategory.map((item: any) => {
-                                        return (
-                                            <TouchableOpacity key={item?.id}
-                                                style={{
-                                                    padding: 10,
-                                                    alignSelf: 'center',
-                                                    backgroundColor: selectedCategory === item?.id ? AppData.colors.primary : AppData.colors.background,
-                                                    borderRadius: 16,
-                                                    alignItems: 'center',
-                                                    boxShadow: '0px 2px 2px 0px #0633361A',
-                                                }}>
-                                                <Text style={{
-                                                    fontSize: AppData.fontSizes.medium,
-                                                    fontWeight: "500",
-                                                    color: selectedCategory === item?.id ? AppData.colors.text[100] : AppData.colors.text[500],
-                                                }}
-                                                    onPress={() => setSelectedCategory(item?.id)}
-                                                >
-                                                    {item?.name}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        )
-                                    })
-                                }
-                            </ScrollView>
-
-                            <View style={{
-                                flexDirection: "row",
-                                flexWrap: "wrap",
-                                justifyContent: "flex-start",
-                                marginTop: 10,
-                                gap: 16,
-                            }}
-                            >
-                                {data1.map((item: any) => renderItem(item))}
+                                    marginLeft: 16,
+                                }}>
+                                    <ArrowRight color="white" />
+                                </View>
                             </View>
-                        </View>
-                    </ScrollView>
+
+                            <View>
+                                <Text style={{
+                                    fontSize: AppData.fontSizes.large,
+                                    fontWeight: "500",
+                                    color: AppData.colors.text[900],
+                                    marginBottom: 16
+                                }}>{'Đề xuất món ăn'}</Text>
+                                <FlatList
+                                    data={data1}
+                                    renderItem={renderRecipeItem}
+                                    horizontal
+                                    keyExtractor={(item) => item.id}
+                                    contentContainerStyle={{ gap: 16 }}
+                                    showsHorizontalScrollIndicator={false}
+                                />
+                            </View>
+
+                            <View style={{ gap: 10 }}>
+                                <Text style={{
+                                    fontSize: AppData.fontSizes.large,
+                                    fontWeight: "500",
+                                    color: AppData.colors.text[900],
+                                    marginBottom: 16,
+                                }}>{'Nguyên liệu'}</Text>
+
+                                <ScrollView horizontal={true}
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={{ gap: 10 }}
+                                >
+                                    <TouchableOpacity style={{
+                                        padding: 10,
+                                        alignSelf: 'center',
+                                        backgroundColor: selectedCategory === 'all' ? AppData.colors.primary : AppData.colors.background,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        boxShadow: '0px 2px 2px 0px #0633361A',
+                                    }}
+                                        onPress={() => setSelectedCategory('all')}
+                                    >
+                                        <Text style={{
+                                            fontSize: AppData.fontSizes.medium,
+                                            fontWeight: "500",
+                                            color: selectedCategory === 'all' ? AppData.colors.text[100] : AppData.colors.text[500],
+                                        }}>
+                                            {'Tất cả'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {
+                                        allCategory && allCategory.map((item: any) => {
+                                            return (
+                                                <TouchableOpacity key={item?.id}
+                                                    style={{
+                                                        padding: 10,
+                                                        alignSelf: 'center',
+                                                        backgroundColor: selectedCategory === item?.id ? AppData.colors.primary : AppData.colors.background,
+                                                        borderRadius: 16,
+                                                        alignItems: 'center',
+                                                        boxShadow: '0px 2px 2px 0px #0633361A',
+                                                    }}>
+                                                    <Text style={{
+                                                        fontSize: AppData.fontSizes.medium,
+                                                        fontWeight: "500",
+                                                        color: selectedCategory === item?.id ? AppData.colors.text[100] : AppData.colors.text[500],
+                                                    }}
+                                                        onPress={() => setSelectedCategory(item?.id)}
+                                                    >
+                                                        {item?.name}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )
+                                        })
+                                    }
+                                </ScrollView>
+
+                                <View style={{
+                                    flexDirection: "row",
+                                    flexWrap: "wrap",
+                                    justifyContent: "flex-start",
+                                    marginTop: 10,
+                                    gap: 16,
+                                }}
+                                >
+                                    {data1.map((item: any) => renderItem(item))}
+                                </View>
+                            </View>
+                        </ScrollView>
+                    </View>
+
 
                 </>
             ) : (
@@ -348,7 +354,7 @@ export const GroupDetailScreen = () => {
             >
                 <Actionsheet.Content borderTopRadius={24}                >
                     <View style={{
-                        height: 500,
+                        height: "auto",
                         padding: 24,
                         gap: 16
                     }}>
@@ -356,16 +362,16 @@ export const GroupDetailScreen = () => {
                             <SearchableDropdown
                                 options={categoryOptions || []}
                                 placeholder="Phân loại"
-                                onSelect={(value) => console.log(value)}
-                                dropdownWidth="250px"
+                                onSelect={(value) => setFormCategory(value)}
+
                             />
                         </View>
                         <View style={{ width: "100%", zIndex: 4 }}>
                             <SearchableDropdown
                                 options={options}
                                 placeholder="Tên thực phẩm"
-                                onSelect={(value) => console.log(value)}
-                                dropdownWidth="250px"
+                                onSelect={(value) => setFormFood(value)}
+
                             />
                         </View>
                         <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
@@ -382,27 +388,55 @@ export const GroupDetailScreen = () => {
                                     borderColor: AppData.colors.primary,
                                     backgroundColor: "white",
                                 }}
-                            // value={search}
-                            // onChangeText={setSearch}
+
+                                onChangeText={setFormQuantity}
                             />
 
                             <View style={{ flex: 1 }}>
                                 <SearchableDropdown
                                     options={unitOptions || []}
                                     placeholder="Đơn vị"
-                                    onSelect={(value) => console.log(value)}
-                                    dropdownWidth="250px"
+                                    onSelect={(value) => setFormUnit(value)}
+
                                 />
                             </View>
                         </View>
 
                         <View style={{ width: "100%", zIndex: 2 }}>
                             < DateTimePickerInput
-                                onChange={(value) => console.log(value)}
+                                onChange={(value) => setFormExpiredate(value?.toString())}
                                 placeholder="Ngày hệ thống"
-                                value={new Date()}
                             />
                         </View>
+
+                        <TouchableOpacity style={{
+                            padding: 16,
+                            height: 60,
+                            alignSelf: 'center',
+                            backgroundColor: AppData.colors.primary,
+                            borderRadius: 16,
+                            alignItems: 'center',
+                            zIndex: 1,
+                            minWidth: 200
+                        }}
+                            onPress={() => {
+                                console.log({
+                                    category: formCategory,
+                                    unit: formUnit,
+                                    name: formFood,
+                                    quantity: formQuantity,
+                                    date: formExpiredate
+                                });
+                            }}
+                        >
+                            <Text style={{
+                                fontSize: AppData.fontSizes.medium,
+                                fontWeight: "500",
+                                color: AppData.colors.text[100],
+                            }}>
+                                {'Lưu'}
+                            </Text>
+                        </TouchableOpacity>
 
                     </View>
                 </Actionsheet.Content>
