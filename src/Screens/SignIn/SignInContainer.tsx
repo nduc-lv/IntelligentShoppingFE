@@ -26,10 +26,5 @@ export const SignInContainer = ({ navigation }: SignInScreenNavigatorProps) => {
 			})
 		);
 	};
-	useEffect(()=>{
-		if(data){
-			onNavigate(RootScreens.MAIN);
-		}
-	},[data])
 	return <SignInAndRegister onNavigate={onNavigate} />;
 };

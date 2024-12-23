@@ -21,41 +21,9 @@ import { RootStack, RootStackParamList } from "..";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { RecipeDetailContainer } from "@/Screens/RecipeDetail/RecipeDetailContainer";
 import { EditRecipeContainer } from "@/Screens/EditRecipe/EditRecipeContainer";
+import { RecipeTabNavigation } from "./Recipe";
 
 const Tab = createBottomTabNavigator();
-
-const RecipeStack = () => (
-	<RootStack.Navigator>
-		<RootStack.Screen
-			name="RECIPE"
-			component={RecipeContainer}
-			options={() => ({
-				headerTitle: `Danh sách món ăn`,
-			})}
-		/>
-		<RootStack.Screen
-			name="RECIPE_LIST"
-			component={RecipeListContainer}
-			options={() => ({
-				headerTitle: `Món ngon hàng ngày`,
-			})}
-		/>
-		<RootStack.Screen
-			name="RECIPE_DETAIL"
-			component={RecipeDetailContainer}
-			options={({ route }) => ({
-				headerShown: false,
-			})}
-		/>
-		<RootStack.Screen
-			name="EDIT_RECIPE"
-			component={EditRecipeContainer}
-			options={({ route }) => ({
-				headerShown: false,
-			})}
-		/>
-	</RootStack.Navigator>
-);
 
 // @refresh reset
 export const MainNavigator = () => {
@@ -81,7 +49,7 @@ export const MainNavigator = () => {
 			/> */}
 			<Tab.Screen
 				name="Recipe"
-				component={RecipeStack}
+				component={RecipeTabNavigation}
 				options={{
 					tabBarIcon: ({ color, size }) => <Heart color={color} size={size} />,
 					tabBarLabelPosition: "below-icon",
@@ -91,7 +59,6 @@ export const MainNavigator = () => {
 				name="User"
 				component={UserTabNavigation}
 				options={{
-					headerShown: false,
 					tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
 					tabBarLabelPosition: "below-icon",
 				}}
@@ -102,6 +69,8 @@ export const MainNavigator = () => {
 				options={{
 					tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
 					tabBarLabelPosition: "below-icon",
+					headerLeft: ()=> null,
+					headerShown:true
 				}}
 			/>
 			<Tab.Screen

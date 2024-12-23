@@ -14,7 +14,7 @@ import {
 } from "redux-persist";
 import { homeReducers, themeReducers, authReducer } from "./reducers";
 import { dataReducer } from "./reducers/data";
-
+import NetInfo from '@react-native-community/netinfo';
 const reducers = combineReducers({
   api: API.reducer,
   theme: themeReducers,
@@ -26,7 +26,6 @@ const reducers = combineReducers({
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  whitelist: ["theme"],
 };
 
 const persistedReducer = persistReducer(persistConfig, reducers);
@@ -52,7 +51,12 @@ const store = configureStore({
 const persistor = persistStore(store);
 
 setupListeners(store.dispatch);
-
+// NetInfo.addEventListener((state) => {
+//   if (state.isConnected) {
+//     persistor.persist();
+//   } else{
+//   }
+// });
 export { store, persistor };
 
 export type RootState = ReturnType<typeof store.getState>;

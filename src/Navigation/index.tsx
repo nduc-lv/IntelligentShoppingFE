@@ -8,7 +8,7 @@ import { RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/Store";
-import { AuthState, clearTokens, fetchTokens } from "@/Store/reducers";
+import { AuthState, fetchTokens } from "@/Store/reducers";
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { GroupDetailContainer } from "@/Screens/GroupDetail/GroupDetailContainer";
@@ -40,10 +40,6 @@ export type RootStackParamList = {
 	GROUP: undefined;
 	GROUP_INFO: { groupId: string, isAdmin: boolean };
 	USERGROUP: { groupId: string, isAdmin: boolean, groupName: string };
-	RECIPE: undefined;
-	RECIPE_DETAIL: { recipeId: string };
-	RECIPE_LIST: undefined;
-	EDIT_RECIPE: { recipeId: string };
 	MANAGE: undefined;
 	MANAGE_ACCOUNT: undefined;
 	MANAGE_FOOD: undefined;
@@ -84,16 +80,25 @@ const _ApplicationNavigator = () => {
 
 	const { type, isConnected } = useNetInfo();
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
-	useEffect(() => {
-		if (isConnected) {
+	useEffect(()=>{
+		if(!accessToken){
+			dispatch(fetchTokens())
+		} else{
 			getMe();
 		}
-	}, [isConnected]);
+	},[accessToken])
 	useEffect(() => {
 		console.log(data)
-		if (!PublicScreens.has(currentRoute) && (!isLoading && !data)) {
-			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
+		if(!PublicScreens.has(currentRoute)){
+			if ( (!isLoading && !data)) {
+				RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
+			} 
+		} else{
+			if(data){
+				RootNavigationContainerRef.navigate(RootScreens.MAIN)
+			}
 		}
+
 	}, [accessToken, currentRoute, isLoading, data, error]);
 
 	if (isLoading) {

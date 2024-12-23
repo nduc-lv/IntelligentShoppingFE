@@ -30,7 +30,7 @@ export const userApi = API
       }),
       getMe: build.query<User, void>({
         query: () => `user/me`,
-        // providesTags: (result, error) => [{ type: 'User', id: 'me' }],
+        providesTags: (result, error) => [{ type: 'User', id: 'me' }],
       }),
       getUserByEmail: build.query<any, string>({
         query: (id) => `user/email/${id}`,

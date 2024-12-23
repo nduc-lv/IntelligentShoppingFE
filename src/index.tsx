@@ -6,6 +6,7 @@ import { store, persistor } from "@/Store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { ApplicationNavigator } from "./Navigation";
+import Loading from "./General/Components/Loading";
 
 i18n.locale = Localization.locale;
 i18n.enableFallback = true;
@@ -15,7 +16,7 @@ export default function App() {
   return (
     <NativeBaseProvider>
       <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
+        <PersistGate loading={<Loading/>} persistor={persistor}>
           <ApplicationNavigator />
         </PersistGate>
       </Provider>
