@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Text, TouchableOpacity, Image, ActivityIndicator } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, Image, ActivityIndicator, TextInput } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { ArrowLeft, Info } from "lucide-react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
@@ -23,7 +23,6 @@ export const GroupDetailScreen = () => {
 
     return (
         <View style={styles.container}>
-
             {isLoading ? (
                 <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
             ) : isError ? (

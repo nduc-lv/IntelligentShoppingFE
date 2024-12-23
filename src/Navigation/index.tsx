@@ -23,6 +23,8 @@ import { RecipeListContainer } from "@/Screens/RecipeList/RecipeListCointainer";
 import { ManageContainer } from "@/Screens/Manage";
 import { ManageAccountContainer } from "@/Screens/ManageAccount";
 import { AdminNavigator } from "./Admin";
+import { ManageFoodContainer } from "@/Screens/ManageFood";
+import { ManageUnitContainer } from "@/Screens/ManageUnit";
 
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
@@ -144,11 +146,11 @@ const _ApplicationNavigator = () => {
 				/>
 				<RootStack.Screen
 					name={"MANAGE_FOOD"}
-					component={ManageAccountContainer}
+					component={ManageFoodContainer}
 				/>
 				<RootStack.Screen
 					name={"MANAGE_UNIT"}
-					component={ManageAccountContainer}
+					component={ManageUnitContainer}
 				/>
 			</RootStack.Navigator>
 		</NavigationContainer>
