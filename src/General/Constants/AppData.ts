@@ -4,19 +4,27 @@ const { width } = Dimensions.get('window');
 const baseFontSize = 16;
 const rem = width / 375 * baseFontSize;
 
+// const fontSizes = {
+//     small: rem * (12 / baseFontSize),
+//     default: rem * (14 / baseFontSize),
+//     medium: rem * (16 / baseFontSize),
+//     large: rem * (20 / baseFontSize),
+//     extraLarge: rem * (24 / baseFontSize),
+// };
+
 const fontSizes = {
-    small: rem * (12 / baseFontSize),
-    default: rem * (14 / baseFontSize),
-    medium: rem * (16 / baseFontSize),
-    large: rem * (20 / baseFontSize),
-    extraLarge: rem * (24 / baseFontSize),
+    small: (12),
+    default: (14),
+    medium: (16),
+    large: (20),
+    extraLarge: (24),
 };
 
 const AppData = {
     colors: {
         primary: "#53B175",
         secondary: "",
-        danger: "#e74c3c",
+        danger: "#FF5653",
         warning: "#f1c40f",
         success: "#2ecc71",
         background: "#fff",
@@ -29,7 +37,7 @@ const AppData = {
             600: '#7E8299',
             700: '#72728B',
             800: '#494968',
-            900: '#18183E',
+            900: '#121212',
         },
     },
 
