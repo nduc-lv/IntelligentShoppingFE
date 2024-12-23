@@ -20,6 +20,9 @@ import Loading from "@/General/Components/Loading";
 import { GroupInfoContainer } from "@/Screens/GroupInfo/GroupInfoContainer";
 import { RecipeContainer } from "@/Screens/Recipe/RecipeContainer";
 import { RecipeListContainer } from "@/Screens/RecipeList/RecipeListCointainer";
+import WarningBanner from "@/General/Components/WarningBanner";
+import { i18n, LocalizationKey } from "@/Localization";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
@@ -62,10 +65,13 @@ const _ApplicationNavigator = () => {
 	);
 	const currentRoute=RootNavigationContainerRef.current?.getCurrentRoute()?.name
 
+	const { type, isConnected } = useNetInfo();
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
 	useEffect(() => {
-		getMe();
-	}, []);
+		if(isConnected){
+			getMe();
+		}
+	}, [isConnected]);
 	useEffect(() => {
 		if (currentRoute!=RootScreens.SIGN_IN&&(!accessToken||(!isLoading&&(!data||error)))) {
 			RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
@@ -78,6 +84,7 @@ const _ApplicationNavigator = () => {
 	return (
 		<NavigationContainer ref={RootNavigationContainerRef}>
 			<StatusBar />
+			<WarningBanner hidden={!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)}/>
 			<RootStack.Navigator
 				initialRouteName={data ? RootScreens.MAIN : RootScreens.WELCOME}
 				screenOptions={{ headerShown: false }}

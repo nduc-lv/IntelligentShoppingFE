@@ -20,9 +20,9 @@ export const UserTabNavigation = () => {
 			<UserTabStack.Screen
 				name={UserTabScreens.USER_TAB_MAIN}
 				component={UserTabContainer}
-        options={{
-          headerBackVisible: false
-        }}
+				options={{
+					headerBackVisible: false
+				}}
 			/>
 			<UserTabStack.Screen
 				name={UserTabScreens.ACCOUNT_SETTING}

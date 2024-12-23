@@ -4,6 +4,7 @@ import { API } from "../base";
 export interface GenericResponse {
   message: string;
   [key: string]: any;
+  user: any;
 }
 
 export interface LoginRequest {
