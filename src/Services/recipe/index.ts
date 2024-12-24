@@ -60,7 +60,8 @@ export interface Recipe {
     instructions: string,
     foods: any,
     user: any,
-    isSaved: boolean
+    isSaved: boolean,
+    ingredients: any
 }
 
 

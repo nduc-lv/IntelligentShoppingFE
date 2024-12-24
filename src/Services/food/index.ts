@@ -24,19 +24,19 @@ export interface Food {
 }
 
 
-const categoryApi = API.injectEndpoints({
+const foodApi = API.injectEndpoints({
     endpoints: (build) => ({
-        getAllFood: build.query<Food[], void>({
+        getAllFood2: build.query<Food[], void>({
             query: () => ({
                 url: `food`,
                 method: "GET",
             }),
-            transformResponse: (response: { rows: Category[] }, meta, arg) => response.rows,
+            transformResponse: (response: { rows: Food[] }, meta, arg) => response.rows,
         }),
     }),
     overrideExisting: true,
 });
 
 export const {
-    useLazyGetAllFoodQuery,
-} = categoryApi;
+    useLazyGetAllFood2Query,
+} = foodApi;

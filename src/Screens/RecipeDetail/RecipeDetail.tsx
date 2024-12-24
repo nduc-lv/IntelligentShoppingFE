@@ -33,7 +33,7 @@ export const RecipeDetailScreen = ({ route }: any) => {
     const handleUnSavedRecipe = async (recipeId: string) => {
         try {
             await unSavedRecipe({ recipe_id: recipeId }).unwrap();
-            fetchRecipe(filters);
+            fetchRecipe({ recipeId });
         } catch (e) {
             console.log(e)
             Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });

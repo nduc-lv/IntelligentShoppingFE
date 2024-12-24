@@ -7,13 +7,36 @@ import { RootStackParamList } from "@/Navigation";
 import {
   Toast,
 } from "antd-mobile";
+import { useLazyGetAllCategoryQuery } from "@/Services/category";
+import { useLazyGetAllFoodQuery } from "@/Services/shoppingList";
+import { useLazyGetUnitsQuery } from "@/Services/unit";
+import { useLazyGetAllFood2Query } from "@/Services/food";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/Store";
+import { setCategory, setUnit, setFood } from "@/Store/reducers/data";
 
 export const GroupScreen = () => {
+  const dispatch = useDispatch<AppDispatch>()
   const [fetchGroup, { data = [], isLoading, isError, error }] = useLazyGetAllGroupQuery();
   const [modalVisible, setModalVisible] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [createGroup] = useCreateGroupMutation();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [fetchAllCategory, { data: categorys, isLoading: isLoadingAllCategory, isError: isErrorAllCategory }] = useLazyGetAllCategoryQuery();
+  const [fetchAllFood, { data: foods, isLoading: isLoadingAllFood, isError: isErrorAllFood }] = useLazyGetAllFood2Query();
+  const [fetchAllUnit, { data: units, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetUnitsQuery();
+
+  useEffect(() => {
+    fetchAllCategory();
+    fetchAllUnit();
+    fetchAllFood();
+  }, []);
+
+  useEffect(() => {
+    dispatch(setCategory(categorys));
+    dispatch(setUnit(units));
+    dispatch(setFood(foods));
+  }, [categorys, units, foods]);
 
   const handleOpenDialog = () => {
     setModalVisible(true);

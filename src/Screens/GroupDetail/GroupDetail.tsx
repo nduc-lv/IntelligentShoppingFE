@@ -15,6 +15,8 @@ import { useLazyGetUnitsQuery } from "@/Services/unit";
 import SearchableDropdown from "@/General/Components/SearchableDropdown";
 import { DatePicker } from "antd-mobile";
 import DateTimePickerInput from "@/General/Components/DateTimePicker";
+import { useLazyGetAllFoodQuery } from "@/Services/shoppingList";
+import { useSelector } from "react-redux";
 
 type GroupRouteParams = {
     GroupDetail: { groupId: string, isAdmin: boolean };
@@ -24,9 +26,8 @@ export const GroupDetailScreen = () => {
     const route = useRoute<RouteProp<GroupRouteParams, "GroupDetail">>();
     const { groupId, isAdmin } = route.params;
     const [fetchGroupInfo, { data, isLoading, isError }] = useLazyGetGroupInfoQuery();
-    const [fetchAllCategory, { data: allCategory, isLoading: isLoadingAllCategory, isError: isErrorAllCategory }] = useLazyGetAllCategoryQuery();
-    const [fetchFoodByCategory, { data: foods, isLoading: isLoadingFoodByCategory, isError: isErrorFoodByCategory }] = useLazyGetAllFoodByCategoryQuery();
-    const [fetchAllUnit, { data: allUnit, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetUnitsQuery();
+    const [fetchFoodByCategory, { data: myFoods, isLoading: isLoadingFoodByCategory, isError: isErrorFoodByCategory }] = useLazyGetAllFoodByCategoryQuery();
+    const { categorys, units, foods } = useSelector((state: any) => state.data);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [isOpenActionSheet, setIsOpenActionSheet] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -35,9 +36,8 @@ export const GroupDetailScreen = () => {
     const [formFood, setFormFood] = useState<string>('');
     const [formExpiredate, setFormExpiredate] = useState<any>('');
     const [formQuantity, setFormQuantity] = useState<string>('');
+
     useEffect(() => {
-        fetchAllCategory();
-        fetchAllUnit();
         fetchGroupInfo({ groupId });
     }, [groupId, fetchGroupInfo]);
 
@@ -176,14 +176,19 @@ export const GroupDetailScreen = () => {
         { label: "Grape", value: "grape" },
     ];
 
-    const categoryOptions = allCategory && allCategory.map((category) => ({
+    const categoryOptions = categorys && categorys.map((category: any) => ({
         label: category.name,  // Dùng name làm label
         value: category.id,    // Dùng id làm value
     }));
 
-    const unitOptions = allUnit && allUnit.map((unit) => ({
+    const unitOptions = units && units.map((unit: any) => ({
         label: unit.name,  // Dùng name làm label
         value: unit.id,    // Dùng id làm value
+    }))
+
+    const foodsOptions = foods && foods.map((food: any) => ({
+        label: food.name,  // Dùng name làm label
+        value: food.id,    // Dùng id làm value
     }))
 
     return (
@@ -219,7 +224,9 @@ export const GroupDetailScreen = () => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.content}>
-                        <ScrollView showsVerticalScrollIndicator={false}>
+                        <ScrollView
+                            contentContainerStyle={{ gap: 24 }}
+                            showsVerticalScrollIndicator={false}>
                             <View style={{ flexDirection: "row", alignItems: "center" }}>
                                 <Input
                                     flex={1}
@@ -299,7 +306,7 @@ export const GroupDetailScreen = () => {
                                         </Text>
                                     </TouchableOpacity>
                                     {
-                                        allCategory && allCategory.map((item: any) => {
+                                        categorys && categorys.map((item: any) => {
                                             return (
                                                 <TouchableOpacity key={item?.id}
                                                     style={{
@@ -350,7 +357,6 @@ export const GroupDetailScreen = () => {
             <Actionsheet isOpen={isOpenActionSheet}
                 onClose={() => setIsOpenActionSheet(false)}
                 hideDragIndicator
-
             >
                 <Actionsheet.Content borderTopRadius={24}                >
                     <View style={{
@@ -368,7 +374,7 @@ export const GroupDetailScreen = () => {
                         </View>
                         <View style={{ width: "100%", zIndex: 4 }}>
                             <SearchableDropdown
-                                options={options}
+                                options={foodsOptions || []}
                                 placeholder="Tên thực phẩm"
                                 onSelect={(value) => setFormFood(value)}
 

@@ -1,10 +1,13 @@
 import AppData from "@/General/Constants/AppData";
 import { ArrowLeft, ChevronDown, Heart, Minus, Plus, ShoppingCart } from "lucide-react-native";
 import { Actionsheet, Input, TextArea } from "native-base";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
+import SearchableDropdown from "@/General/Components/SearchableDropdown";
+import { useSelector } from "react-redux";
+import { useLazyGetRecipeQuery } from "@/Services/recipe";
 
 export const EditRecipeScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -14,8 +17,41 @@ export const EditRecipeScreen = ({ route }: any) => {
     const [recipeDescription, setRecipeDescription] = useState('');
     const [recipeInstructions, setRecipeInstructions] = useState('');
     const [recipeIngredients, setRecipeIngredients] = useState([]);
+    const { categorys, units, foods } = useSelector((state: any) => state.data);
+    const [fetchRecipe, { data: recipe, isLoading, isError, error }] = useLazyGetRecipeQuery();
+    const [formCategory, setFormCategory] = useState<string>('');
+    const [formUnit, setFormUnit] = useState<string>('');
+    const [formFood, setFormFood] = useState<string>('');
+    const [formExpiredate, setFormExpiredate] = useState<any>('');
+    const [formQuantity, setFormQuantity] = useState<string>('');
 
-    console.log(route.params);
+    useEffect(() => {
+        fetchRecipe({ recipeId });
+    }, []);
+
+    useEffect(() => {
+        if (recipe) {
+            setRecipeName(recipe.name);
+            setRecipeDescription(recipe.description);
+            setRecipeInstructions(recipe.instructions);
+            setRecipeIngredients(recipe.ingredients);
+        }
+    }, [recipe]);
+
+    const categoryOptions = categorys && categorys.map((category: any) => ({
+        label: category.name,  // Dùng name làm label
+        value: category.id,    // Dùng id làm value
+    }));
+
+    const unitOptions = units && units.map((unit: any) => ({
+        label: unit.name,  // Dùng name làm label
+        value: unit.id,    // Dùng id làm value
+    }))
+
+    const foodsOptions = foods && foods.map((food: any) => ({
+        label: food.name,  // Dùng name làm label
+        value: food.id,    // Dùng id làm value
+    }))
 
     return (
         <View style={styles.container}>
@@ -89,6 +125,8 @@ export const EditRecipeScreen = ({ route }: any) => {
                                 borderColor: AppData.colors.primary,
                                 backgroundColor: "white",
                             }}
+                            value={recipeName}
+                            onChangeText={setRecipeName}
                         />
                     </View>
 
@@ -115,7 +153,8 @@ export const EditRecipeScreen = ({ route }: any) => {
                                 borderColor: AppData.colors.primary,
                                 backgroundColor: "white",
                             }}
-                        />
+                            value={recipeDescription}
+                            onChangeText={setRecipeDescription} tvParallaxProperties={undefined} onTextInput={undefined} autoCompleteType={undefined} />
                     </View>
 
                     <View style={{ gap: 10 }}>
@@ -141,7 +180,8 @@ export const EditRecipeScreen = ({ route }: any) => {
                                 borderColor: AppData.colors.primary,
                                 backgroundColor: "white",
                             }}
-                        />
+                            value={recipeInstructions}
+                            onChangeText={setRecipeInstructions} tvParallaxProperties={undefined} onTextInput={undefined} autoCompleteType={undefined} />
                     </View>
 
                     <View style={{ gap: 10 }}>
@@ -229,7 +269,11 @@ export const EditRecipeScreen = ({ route }: any) => {
                         backgroundColor: AppData.colors.primary,
                         borderRadius: 16,
                         alignItems: 'center',
-                    }}>
+                    }}
+                        onPress={() => {
+                            console.log({ recipeName, recipeDescription, recipeInstructions, recipeIngredients });
+                        }}
+                    >
                         <Text style={{
                             fontSize: AppData.fontSizes.medium,
                             fontWeight: "500",
@@ -248,12 +292,86 @@ export const EditRecipeScreen = ({ route }: any) => {
                 hideDragIndicator
 
             >
-                <Actionsheet.Content borderTopRadius={32}
-                    style={{
-                        height: 300
-                    }}
-                >
+                <Actionsheet.Content borderTopRadius={24}                >
+                    <View style={{
+                        height: "auto",
+                        padding: 24,
+                        gap: 16
+                    }}>
+                        <View style={{ width: "100%", zIndex: 5 }}>
+                            <SearchableDropdown
+                                options={categoryOptions || []}
+                                placeholder="Phân loại"
+                                onSelect={(value) => setFormCategory(value)}
 
+                            />
+                        </View>
+                        <View style={{ width: "100%", zIndex: 4 }}>
+                            <SearchableDropdown
+                                options={foodsOptions || []}
+                                placeholder="Tên thực phẩm"
+                                onSelect={(value) => setFormFood(value)}
+
+                            />
+                        </View>
+                        <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                            <Input
+                                width={"40%"}
+                                placeholder="Số lượng"
+                                size={"xl"}
+                                height={12}
+                                bgColor="white"
+                                borderRadius={10}
+                                borderColor={AppData.colors.text[400]}
+                                borderWidth={0.3}
+                                _focus={{
+                                    borderColor: AppData.colors.primary,
+                                    backgroundColor: "white",
+                                }}
+
+                                onChangeText={setFormQuantity}
+                            />
+
+                            <View style={{ flex: 1 }}>
+                                <SearchableDropdown
+                                    options={unitOptions || []}
+                                    placeholder="Đơn vị"
+                                    onSelect={(value) => setFormUnit(value)}
+
+                                />
+                            </View>
+                        </View>
+
+                        <TouchableOpacity style={{
+                            padding: 16,
+                            height: 60,
+                            alignSelf: 'center',
+                            backgroundColor: AppData.colors.primary,
+                            borderRadius: 16,
+                            alignItems: 'center',
+                            zIndex: 1,
+                            minWidth: 200
+                        }}
+                            onPress={() => {
+                                console.log({
+                                    category: formCategory,
+                                    unit: formUnit,
+                                    name: formFood,
+                                    quantity: formQuantity,
+                                    date: formExpiredate
+                                });
+                            }}
+                        >
+                            <Text style={{
+                                fontSize: AppData.fontSizes.medium,
+                                fontWeight: "500",
+                                color: AppData.colors.text[100],
+                            }}>
+                                {'Lưu'}
+                            </Text>
+                        </TouchableOpacity>
+
+                    </View>
                 </Actionsheet.Content>
             </Actionsheet>
         </View>
