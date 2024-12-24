@@ -33,6 +33,7 @@ export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
 	[RootScreens.SIGN_IN]: undefined;
+	[RootScreens.ADMIN]: undefined;
 	SHOPPING_LIST: undefined;
 	SHOPPING_LIST_DETAIL: { groupId: string };
 	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
@@ -118,6 +119,10 @@ const _ApplicationNavigator = () => {
 				<RootStack.Screen
 					name={RootScreens.SIGN_IN}
 					component={SignInContainer}
+				/>
+				<RootStack.Screen
+					name={RootScreens.ADMIN}
+					component={AdminNavigator}
 				/>
 				<RootStack.Screen
 					name={'SHOPPING_LIST'}

@@ -2,7 +2,6 @@ import { API } from "../base";
 export interface Unit {
     id: string;
     name: string;
-    description: string;
 }
 
 export interface CreateUnitPayload {

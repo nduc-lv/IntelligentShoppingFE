@@ -1,4 +1,4 @@
-import { UnitResponse, useCreateUnitMutation, useDeleteUnitMutation, useLazyGetUnitQuery, useUpdateUnitMutation } from "@/Services/unit";
+import { Unit, useCreateUnitMutation, useDeleteUnitMutation, useLazyGetAllUnitQuery, useUpdateUnitMutation } from "@/Services/unit";
 import { ArrowLeft, Edit, Plus, Trash } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
@@ -8,18 +8,20 @@ import { RootStackParamList } from "@/Navigation";
 import {
     Toast,
 } from "antd-mobile";
+import AppData from "@/General/Constants/AppData";
+import { Actionsheet, Input } from "native-base";
 
 export const ManageUnitScreen = () => {
-    const [fetchUnit, { data, isLoading, isError }] = useLazyGetUnitQuery();
+    const [fetchUnit, { data, isLoading, isError }] = useLazyGetAllUnitQuery();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [createUnit] = useCreateUnitMutation();
     const [updateUnit] = useUpdateUnitMutation();
     const [deleteUnit] = useDeleteUnitMutation();
     const [modalOption, setModalOption] = useState('');
     const [newUnitName, setNewUnitName] = useState('');
-    const [selectedUnit, setSelectedUnit] = useState<UnitResponse | null>();
+    const [selectedUnit, setSelectedUnit] = useState<Unit | null>();
 
-    const handleOpenDialog = (option: string, item: UnitResponse | null = null) => {
+    const handleOpenDialog = (option: string, item: Unit | null = null) => {
         setModalOption(option);
         if (item) setNewUnitName(item.name);
         setSelectedUnit(item);
@@ -34,8 +36,7 @@ export const ManageUnitScreen = () => {
     const handleSubmit = async () => {
         try {
             if (!newUnitName) {
-                console.log(1)
-                Toast.show({ content: "Please fill in new unit name.", icon: "fail" });
+                Toast.show({ content: "Hãy điền tên mới cho đơn vị.", icon: "fail" });
                 return;
             }
             const payload = {
@@ -104,10 +105,10 @@ export const ManageUnitScreen = () => {
                                 <Text style={styles.unitName}>{item.name}</Text>
                                 <View style={styles.actionIcons}>
                                     <TouchableOpacity onPress={() => handleOpenDialog('edit', item)}>
-                                        <Edit size={24} color="#007AFF" />
+                                        <Edit size={20} color={AppData.colors.primary} />
                                     </TouchableOpacity>
                                     <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                                        <Trash size={24} color="#FF3B30" />
+                                        <Trash size={20} color="#FF3B30" />
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -121,28 +122,57 @@ export const ManageUnitScreen = () => {
             <TouchableOpacity style={styles.fab} onPress={() => handleOpenDialog('create')}>
                 <Plus color="white" size={25} />
             </TouchableOpacity>
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={modalOption === 'create' || modalOption === 'edit'}
-                onRequestClose={() => handleCloseDialog()}
+            <Actionsheet isOpen={modalOption === 'create' || modalOption === 'edit'}
+                onClose={() => handleCloseDialog()}
+                hideDragIndicator
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Enter New Unit Name</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Unit Name"
-                            value={newUnitName}
-                            onChangeText={setNewUnitName}
-                        />
-                        <View style={styles.buttonContainer}>
-                            <Button title="Cancel" onPress={() => handleCloseDialog()} />
-                            <Button title={modalOption === 'create' ? "Create" : "Save"} onPress={() => handleSubmit()} />
+                <Actionsheet.Content borderTopRadius={24}                >
+                    <View style={{
+                        height: 150,
+                        padding: 24,
+                        gap: 16
+                    }}>
+                        <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                            <Input
+                                width={"100%"}
+                                placeholder="Đơn vị"
+                                size={"xl"}
+                                height={12}
+                                bgColor="white"
+                                borderRadius={10}
+                                borderColor={AppData.colors.text[400]}
+                                borderWidth={0.3}
+                                _focus={{
+                                    borderColor: AppData.colors.primary,
+                                    backgroundColor: "white",
+                                }}
+                                value={newUnitName}
+                                onChangeText={setNewUnitName}
+                            />
                         </View>
+                        <TouchableOpacity style={{
+                            padding: 16,
+                            height: 60,
+                            alignSelf: 'center',
+                            backgroundColor: AppData.colors.primary,
+                            borderRadius: 16,
+                            alignItems: 'center',
+                            zIndex: 1,
+                            minWidth: 200
+                        }}
+                            onPress={() => handleSubmit()}
+                        >
+                            <Text style={{
+                                fontSize: AppData.fontSizes.medium,
+                                fontWeight: "500",
+                                color: AppData.colors.text[100],
+                            }}>
+                                {modalOption === 'edit' ? 'Lưu' : 'Tạo mới'}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
-                </View>
-            </Modal>
+                </Actionsheet.Content>
+            </Actionsheet>
         </View>
     );
 }
@@ -208,12 +238,10 @@ const styles = StyleSheet.create({
     },
     fab: {
         position: 'absolute',
-        bottom: 25,
+        bottom: 35,
         right: 25,
-        backgroundColor: '#007AFF',
         width: 60,
         height: 60,
-        borderRadius: 30,
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,
@@ -221,32 +249,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
+        backgroundColor: AppData.colors.primary,
+        display: "flex",
+        borderRadius: 16,
     },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    modalContent: {
-        width: "80%",
-        backgroundColor: "#fff",
-        borderRadius: 8,
-        padding: 20,
-        elevation: 5,
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 16,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 16,
-        fontSize: 16,
-    },
-    buttonContainer: { flexDirection: "row", justifyContent: "space-between" },
 });

@@ -3,7 +3,6 @@ import { API } from "../base";
 export interface Category {
     id: string;
     name: string;
-    description: string;
 }
 
 export interface CreateCategoryPayload {

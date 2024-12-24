@@ -73,7 +73,7 @@ export const MainNavigator = () => {
       catch (error) {
         console.error('Error fetching data:', error);
       } finally {
-        if (resp.data.user_role.role.name === 'admin') {
+        if (resp.data.user_role.role_id === 'admin') {
           navigation.navigate(RootScreens.ADMIN);
         }
       }
