@@ -163,7 +163,7 @@ export const GroupDetailScreen = () => {
                                 fontWeight: "500",
                                 color: AppData.colors.text[100],
                             }}>
-                                {item?.food_groups[0]?.quantity + ' ' + item?.food_groups[0]?.unit_name}
+                                {item?.quantity + ' ' + item?.unit_name}
                             </Text>
                         </View>
 
@@ -175,7 +175,7 @@ export const GroupDetailScreen = () => {
                             marginTop: 'auto',
                             marginBottom: 10,
                         }}>
-                            {`Còn ${Utils.calculateDaysRemaining(item?.food_groups[0]?.exprire_date)} ngày`}
+                            {`Còn ${Utils.calculateDaysRemaining(item?.exprire_date)} ngày`}
                         </Text>
                     </ImageBackground>
                 </View>
@@ -192,7 +192,7 @@ export const GroupDetailScreen = () => {
                         textAlign: 'center',
                         flex: 1
                     }}>
-                        {item?.name}
+                        {item?.food?.name}
                     </Text>
 
                     <TouchableOpacity
@@ -523,8 +523,8 @@ const styles = StyleSheet.create({
     title: {
         flex: 1,
         marginLeft: 8,
-        fontSize: 20,
-        fontWeight: "bold",
+        fontSize: AppData.fontSizes.large,
+        fontWeight: "500",
     },
     groupImage: {
         width: 35,

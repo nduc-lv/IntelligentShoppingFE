@@ -52,12 +52,12 @@ export const API = createApi({
       console.log("action")
       console.log(action)
       // when persisting the api reducer
-      // if (action.key === 'root') {
-      //   return action.payload
-      // }
+      if (action.key === 'root') {
+        return action.payload
+      }
 
       // When persisting the root reducer
-      return action.payload[reducerPath]
+      // return action.payload[reducerPath]
     }
   },
   endpoints: () => ({}),

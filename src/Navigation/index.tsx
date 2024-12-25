@@ -26,6 +26,7 @@ import { ManageAccountContainer } from "@/Screens/ManageAccount";
 import { AdminNavigator } from "./Admin";
 import { ManageFoodContainer } from "@/Screens/ManageFood";
 import { ManageUnitContainer } from "@/Screens/ManageUnit";
+
 import WarningBanner from "@/General/Components/WarningBanner";
 import { i18n, LocalizationKey } from "@/Localization";
 import { useNetInfo } from "@react-native-community/netinfo";
@@ -34,6 +35,7 @@ export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
 	[RootScreens.SIGN_IN]: undefined;
+	[RootScreens.ADMIN]: undefined;
 	[RootScreens.ADMIN]: undefined;
 	SHOPPING_LIST: undefined;
 	SHOPPING_LIST_DETAIL: { groupId: string };
@@ -46,8 +48,12 @@ export type RootStackParamList = {
 	MANAGE_ACCOUNT: undefined;
 	MANAGE_FOOD: undefined;
 	MANAGE_UNIT: undefined;
+	RECIPE: undefined;
+	RECIPE_DETAIL: { recipeId: string };
+	RECIPE_LIST: undefined;
+	EDIT_RECIPE: { recipeId: string };
 };
-const PublicScreens:Set<string|undefined>=new Set(
+const PublicScreens: Set<string | undefined> = new Set(
 	[
 		RootScreens.SIGN_IN,
 		RootScreens.WELCOME
@@ -82,24 +88,25 @@ const _ApplicationNavigator = () => {
 
 	const { type, isConnected } = useNetInfo();
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
-	useEffect(()=>{
-		if(!accessToken){
+	useEffect(() => {
+		if (!accessToken) {
 			dispatch(fetchTokens())
-		} else{
+		} else {
 			getMe();
 		}
-	},[accessToken])
+	}, [accessToken])
 	useEffect(() => {
 		console.log(data)
-		if(!PublicScreens.has(currentRoute)){
-			if ( (!isLoading && !data)) {
+		if (!PublicScreens.has(currentRoute)) {
+			if ((!isLoading && !data)) {
 				RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
-			} 
-		} else{
-			if(data){
+			}
+		} else {
+			if (data) {
 				RootNavigationContainerRef.navigate(RootScreens.MAIN)
 			}
 		}
+
 
 	}, [accessToken, currentRoute, isLoading, data, error]);
 
@@ -170,6 +177,7 @@ const _ApplicationNavigator = () => {
 					name={"MANAGE_UNIT"}
 					component={ManageUnitContainer}
 				/>
+
 				<RootStack.Screen
 				name="SHOPPING_LIST_BY_ID"
 				component={ShoppingListByIdContainer}/>
