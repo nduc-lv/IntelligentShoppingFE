@@ -14,7 +14,10 @@ type SignInScreenNavigatorProps = NativeStackScreenProps<
 >;
 
 export const SignInContainer = ({ navigation }: SignInScreenNavigatorProps) => {
-	const [getMe] = userApi.useLazyGetMeQuery();
+	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
+	const accessToken = useSelector(
+		(state: { auth: AuthState }) => state.auth.accessToken
+	);
 	const onNavigate = (screen: RootScreens) => {
 		navigation.dispatch(
 			CommonActions.reset({
@@ -23,27 +26,5 @@ export const SignInContainer = ({ navigation }: SignInScreenNavigatorProps) => {
 			})
 		);
 	};
-	const accessToken = useSelector(
-		(state: { auth: AuthState }) => state.auth.accessToken
-	);
-	useEffect(() => {
-		var resp: any;
-		const fetchMe = async () => {
-			try {
-				resp = await getMe();
-			}
-			catch (error) {
-				console.error('Error fetching data:', error);
-			} finally {
-				if(resp.data.user_role.role.name === 'admin'){
-					onNavigate(RootScreens.ADMIN);
-				}
-				else onNavigate(RootScreens.MAIN);
-			}
-		}
-		if (accessToken) {
-			fetchMe();
-		}
-	}, [accessToken]);
 	return <SignInAndRegister onNavigate={onNavigate} />;
 };

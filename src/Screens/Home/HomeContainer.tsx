@@ -7,9 +7,5 @@ export const HomeContainer = () => {
   const [getMe, { data, isSuccess, isUninitialized, isFetching, error }] =
     useLazyGetMeQuery();
 
-  useEffect(() => {
-    getMe()
-  }, [getMe]);
-
   return <Home data={data} isLoading={isUninitialized} />;
 };

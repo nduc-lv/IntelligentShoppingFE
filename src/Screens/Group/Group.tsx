@@ -71,8 +71,6 @@ export const GroupScreen = () => {
     fetchGroup();
   }, []);
 
-  console.log(data);
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Groups</Text>
@@ -116,7 +114,7 @@ export const GroupScreen = () => {
         animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => handleCloseDialog()}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -197,11 +195,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 8,
+    width: '90%',
+    backgroundColor: '#fff',
     padding: 20,
-    elevation: 5,
+    borderRadius: 10,
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 18,
