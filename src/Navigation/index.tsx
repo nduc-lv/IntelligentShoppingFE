@@ -44,8 +44,12 @@ export type RootStackParamList = {
 	MANAGE_ACCOUNT: undefined;
 	MANAGE_FOOD: undefined;
 	MANAGE_UNIT: undefined;
+	RECIPE: undefined;
+	RECIPE_DETAIL: { recipeId: string };
+	RECIPE_LIST: undefined;
+	EDIT_RECIPE: { recipeId: string };
 };
-const PublicScreens:Set<string|undefined>=new Set(
+const PublicScreens: Set<string | undefined> = new Set(
 	[
 		RootScreens.SIGN_IN,
 		RootScreens.WELCOME
@@ -80,21 +84,21 @@ const _ApplicationNavigator = () => {
 
 	const { type, isConnected } = useNetInfo();
 	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
-	useEffect(()=>{
-		if(!accessToken){
+	useEffect(() => {
+		if (!accessToken) {
 			dispatch(fetchTokens())
-		} else{
+		} else {
 			getMe();
 		}
-	},[accessToken])
+	}, [accessToken])
 	useEffect(() => {
 		console.log(data)
-		if(!PublicScreens.has(currentRoute)){
-			if ( (!isLoading && !data)) {
+		if (!PublicScreens.has(currentRoute)) {
+			if ((!isLoading && !data)) {
 				RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
-			} 
-		} else{
-			if(data){
+			}
+		} else {
+			if (data) {
 				RootNavigationContainerRef.navigate(RootScreens.MAIN)
 			}
 		}

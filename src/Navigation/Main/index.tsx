@@ -25,18 +25,51 @@ import { RecipeTabNavigation } from "./Recipe";
 
 const Tab = createBottomTabNavigator();
 
+const RecipeStack = () => (
+	<RootStack.Navigator>
+		<RootStack.Screen
+			name="RECIPE"
+			component={RecipeContainer}
+			options={() => ({
+				headerTitle: `Danh sách món ăn`,
+			})}
+		/>
+		<RootStack.Screen
+			name="RECIPE_LIST"
+			component={RecipeListContainer}
+			options={() => ({
+				headerTitle: `Món ngon hàng ngày`,
+			})}
+		/>
+		<RootStack.Screen
+			name="RECIPE_DETAIL"
+			component={RecipeDetailContainer}
+			options={({ route }) => ({
+				headerShown: false
+			})}
+		/>
+		<RootStack.Screen
+			name="EDIT_RECIPE"
+			component={EditRecipeContainer}
+			options={({ route }) => ({
+				headerShown: false
+			})}
+		/>
+	</RootStack.Navigator>
+);
+
 // @refresh reset
 export const MainNavigator = () => {
 	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-	const [getMe,getMeState] = userApi.useLazyGetMeQuery();
+	const [getMe, getMeState] = userApi.useLazyGetMeQuery();
 	const accessToken = useSelector(
 		(state: { auth: AuthState }) => state.auth.accessToken
 	);
-	useEffect(()=>{
-		if(getMeState?.data?.user_role?.role?.name=== "admin"){
+	useEffect(() => {
+		if (getMeState?.data?.user_role?.role?.name === "admin") {
 			navigation.navigate(RootScreens.ADMIN);
 		}
-	},[getMeState.data])
+	}, [getMeState.data])
 	return (
 		<Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}>
 			{/* <Tab.Screen
@@ -49,7 +82,7 @@ export const MainNavigator = () => {
 			/> */}
 			<Tab.Screen
 				name="Recipe"
-				component={RecipeTabNavigation}
+				component={RecipeStack}
 				options={{
 					tabBarIcon: ({ color, size }) => <Heart color={color} size={size} />,
 					tabBarLabelPosition: "below-icon",
@@ -69,8 +102,8 @@ export const MainNavigator = () => {
 				options={{
 					tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
 					tabBarLabelPosition: "below-icon",
-					headerLeft: ()=> null,
-					headerShown:true
+					headerLeft: () => null,
+					headerShown: true
 				}}
 			/>
 			<Tab.Screen
