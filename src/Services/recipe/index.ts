@@ -88,6 +88,13 @@ const recipeAPI = API.injectEndpoints({
             }),
             transformResponse: (response: { rows: Recipe[] }, meta, arg) => response.rows,
         }),
+        getMyRecipe: build.query<Recipe[], void>({
+            query: () => ({
+                url: `recipe/myrecipe`,
+                method: "GET",
+            }),
+            transformResponse: (response: { rows: Recipe[] }, meta, arg) => response.rows,
+        }),
         saveRecipe: build.mutation<any, { recipe_id: string }>({
             query: (recipe_id) => ({
                 url: `recipe/save`,
@@ -134,6 +141,7 @@ const recipeAPI = API.injectEndpoints({
 export const {
     useLazyGetRecipeListQuery,
     useLazyGetSavedRecipeQuery,
+    useLazyGetMyRecipeQuery,
     useLazyGetRecipeQuery,
     useSaveRecipeMutation,
     useCreateRecipeMutation,

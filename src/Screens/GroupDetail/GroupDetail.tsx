@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView, ImageBackground, Pressable } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
-import { ArrowLeft, ArrowRight, Clock5, Heart, Info, NotebookText, Plus, Search } from "lucide-react-native";
+import { ArrowLeft, ArrowRight, Clock5, EllipsisVertical, Heart, Info, NotebookText, Plus, Search } from "lucide-react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "..";
@@ -10,13 +10,14 @@ import AppData from "@/General/Constants/AppData";
 import { Actionsheet, Avatar, Input } from "native-base";
 import { FlatList } from "react-native";
 import { useLazyGetAllCategoryQuery } from "@/Services/category";
-import { useLazyGetAllFoodByCategoryQuery } from "@/Services/foodGroup";
+import { useCreateFoodGroupMutation, useCreateFoodMutation, useLazyGetAllFoodByCategoryQuery } from "@/Services/foodGroup";
 import { useLazyGetUnitsQuery } from "@/Services/unit";
 import SearchableDropdown from "@/General/Components/SearchableDropdown";
 import { DatePicker } from "antd-mobile";
 import DateTimePickerInput from "@/General/Components/DateTimePicker";
 import { useLazyGetAllFoodQuery } from "@/Services/shoppingList";
 import { useSelector } from "react-redux";
+import { Utils } from "@/General/Utils/Utils";
 
 type GroupRouteParams = {
     GroupDetail: { groupId: string, isAdmin: boolean };
@@ -34,8 +35,10 @@ export const GroupDetailScreen = () => {
     const [formCategory, setFormCategory] = useState<string>('');
     const [formUnit, setFormUnit] = useState<string>('');
     const [formFood, setFormFood] = useState<string>('');
-    const [formExpiredate, setFormExpiredate] = useState<any>('');
-    const [formQuantity, setFormQuantity] = useState<string>('');
+    const [formExpiredate, setFormExpiredate] = useState<any>('2025-02-20 17:22:58');
+    const [formQuantity, setFormQuantity] = useState<number>(0);
+    const [createFood, { isLoading: isLoadingCreateFood, isError: isErrorCreateFood }] = useCreateFoodMutation();
+    const [createFoodGroup, { isLoading: isLoadingCreateFoodGroup, isError: isErrorCreateFoodGroup }] = useCreateFoodGroupMutation();
 
     useEffect(() => {
         fetchGroupInfo({ groupId });
@@ -44,6 +47,30 @@ export const GroupDetailScreen = () => {
     useEffect(() => {
         fetchFoodByCategory({ group_id: groupId, category_id: selectedCategory });
     }, [selectedCategory, fetchFoodByCategory]);
+
+    const handleCreateFoodGroup = async () => {
+        try {
+            if (foods.find((food: any) => food.id === formFood)) {
+                await createFoodGroup({ group_id: groupId, food_id: formFood, category_id: formCategory, unit_name: formUnit, quantity: formQuantity, exprire_date: formExpiredate }).unwrap();
+            } else {
+                await createFood({ name: formFood, category_id: formCategory }).unwrap().then(async (res: any) => {
+                    await createFoodGroup({
+                        group_id: groupId,
+                        food_id: res?.dataValues?.id,
+                        category_id: formCategory,
+                        unit_name: formUnit,
+                        quantity: formQuantity,
+                        exprire_date: formExpiredate
+                    }).unwrap().then(() => {
+                        fetchFoodByCategory({ group_id: groupId, category_id: selectedCategory });
+                    })
+                })
+            }
+
+        } catch (error) {
+
+        }
+    }
 
     const renderRecipeItem = ({ item }: { item: any }) => (
         <View key={item.id} style={[{ width: 290, height: 270, padding: 0 }]}
@@ -64,7 +91,7 @@ export const GroupDetailScreen = () => {
                         color: AppData.colors.text[900],
                         marginTop: 8,
                     }}>
-                        {item.name}
+                        {item.name + ' x2'}
                     </Text>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -80,85 +107,108 @@ export const GroupDetailScreen = () => {
                     </View>
                 </View>
 
-                <View
+                <TouchableOpacity
                     style={{
-                        height: 36,
-                        width: 36,
-                        backgroundColor: AppData.colors.text[500],
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: 8,
+                        marginLeft: 'auto'
                     }}
-                >
-                    <Text style={{
-                        fontSize: AppData.fontSizes.medium,
-                        fontWeight: "600",
-                        color: AppData.colors.text[100],
+                    onPress={() => {
+
                     }}>
-                        {2}
-                    </Text>
-                </View>
+                    <EllipsisVertical size={24} color={AppData.colors.text[400]} />
+                </TouchableOpacity>
             </View>
 
 
         </View>
     );
 
-    const renderItem = (item: any) => (
-        <View
-            key={item.id}
-            style={[styles.card, {
-                width: "47%",
-                maxWidth: 200,
-                height: 200,
-                borderWidth: 1,
-                borderColor: '#FBFBFB',
-                padding: 10,
-                gap: 10,
-                marginBottom: 10,
-            }]}
+    const renderItem = (item: any) => {
+        return (
+            <View key={item.id}
+                style={[{
+                    width: "47%",
+                    maxWidth: 200,
+                    height: 230,
+                    gap: 10,
+                    marginBottom: 10,
+                }]}>
+                <View
+                    style={[styles.card, {
+                        width: "100%",
+                        height: 200,
+                        borderWidth: 1,
+                        borderColor: '#FBFBFB',
+                        padding: 10,
+                        gap: 10,
+                    }]}>
+                    <ImageBackground
+                        source={{ uri: 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
+                        style={[StyleSheet.absoluteFillObject, {
+                            alignItems: 'center',
+                        }]}
+                        imageStyle={{
+                            borderRadius: 16,
+                        }}
+                    >
+                        <View style={{
+                            marginTop: 10,
+                            padding: 10,
+                            backgroundColor: AppData.colors.text[500],
+                            borderRadius: 16,
+                            alignItems: 'center',
+                            width: 80,
+                        }}>
+                            <Text style={{
+                                fontSize: AppData.fontSizes.medium,
+                                fontWeight: "500",
+                                color: AppData.colors.text[100],
+                            }}>
+                                {item?.food_groups[0]?.quantity + ' ' + item?.food_groups[0]?.unit_name}
+                            </Text>
+                        </View>
 
-        >
-            <ImageBackground
-                source={{ uri: 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
-                style={[StyleSheet.absoluteFillObject, {
-                    alignItems: 'center',
-                }]}
-                imageStyle={{
-                    borderRadius: 16,
-                }}
-            >
+
+                        <Text style={{
+                            fontSize: AppData.fontSizes.medium,
+                            fontWeight: "500",
+                            color: AppData.colors.text[100],
+                            marginTop: 'auto',
+                            marginBottom: 10,
+                        }}>
+                            {`Còn ${Utils.calculateDaysRemaining(item?.food_groups[0]?.exprire_date)} ngày`}
+                        </Text>
+                    </ImageBackground>
+                </View>
                 <View style={{
-                    marginTop: 10,
-                    padding: 10,
-                    backgroundColor: AppData.colors.text[500],
-                    borderRadius: 16,
+                    flexDirection: 'row',
                     alignItems: 'center',
-                    width: 80,
+
                 }}>
                     <Text style={{
-                        fontSize: AppData.fontSizes.medium,
+                        fontSize: AppData.fontSizes.large,
                         fontWeight: "500",
-                        color: AppData.colors.text[100],
+                        color: AppData.colors.text[900],
+                        marginTop: 'auto',
+                        textAlign: 'center',
+                        flex: 1
                     }}>
-                        {'600g'}
+                        {item?.name}
                     </Text>
+
+                    <TouchableOpacity
+                        style={{
+                            marginLeft: 'auto'
+                        }}
+                        onPress={() => {
+
+                        }}>
+                        <EllipsisVertical size={24} color={AppData.colors.text[400]} />
+                    </TouchableOpacity>
+
                 </View>
-
-
-                <Text style={{
-                    fontSize: AppData.fontSizes.medium,
-                    fontWeight: "500",
-                    color: AppData.colors.text[100],
-                    marginTop: 'auto',
-                    marginBottom: 10,
-                }}>
-                    {'Còn 7 ngày'}
-                </Text>
-            </ImageBackground>
-        </View>
-    );
+            </View>
+        );
+    };
 
     const data1 = [
         { id: '1', name: 'Cơm gà chiên trứng' },
@@ -167,13 +217,6 @@ export const GroupDetailScreen = () => {
         { id: '4', name: 'Vegan Burrito' },
         { id: '5', name: 'Vegetable Stir Fry' },
         { id: '6', name: 'Chicken Tacos' },
-    ];
-
-    const options = [
-        { label: "Apple", value: "apple" },
-        { label: "Banana", value: "banana" },
-        { label: "Cherry", value: "cherry" },
-        { label: "Grape", value: "grape" },
     ];
 
     const categoryOptions = categorys && categorys.map((category: any) => ({
@@ -188,7 +231,7 @@ export const GroupDetailScreen = () => {
 
     const foodsOptions = foods && foods.map((food: any) => ({
         label: food.name,  // Dùng name làm label
-        value: food.id,    // Dùng id làm value
+        value: food.name,    // Dùng id làm value
     }))
 
     return (
@@ -264,7 +307,7 @@ export const GroupDetailScreen = () => {
                                     fontWeight: "500",
                                     color: AppData.colors.text[900],
                                     marginBottom: 16
-                                }}>{'Đề xuất món ăn'}</Text>
+                                }}>{'Thức ăn còn lại'}</Text>
                                 <FlatList
                                     data={data1}
                                     renderItem={renderRecipeItem}
@@ -281,7 +324,7 @@ export const GroupDetailScreen = () => {
                                     fontWeight: "500",
                                     color: AppData.colors.text[900],
                                     marginBottom: 16,
-                                }}>{'Nguyên liệu'}</Text>
+                                }}>{'Thực phẩm'}</Text>
 
                                 <ScrollView horizontal={true}
                                     showsHorizontalScrollIndicator={false}
@@ -340,7 +383,7 @@ export const GroupDetailScreen = () => {
                                     gap: 16,
                                 }}
                                 >
-                                    {data1.map((item: any) => renderItem(item))}
+                                    {myFoods && myFoods.map((item: any) => renderItem(item))}
                                 </View>
                             </View>
                         </ScrollView>
@@ -364,6 +407,16 @@ export const GroupDetailScreen = () => {
                         padding: 24,
                         gap: 16
                     }}>
+                        <View style={{ width: "100%", zIndex: 5 }}>
+                            <Text style={{
+                                fontSize: AppData.fontSizes.large,
+                                fontWeight: "500",
+                                color: AppData.colors.text[900],
+                                textAlign: "center",
+                            }}>
+                                {'Tạo thực phẩm'}
+                            </Text>
+                        </View>
                         <View style={{ width: "100%", zIndex: 5 }}>
                             <SearchableDropdown
                                 options={categoryOptions || []}
@@ -394,9 +447,18 @@ export const GroupDetailScreen = () => {
                                     borderColor: AppData.colors.primary,
                                     backgroundColor: "white",
                                 }}
-
-                                onChangeText={setFormQuantity}
+                                keyboardType="numeric" // Hiển thị bàn phím số và dấu chấm (trên một số thiết bị)
+                                onChangeText={(text) => {
+                                    const numericValue = parseFloat(text.replace(/[^0-9.]/g, "")); // Loại bỏ ký tự không phải số, chuyển thành số
+                                    if (!isNaN(numericValue)) {
+                                        setFormQuantity(numericValue); // Cập nhật giá trị
+                                    } else {
+                                        setFormQuantity(0); // Trường hợp nhập không hợp lệ, đặt giá trị mặc định là 0
+                                    }
+                                }}
+                                value={formQuantity ? String(formQuantity) : ""}
                             />
+
 
                             <View style={{ flex: 1 }}>
                                 <SearchableDropdown
@@ -411,7 +473,7 @@ export const GroupDetailScreen = () => {
                         <View style={{ width: "100%", zIndex: 2 }}>
                             < DateTimePickerInput
                                 onChange={(value) => setFormExpiredate(value?.toString())}
-                                placeholder="Ngày hệ thống"
+                                placeholder="Ngày hết hạn"
                             />
                         </View>
 
@@ -426,13 +488,7 @@ export const GroupDetailScreen = () => {
                             minWidth: 200
                         }}
                             onPress={() => {
-                                console.log({
-                                    category: formCategory,
-                                    unit: formUnit,
-                                    name: formFood,
-                                    quantity: formQuantity,
-                                    date: formExpiredate
-                                });
+                                handleCreateFoodGroup();
                             }}
                         >
                             <Text style={{
@@ -454,12 +510,16 @@ export const GroupDetailScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f9f9f9",
+        backgroundColor: "#fff",
     },
     header: {
         flexDirection: "row",
         alignItems: "center",
         padding: 16,
+        borderBottomColor: "#ccc",
+        borderBottomWidth: 0.1,
+        fontSize: AppData.fontSizes.large,
+        fontWeight: "400",
     },
     title: {
         flex: 1,
