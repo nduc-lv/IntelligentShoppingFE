@@ -138,7 +138,6 @@ export const UsergroupScreen = () => {
 
     useEffect(() => {
         fetchUserGroupList({ groupId, ...pagination });
-        getMe();
     }, [groupId, pagination, fetchUserGroupList]);
 
     return (

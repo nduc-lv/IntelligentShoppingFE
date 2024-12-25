@@ -26,6 +26,7 @@ const SignInAndRegisterFragment = {
 	REGISTER: 1,
 };
 export const SignInAndRegister = (props: SignInAndRegisterProps) => {
+
 	const [fragment, setFragment] = useState(SignInAndRegisterFragment.LOGIN);
 	console.log(fragment);
 	switch (fragment) {
@@ -46,14 +47,6 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 	);
 	const [register, { isLoading, error, data }] = userApi.useRegisterMutation();
 	const dispatch = useDispatch<AppDispatch>();
-	const accessToken = useSelector((state: {
-		auth: AuthState
-	}) => state.auth.accessToken)
-	useEffect(() => {
-		if (accessToken) {
-			props.onNavigate(RootScreens.MAIN);
-		}
-	}, [accessToken])
 	const handleRegister = async () => {
 		try {
 			const response = await register({
@@ -171,14 +164,6 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 	const [password, setPassword] = useState("");
 	const [login, { isLoading, error, data }] = userApi.useLoginMutation();
 	const dispatch = useDispatch<AppDispatch>()
-	const accessToken = useSelector((state: {
-		auth: AuthState
-	}) => state.auth.accessToken)
-	useEffect(() => {
-		if (accessToken) {
-			props.onNavigate(RootScreens.MAIN);
-		}
-	}, [accessToken])
 	const handleLogin = async () => {
 		try {
 			const response = await login({

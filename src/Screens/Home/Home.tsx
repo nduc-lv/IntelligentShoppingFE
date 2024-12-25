@@ -33,10 +33,6 @@ export const Home = (props: IHomeProps) => {
           <Heading color="primary.500" fontSize="md">
             {data?.username}
           </Heading>
-          <Button
-            title="Go to Welcome"
-            onPress={() => navigation.navigate(RootScreens.WELCOME)}
-          />
         </>
       )}
     </View>
