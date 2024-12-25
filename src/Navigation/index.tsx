@@ -152,6 +152,14 @@ const _ApplicationNavigator = () => {
 					name="USERGROUP"
 					component={UsergroupContainer} />
 				<RootStack.Screen
+					name="RECIPE"
+					component={RecipeContainer}
+				/>
+				<RootStack.Screen
+					name="RECIPE_LIST"
+					component={RecipeListContainer}
+				/>
+				<RootStack.Screen
 					name={"MANAGE"}
 					component={ManageContainer}
 				/>

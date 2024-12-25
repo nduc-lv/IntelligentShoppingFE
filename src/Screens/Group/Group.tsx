@@ -73,7 +73,6 @@ export const GroupScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your Groups</Text>
       {isLoading ? (
         <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
       ) : isError ? (

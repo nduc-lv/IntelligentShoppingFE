@@ -523,8 +523,8 @@ const styles = StyleSheet.create({
     title: {
         flex: 1,
         marginLeft: 8,
-        fontSize: 20,
-        fontWeight: "bold",
+        fontSize: AppData.fontSizes.large,
+        fontWeight: "500",
     },
     groupImage: {
         width: 35,
