@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import SwipeRow from '@nghinv/react-native-swipe-row'
+import { ChevronRight, Trash2 } from "lucide-react-native";
+import { Plus } from "lucide-react-native";
 import moment from "moment"
 import {
   View,
@@ -8,9 +9,12 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
-  ScrollView, // Import ScrollView
+  ScrollView,
+  TouchableHighlight, // Import ScrollView
 } from "react-native";
 import { useSelector } from "react-redux";
+import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
+import { Calendar } from "lucide-react-native";
 import {
   Form,
   Toast,
@@ -95,25 +99,6 @@ export const ShoppingListDetail: React.FC = () => {
   const handleModalOpen = (action: "create" | "edit" | "delete", item: Shopping | null = null) => {
     setCurrentAction(action);
     setSelectedItem(item);
-    if (action !== "delete") {
-      loadPickerData();
-      form.resetFields();
-      if (action === "edit" && item) {
-        form.setFieldsValue({ date: moment(item.date).format("MM-DD-YY") });
-        const items = item.tasks.map(item => {
-          return {
-            food: item?.food_id,
-            unit: item?.unit_id,
-            assignee: item?.task?.user_id,
-            quantity: item?.quantity || 0
-          }
-        })
-        setItems([...items]);
-      }
-      if (action === "create") {
-        setItems([{ food: "", assignee: "", unit: "", quantity: 0 }]);
-      }
-    }
     setIsModalVisible(true);
   };
   const [showCalendar, setShowCalendar] = useState(false);
@@ -145,19 +130,6 @@ export const ShoppingListDetail: React.FC = () => {
   // Save shopping list (create or update)
   const saveShoppingList = async () => {
     try {
-      // Validate the items fields
-      // let isValid = true;
-      // for (const item of items) {
-      //   if (!item.food || !item.unit || !item.assignee) {
-      //     isValid = false;
-      //     break;
-      //   }
-      // }
-      // if (!isValid) {
-      //   Toast.show({ content: "Please fill in all fields for each item.", icon: "fail" });
-      //   return;
-      // }
-
       const values = await form.validateFields();
       const payload = {
         groupId: groupId,
@@ -166,17 +138,12 @@ export const ShoppingListDetail: React.FC = () => {
         foods: []
       }
       await createShoppingList(payload).unwrap();
-      toast.show("Shopping list created successfully!", {placement:"top", type: "success" });
-      // if (currentAction === "create") {
-      // } else if (currentAction === "edit" && selectedItem) {
-      //   await updateShoppingList({ id: selectedItem.id, ...payload }).unwrap();
-      //   Toast.show({ content: "Shopping list updated successfully!", icon: "success" });
-      // }
+      toast.show("Shopping list created successfully!", { placement: "top", type: "success" });
       fetchShoppingList({ groupId, ...pagination });
       handleModalClose();
     } catch (e) {
       console.log(e)
-      toast.show("Failed to save shopping list", {placement:"top", type: "warning" });
+      toast.show("Failed to save shopping list", { placement: "top", type: "warning" });
     }
   };
 
@@ -185,11 +152,11 @@ export const ShoppingListDetail: React.FC = () => {
     if (selectedItem) {
       try {
         await deleteShoppingList(selectedItem.id).unwrap();
-        toast.show("Shopping list deleted successfully!", {placement:"top", type: "success" });
+        toast.show("Shopping list deleted successfully!", { placement: "top", type: "success" });
         fetchShoppingList({ groupId, ...pagination });
         handleModalClose();
       } catch {
-        toast.show("Failed to delete shopping list", { placement:"top", type: "warning" });
+        toast.show("Failed to delete shopping list", { placement: "top", type: "warning" });
       }
     }
   };
@@ -197,8 +164,7 @@ export const ShoppingListDetail: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Shopping Lists</Text>
-      <Button onPress={() => handleModalOpen("create")}>Create New Shopping List</Button>
-
+      {/* <Button onPress={() => handleModalOpen("create")}>Create New Shopping List</Button> */}
       {isLoading ? (
         <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
       ) : isError ? (
@@ -211,25 +177,22 @@ export const ShoppingListDetail: React.FC = () => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <SwipeRow
-            left={[
-              { title: 'Delete', 
-                backgroundColor: 'tomato', 
-                icon: {name: 'delete'},
-                onPress: () => { handleModalOpen("delete", item)
-              }
-            },
-            ]}
+              leftOpenValue={70}
             >
-              <TouchableOpacity style={styles.groupItem} onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>
-                <View>
-                  <Text>{moment(item.date).format("MM-DD-YY")}</Text>
-                  <Text>{item.name}</Text>
-                </View>
-                <View style={styles.buttonContainer}>
-                  {/* <Button onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>Edit</Button> */}
-                  <Button onPress={() => { handleModalOpen("delete", item); }}>Delete</Button>
-                </View>
+              {/* Hidden Row (Actions) */}
+              <TouchableOpacity style={styles.deleteButton}  onPress={() => { handleModalOpen("delete", item); }}>
+                 <Trash2></Trash2>
               </TouchableOpacity>
+              {/* Visible Row */}
+              <TouchableHighlight underlayColor={'#AAA'} onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>
+                <View style={styles.groupItem}>
+                  <View>
+                    <Text>{moment(item.date).format("MM-DD-YY")}</Text>
+                    <Text>{item.name}</Text>
+                  </View>
+                  <ChevronRight></ChevronRight>
+                </View>
+              </TouchableHighlight>
             </SwipeRow>
           )}
           // onEndReached={() =>
@@ -240,7 +203,6 @@ export const ShoppingListDetail: React.FC = () => {
       ) : (
         <Text>No shopping lists found.</Text>
       )}
-
       <Modal isOpen={isModalVisible} onClose={() => setIsModalVisible(false)}>
         <Modal.Content>
           {currentAction == 'delete' && (
@@ -267,12 +229,15 @@ export const ShoppingListDetail: React.FC = () => {
                   <Form form={form}>
                     <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
                     >
-                      <Text>
-                          Date: {moment(date).format("YYYY-MM-DD")}
-                      </Text>
-                      <Button onPress={() => showDatepicker()}>
+                      <TouchableOpacity onPress={() => showDatepicker()} style={{display: "flex", flexDirection: "row", gap: 10, justifyContent: "center", alignItems:"center"}}>
+                        <Text style={{fontSize: 20}}>
+                          {moment(date).format("YYYY-MM-DD")}
+                        </Text>
+                        <Calendar/>
+                      </TouchableOpacity>
+                      {/* <Button onPress={() => showDatepicker()}>
                         Choose Date
-                      </Button>
+                      </Button> */}
                     </Form.Item>
 
                     <Form.Item name="name" label="name" rules={[{ required: true, message: "Please select a date" }]}>
@@ -294,19 +259,47 @@ export const ShoppingListDetail: React.FC = () => {
           }
         </Modal.Content>
       </Modal>
-
+      <TouchableOpacity style={styles.fab} onPress={() => handleModalOpen("create")}>
+                <Plus color="white" size={25} />
+      </TouchableOpacity>
     </View>
+
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
   title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
-  groupItem: { padding: 12, backgroundColor: "#fff", marginBottom: 8, borderRadius: 8 },
+  groupItem: { padding: 12, backgroundColor: "#fff", marginBottom: 8, borderRadius: 8, flexDirection:"row" , justifyContent:"space-between"},
   buttonContainer: { flexDirection: "row", justifyContent: "space-between" },
+  deleteButton: {
+    padding: 12,
+    alignItems: 'center',
+    // flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    backgroundColor: 'red',
+    marginBottom: 8, borderRadius: 8 
+  },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { color: "red" },
   modalButtons: { flexDirection: "row", justifyContent: "space-between", margin: 16 },
-  itemsContainer: { maxHeight: 400 }, // You can adjust the height based on your needs
-  itemRow: { marginBottom: 12 }, // Add margin for spacing between items
+  itemsContainer: { maxHeight: 400 },
+  itemRow: { marginBottom: 12 },
+  fab: {
+    position: 'absolute',
+    bottom: 25,
+    right: 25,
+    backgroundColor: '#007AFF',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+},
 });

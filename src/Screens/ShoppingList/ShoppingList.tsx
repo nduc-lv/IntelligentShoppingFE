@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { useLazyGetUserGroupQuery } from "@/Services/shoppingList";
 import { Button, Spinner } from "native-base";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import { useLazyGetMeQuery } from "@/Services";
+import { ChevronRight } from "lucide-react-native";
 // Type definition for Group
 interface Group {
   id: string;
@@ -68,21 +69,22 @@ export const ShoppingListScreen: React.FC = () => {
   // Content state (groups available)
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your Groups</Text>
+      <Text style={styles.title}>Choose Group To View</Text>
       {data && data && data.length > 0 ? (
         <FlatList
           data={data}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: Group }) => (
-            <View style={styles.groupItem}>
+            <TouchableOpacity style={styles.groupItem} onPress={() => navigation.navigate("SHOPPING_LIST_DETAIL", { groupId: item.id })}>
               <Text style={styles.groupName}>{item.name}</Text>
-              <Button
+              {/* <Button
                 size="sm"
                 onPress={() => navigation.navigate("SHOPPING_LIST_DETAIL", { groupId: item.id })}
               >
                 View Shopping List
-              </Button>
-            </View>
+              </Button> */}
+              <ChevronRight size={24} color="#888" />
+            </TouchableOpacity>
           )}
         />
       ) : (
