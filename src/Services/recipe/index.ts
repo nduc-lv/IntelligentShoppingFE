@@ -60,7 +60,8 @@ export interface Recipe {
     instructions: string,
     foods: any,
     user: any,
-    isSaved: boolean
+    isSaved: boolean,
+    ingredients: any
 }
 
 
@@ -83,6 +84,13 @@ const recipeAPI = API.injectEndpoints({
         getSavedRecipe: build.query<Recipe[], void>({
             query: () => ({
                 url: `recipe/user`,
+                method: "GET",
+            }),
+            transformResponse: (response: { rows: Recipe[] }, meta, arg) => response.rows,
+        }),
+        getMyRecipe: build.query<Recipe[], void>({
+            query: () => ({
+                url: `recipe/myrecipe`,
                 method: "GET",
             }),
             transformResponse: (response: { rows: Recipe[] }, meta, arg) => response.rows,
@@ -133,6 +141,7 @@ const recipeAPI = API.injectEndpoints({
 export const {
     useLazyGetRecipeListQuery,
     useLazyGetSavedRecipeQuery,
+    useLazyGetMyRecipeQuery,
     useLazyGetRecipeQuery,
     useSaveRecipeMutation,
     useCreateRecipeMutation,

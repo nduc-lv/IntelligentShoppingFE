@@ -25,6 +25,39 @@ import { RecipeTabNavigation } from "./Recipe";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
 const Tab = createBottomTabNavigator();
 
+const RecipeStack = () => (
+	<RootStack.Navigator>
+		<RootStack.Screen
+			name="RECIPE"
+			component={RecipeContainer}
+			options={() => ({
+				headerTitle: `Danh sách món ăn`,
+			})}
+		/>
+		<RootStack.Screen
+			name="RECIPE_LIST"
+			component={RecipeListContainer}
+			options={() => ({
+				headerTitle: `Món ngon hàng ngày`,
+			})}
+		/>
+		<RootStack.Screen
+			name="RECIPE_DETAIL"
+			component={RecipeDetailContainer}
+			options={({ route }) => ({
+				headerShown: false
+			})}
+		/>
+		<RootStack.Screen
+			name="EDIT_RECIPE"
+			component={EditRecipeContainer}
+			options={({ route }) => ({
+				headerShown: false
+			})}
+		/>
+	</RootStack.Navigator>
+);
+
 // @refresh reset
 export const MainNavigator = () => {
 	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -45,8 +78,18 @@ export const MainNavigator = () => {
 				}}
 			/> */}
 			<Tab.Screen
+				name="Group"
+				component={GroupContainer}
+				options={{
+					tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+					tabBarLabelPosition: "below-icon",
+					headerLeft: () => null,
+					headerShown: true
+				}}
+			/>
+			<Tab.Screen
 				name="Recipe"
-				component={RecipeTabNavigation}
+				component={RecipeStack}
 				options={{
 					tabBarIcon: ({ color, size }) => <Heart color={color} size={size} />,
 					tabBarLabelPosition: "below-icon",
@@ -60,16 +103,7 @@ export const MainNavigator = () => {
 					tabBarLabelPosition: "below-icon",
 				}}
 			/>
-			<Tab.Screen
-				name="Group"
-				component={GroupContainer}
-				options={{
-					tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
-					tabBarLabelPosition: "below-icon",
-					headerLeft: ()=> null,
-					headerShown:true
-				}}
-			/>
+
 			<Tab.Screen
 				name="Shopping List"
 				component={ShoppingListContainer}

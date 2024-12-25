@@ -8,8 +8,9 @@ npm-debug.*
 *.key
 *.mobileprovision
 *.orig.*
+.env
 web-build/
-
+.env
 # macOS
 .DS_Store
 
@@ -19,3 +20,5 @@ web-build/
 expo-env.d.ts
 # @end expo-cli
 yarn.lock
+android
+package-lock.json

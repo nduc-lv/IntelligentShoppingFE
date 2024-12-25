@@ -230,7 +230,7 @@ export const RecipeListScreen = () => {
             </View>
 
             <View>
-                <Text style={styles.title}>{'Thực phẩm'}</Text>
+                <Text style={styles.title}>{'Nguyên liệu'}</Text>
                 <FlatList
                     data={food_recipes}
                     renderItem={renderIngredientItem}
