@@ -6,12 +6,12 @@ import { Avatar } from "native-base";
 import { StatusBar } from "expo-status-bar";
 import { ArrowRight, Heart, Plus } from "lucide-react-native";
 import AppData from "@/General/Constants/AppData";
-import { useLazyGetSavedRecipeQuery, useUnsaveRecipeMutation } from "@/Services/recipe";
+import { useLazyGetMyRecipeQuery, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
 
-export const RecipeScreen = () => {
+export const MyRecipeScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const [fetchSavedRecipe, { data: recipes, isLoading, isError, error }] = useLazyGetSavedRecipeQuery();
+    const [fetchSavedRecipe, { data: recipes, isLoading, isError, error }] = useLazyGetMyRecipeQuery();
 
 
     useEffect(() => {
@@ -33,7 +33,6 @@ export const RecipeScreen = () => {
     }
     const renderItem = (item: any) => (
         <TouchableOpacity
-            key={item.id}
             style={[styles.card, {
                 width: "47%",
                 maxWidth: 200,
@@ -143,7 +142,7 @@ export const RecipeScreen = () => {
                         fontWeight: "500",
                         color: AppData.colors.text[900],
                     }}>
-                        {'Công thức đã lưu'}
+                        {'Công thức của tôi'}
                     </Text>
                     {/* <Text style={{
                         fontSize: AppData.fontSizes.default,

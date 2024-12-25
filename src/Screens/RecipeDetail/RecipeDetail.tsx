@@ -1,5 +1,5 @@
 import AppData from "@/General/Constants/AppData";
-import { ArrowLeft, Heart, Plus, ShoppingCart } from "lucide-react-native";
+import { ArrowLeft, Heart, Pencil, Plus, ShoppingCart } from "lucide-react-native";
 import { TextArea } from "native-base";
 import React, { useEffect } from "react";
 import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity } from "react-native";
@@ -33,7 +33,7 @@ export const RecipeDetailScreen = ({ route }: any) => {
     const handleUnSavedRecipe = async (recipeId: string) => {
         try {
             await unSavedRecipe({ recipe_id: recipeId }).unwrap();
-            fetchRecipe(filters);
+            fetchRecipe({ recipeId });
         } catch (e) {
             console.log(e)
             Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
@@ -84,10 +84,10 @@ export const RecipeDetailScreen = ({ route }: any) => {
                             marginLeft: 'auto'
                         }}
                         onPress={() => {
-
+                            navigation.navigate("EDIT_RECIPE", { recipeId: recipeId });
                         }}
                     >
-                        <ShoppingCart size={24} color={AppData.colors.primary} />
+                        <Pencil size={24} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -224,7 +224,7 @@ export const RecipeDetailScreen = ({ route }: any) => {
                                     color: AppData.colors.text[900],
                                     marginLeft: 'auto'
                                 }}>
-                                    {item?.quantity + " " + item?.unit?.name}
+                                    {item?.quantity + " " + item?.unit_name}
                                 </Text>
 
                                 <TouchableOpacity

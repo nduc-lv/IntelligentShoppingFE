@@ -2,13 +2,15 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 export interface dataState {
-    category: any;
-    unit: any;
+    categorys: any;
+    units: any;
+    foods: any
 }
 
 const initialState: dataState = {
-    category: [],
-    unit: []
+    categorys: [],
+    units: [],
+    foods: []
 };
 
 const dataSlice = createSlice({
@@ -16,11 +18,14 @@ const dataSlice = createSlice({
     initialState,
     reducers: {
         setCategory: (state, action: PayloadAction<any>) => {
-            state.category = action.payload;
+            state.categorys = action.payload;
         },
         setUnit: (state, action: PayloadAction<any>) => {
-            state.unit = action.payload;
-        }
+            state.units = action.payload;
+        },
+        setFood: (state, action: PayloadAction<any>) => {
+            state.foods = action.payload;
+        },
     },
     extraReducers: (builder) => {
 
@@ -29,3 +34,4 @@ const dataSlice = createSlice({
 
 
 export const dataReducer = dataSlice.reducer;
+export const { setCategory, setUnit, setFood } = dataSlice.actions;

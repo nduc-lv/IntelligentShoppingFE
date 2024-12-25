@@ -1,22 +1,18 @@
 import { API } from "../base";
 
-export interface Category {
-    id: string;
+export interface CreateFoodGroupPayload {
+    food_id: string;
+    category_id: string;
+    group_id: string;
+    unit_name: string;
+    quantity: number;
+    exprire_date: string;
+}
+
+export interface CreateFoodPayload {
+    category_id: string;
     name: string;
-    description: string;
 }
-
-export interface CreateCategoryPayload {
-    name: string;
-    imageUrl?: string;
-}
-
-export interface UpdateCategoryPayload {
-    id: string;
-    name?: string;
-    imageUrl?: string;
-}
-
 export interface Food {
     id: string;
     name: string;
@@ -24,39 +20,27 @@ export interface Food {
 }
 
 
-const categoryApi = API.injectEndpoints({
+const foodGroupsApi = API.injectEndpoints({
     endpoints: (build) => ({
         getAllFoodByCategory: build.query<Food[], { group_id: string; category_id: string }>({
             query: ({ group_id, category_id }) => ({
                 url: `foodgroup/food/${group_id}/${category_id}`,
                 method: "GET",
             }),
-            transformResponse: (response: { rows: Category[] }, meta, arg) => response.rows,
+            transformResponse: (response: { rows: Food[] }, meta, arg) => response.rows,
         }),
-        getCategoryInfo: build.query<any, { categoryId: string }>({
-            query: ({ categoryId }) => ({
-                url: `category/${categoryId}`,
-                method: "GET",
-            })
-        }),
-        createCategory: build.mutation<any, CreateCategoryPayload>({
+        createFoodGroup: build.mutation<any, CreateFoodGroupPayload>({
             query: (payload) => ({
-                url: `category`,
+                url: `foodgroup`,
                 method: "POST",
                 body: payload,
-            })
+            }),
         }),
-        updateCategory: build.mutation<any, UpdateCategoryPayload>({
-            query: ({ id, ...payload }) => ({
-                url: `category/${id}`,
-                method: "PUT",
+        createFood: build.mutation<any, CreateFoodPayload>({
+            query: (payload) => ({
+                url: `food`,
+                method: "POST",
                 body: payload,
-            })
-        }),
-        deleteCategory: build.mutation<any, string>({
-            query: (id) => ({
-                url: `category/${id}`,
-                method: "DELETE",
             }),
         }),
     }),
@@ -65,8 +49,6 @@ const categoryApi = API.injectEndpoints({
 
 export const {
     useLazyGetAllFoodByCategoryQuery,
-    useLazyGetCategoryInfoQuery,
-    useCreateCategoryMutation,
-    useUpdateCategoryMutation,
-    useDeleteCategoryMutation
-} = categoryApi;
+    useCreateFoodGroupMutation,
+    useCreateFoodMutation
+} = foodGroupsApi;

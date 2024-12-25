@@ -108,21 +108,21 @@ const shoppingListAPI = API.injectEndpoints({
         url: `shopping-list/all-food/${userId}`,
         method: "GET",
       }),
-      transformResponse: (response: {foods: Food[]}, meta, arg) => response.foods
+      transformResponse: (response: { foods: Food[] }, meta, arg) => response.foods
     }),
-    getAllUnit: build.query<Unit[], {userId:string}>({
-      query: ({userId}) => ({
+    getAllUnit: build.query<Unit[], { userId: string }>({
+      query: ({ userId }) => ({
         url: `shopping-list/all-unit/${userId}`,
         method: "GET"
       }),
-      transformResponse: (response: {units: Unit[]}, meta, arg) => response.units
+      transformResponse: (response: { units: Unit[] }, meta, arg) => response.units
     }),
-    getAllUser: build.query<User[], {groupId: string}>({
-      query: ({groupId}) => ({
+    getAllUser: build.query<User[], { groupId: string }>({
+      query: ({ groupId }) => ({
         url: `shopping-list/all-user/${groupId}`,
         method: "GET",
       }),
-      transformResponse: (response: {users: User[]}, meta, arg) => response.users
+      transformResponse: (response: { users: User[] }, meta, arg) => response.users
     }),
 
     createShoppingList: build.mutation<Shopping, CreateShoppingPayload>({
@@ -131,7 +131,7 @@ const shoppingListAPI = API.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      transformResponse: (response: {list: any }, meta, arg) => response.list,
+      transformResponse: (response: { list: any }, meta, arg) => response.list,
     }),
 
     updateShoppingList: build.mutation<any, UpdateShoppingPayload>({
