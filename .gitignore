@@ -20,5 +20,5 @@ web-build/
 expo-env.d.ts
 # @end expo-cli
 yarn.lock
-./android
+android
 package-lock.json
