@@ -7,13 +7,37 @@ import { RootStackParamList } from "@/Navigation";
 import {
   Toast,
 } from "antd-mobile";
+import { useLazyGetAllCategoryQuery } from "@/Services/category";
+import { useLazyGetAllFoodQuery } from "@/Services/shoppingList";
+import { useLazyGetUnitsQuery } from "@/Services/unit";
+import { useLazyGetAllFood2Query } from "@/Services/food";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/Store";
+import { setCategory, setUnit, setFood } from "@/Store/reducers/data";
+import AppData from "@/General/Constants/AppData";
 
 export const GroupScreen = () => {
+  const dispatch = useDispatch<AppDispatch>()
   const [fetchGroup, { data = [], isLoading, isError, error }] = useLazyGetAllGroupQuery();
   const [modalVisible, setModalVisible] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [createGroup] = useCreateGroupMutation();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [fetchAllCategory, { data: categorys, isLoading: isLoadingAllCategory, isError: isErrorAllCategory }] = useLazyGetAllCategoryQuery();
+  const [fetchAllFood, { data: foods, isLoading: isLoadingAllFood, isError: isErrorAllFood }] = useLazyGetAllFood2Query();
+  const [fetchAllUnit, { data: units, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetUnitsQuery();
+
+  useEffect(() => {
+    fetchAllCategory();
+    fetchAllUnit();
+    fetchAllFood();
+  }, []);
+
+  useEffect(() => {
+    dispatch(setCategory(categorys));
+    dispatch(setUnit(units));
+    dispatch(setFood(foods));
+  }, [categorys, units, foods]);
 
   const handleOpenDialog = () => {
     setModalVisible(true);
@@ -60,6 +84,7 @@ export const GroupScreen = () => {
         <FlatList
           data={data}
           keyExtractor={(item) => item.group_id}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => navigation.navigate("GROUP_DETAIL", { groupId: item.group_id, isAdmin: item.is_admin })}>
               <View style={styles.groupItem}>
@@ -112,7 +137,7 @@ export const GroupScreen = () => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
+  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
   title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
   groupItem: {
     flexDirection: "row",
@@ -123,6 +148,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 8,
     elevation: 2,
+    boxShadow: '2px 2px 2px 0px #0633361A',
   },
   itemText: {
     fontSize: 16,
@@ -136,12 +162,10 @@ const styles = StyleSheet.create({
   itemRow: { marginBottom: 12 }, // Add margin for spacing between items
   fab: {
     position: 'absolute',
-    bottom: 25,
+    bottom: 35,
     right: 25,
-    backgroundColor: '#007AFF',
     width: 60,
     height: 60,
-    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
@@ -149,6 +173,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
+    backgroundColor: AppData.colors.primary,
+    display: "flex",
+    borderRadius: 16,
   },
   groupImage: {
     width: 35,

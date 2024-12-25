@@ -37,8 +37,9 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = ({
                 size={"xl"}
                 height={12}
                 bgColor="white"
+                isDisabled
                 borderRadius={10}
-                borderColor={AppData.colors.text[400]}
+                borderColor={AppData.colors.text[900]}
                 borderWidth={0.3}
                 _focus={{
                     borderColor: AppData.colors.primary,

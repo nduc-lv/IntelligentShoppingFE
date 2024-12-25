@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input, FlatList, Pressable, Text, Icon } from "native-base";
 import { View, Keyboard, TouchableWithoutFeedback } from "react-native";
 import AppData from "@/General/Constants/AppData";
@@ -20,7 +20,6 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     options,
     placeholder = "Search...",
     onSelect,
-    dropdownWidth = "300px",
 }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
@@ -60,6 +59,10 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     onChangeText={(text) => {
                         setSearchTerm(text);
                         setShowDropdown(true); // Mở dropdown khi tìm kiếm
+
+                        if (filteredOptions.length === 0) {
+                            onSelect(text);
+                        }
                     }}
                     onFocus={() => setShowDropdown(true)} // Mở dropdown khi focus
                     w={{ base: "100%" }}
@@ -98,7 +101,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                     <FlatList
                         data={filteredOptions}
                         keyExtractor={(item) => item.value}
-                        showsVerticalScrollIndicator={false}
+                        // showsVerticalScrollIndicator={false}
                         renderItem={({ item }) => (
                             <Pressable
                                 onPress={() => handleSelect(item)}
@@ -112,10 +115,10 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                             </Pressable>
                         )}
                         style={{
-                            position: "absolute", // Đặt dropdown lên trên input
-                            top: "100%", // Dưới input
-                            left: 0,
-                            right: 0,
+                            // position: "absolute", // Đặt dropdown lên trên input
+                            // top: "100%", // Dưới input
+                            // left: 0,
+                            // right: 0,
                             backgroundColor: "white",
                             borderColor: "#ccc",
                             borderWidth: 1,
