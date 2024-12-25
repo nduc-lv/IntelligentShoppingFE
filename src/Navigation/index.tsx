@@ -20,6 +20,7 @@ import Loading from "@/General/Components/Loading";
 import { GroupInfoContainer } from "@/Screens/GroupInfo/GroupInfoContainer";
 import { RecipeContainer } from "@/Screens/Recipe/RecipeContainer";
 import { RecipeListContainer } from "@/Screens/RecipeList/RecipeListCointainer";
+import { ShoppingListByIdContainer } from "@/Screens/ShoppingListById/ShoppingListByIdContainer";
 import { ManageContainer } from "@/Screens/Manage";
 import { ManageAccountContainer } from "@/Screens/ManageAccount";
 import { AdminNavigator } from "./Admin";
@@ -36,6 +37,7 @@ export type RootStackParamList = {
 	[RootScreens.ADMIN]: undefined;
 	SHOPPING_LIST: undefined;
 	SHOPPING_LIST_DETAIL: { groupId: string };
+	SHOPPING_LIST_BY_ID: {groupId: string, shoppingId: string};
 	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
 	GROUP: undefined;
 	GROUP_INFO: { groupId: string, isAdmin: boolean };
@@ -168,6 +170,9 @@ const _ApplicationNavigator = () => {
 					name={"MANAGE_UNIT"}
 					component={ManageUnitContainer}
 				/>
+				<RootStack.Screen
+				name="SHOPPING_LIST_BY_ID"
+				component={ShoppingListByIdContainer}/>
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);
