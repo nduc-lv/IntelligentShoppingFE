@@ -81,6 +81,16 @@ export const MainNavigator = () => {
 				}}
 			/> */}
 			<Tab.Screen
+				name="Group"
+				component={GroupContainer}
+				options={{
+					tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
+					tabBarLabelPosition: "below-icon",
+					headerLeft: () => null,
+					headerShown: true
+				}}
+			/>
+			<Tab.Screen
 				name="Recipe"
 				component={RecipeStack}
 				options={{
@@ -96,16 +106,7 @@ export const MainNavigator = () => {
 					tabBarLabelPosition: "below-icon",
 				}}
 			/>
-			<Tab.Screen
-				name="Group"
-				component={GroupContainer}
-				options={{
-					tabBarIcon: ({ color, size }) => <Users color={color} size={size} />,
-					tabBarLabelPosition: "below-icon",
-					headerLeft: () => null,
-					headerShown: true
-				}}
-			/>
+
 			<Tab.Screen
 				name="Shopping List"
 				component={ShoppingListContainer}

@@ -25,11 +25,7 @@ import { ManageAccountContainer } from "@/Screens/ManageAccount";
 import { AdminNavigator } from "./Admin";
 import { ManageFoodContainer } from "@/Screens/ManageFood";
 import { ManageUnitContainer } from "@/Screens/ManageUnit";
-import { ManageContainer } from "@/Screens/Manage";
-import { ManageAccountContainer } from "@/Screens/ManageAccount";
-import { AdminNavigator } from "./Admin";
-import { ManageFoodContainer } from "@/Screens/ManageFood";
-import { ManageUnitContainer } from "@/Screens/ManageUnit";
+
 import WarningBanner from "@/General/Components/WarningBanner";
 import { i18n, LocalizationKey } from "@/Localization";
 import { useNetInfo } from "@react-native-community/netinfo";
@@ -156,14 +152,6 @@ const _ApplicationNavigator = () => {
 					name="USERGROUP"
 					component={UsergroupContainer} />
 				<RootStack.Screen
-					name="RECIPE"
-					component={RecipeContainer}
-				/>
-				<RootStack.Screen
-					name="RECIPE_LIST"
-					component={RecipeListContainer}
-				/>
-				<RootStack.Screen
 					name={"MANAGE"}
 					component={ManageContainer}
 				/>
@@ -179,30 +167,7 @@ const _ApplicationNavigator = () => {
 					name={"MANAGE_UNIT"}
 					component={ManageUnitContainer}
 				/>
-				<RootStack.Screen
-					name="RECIPE"
-					component={RecipeContainer}
-				/>
-				<RootStack.Screen
-					name="RECIPE_LIST"
-					component={RecipeListContainer}
-				/>
-				<RootStack.Screen
-					name={"MANAGE"}
-					component={ManageContainer}
-				/>
-				<RootStack.Screen
-					name={"MANAGE_ACCOUNT"}
-					component={ManageAccountContainer}
-				/>
-				<RootStack.Screen
-					name={"MANAGE_FOOD"}
-					component={ManageFoodContainer}
-				/>
-				<RootStack.Screen
-					name={"MANAGE_UNIT"}
-					component={ManageUnitContainer}
-				/>
+
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);
