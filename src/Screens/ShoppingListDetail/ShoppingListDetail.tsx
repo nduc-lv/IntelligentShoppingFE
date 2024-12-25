@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { ChevronRight, Trash2 } from "lucide-react-native";
+import { Plus } from "lucide-react-native";
 import moment from "moment"
 import {
   View,
@@ -7,20 +9,21 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
-  ScrollView, // Import ScrollView
+  ScrollView,
+  TouchableHighlight, // Import ScrollView
 } from "react-native";
+import { useSelector } from "react-redux";
+import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
+import { Calendar } from "lucide-react-native";
 import {
-  Button,
-  Popup,
-  Input,
   Form,
-  Space,
-  Calendar,
   Toast,
-  CalendarPicker,
   DatePicker
-} from "antd-mobile";
-import { Select, FormControl, WarningOutlineIcon, CheckIcon } from "native-base";
+} from "@ant-design/react-native";
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "@/Navigation";
+import { Select, FormControl, WarningOutlineIcon, CheckIcon, Modal, Button, Input } from "native-base";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { Shopping, useLazyGetAllUserQuery } from "@/Services/shoppingList";
 import {
@@ -31,17 +34,19 @@ import {
   useLazyGetAllUnitQuery,
   useLazyGetAllFoodQuery,
 } from "@/Services/shoppingList";
-
+import { useToast } from 'react-native-toast-notifications'
 type ShoppingListRouteParams = {
   ShoppingListDetail: { groupId: string };
 };
 
 export const ShoppingListDetail: React.FC = () => {
-  const mockUserId = "84ef5319-acef-4d19-b048-fdf00ff3e386";
   const route = useRoute<RouteProp<ShoppingListRouteParams, "ShoppingListDetail">>();
+  const userData = useSelector((state: any) => state?.userApi?.queries[`getMe`]?.data);
+  const mockUserId = userData?.id;
   const { groupId } = route.params;
-
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [fetchShoppingList, { data: rows = [], isLoading, isError }] = useLazyGetShoppingListQuery();
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [deleteShoppingList] = useDeleteShoppingListMutation();
   const [updateShoppingList] = useUpdateShoppingListMutation();
   const [createShoppingList] = useCreateShoppingListMutation();
@@ -59,8 +64,11 @@ export const ShoppingListDetail: React.FC = () => {
   useEffect(() => {
     fetchShoppingList({ groupId, ...pagination });
   }, [groupId, pagination, fetchShoppingList]);
+  useEffect(() => {
+    fetchShoppingList({ groupId, ...pagination });
+  }, [])
 
-  const [items, setItems] = useState([{ food: "", unit: "", assignee: "" }]);
+  const [items, setItems] = useState([{ food: "", unit: "", assignee: "", quantity: 0 }]);
 
   // Fetch food and unit data only when needed
   const loadPickerData = useCallback(() => {
@@ -71,7 +79,7 @@ export const ShoppingListDetail: React.FC = () => {
 
   // Add new item
   const addItem = () => {
-    setItems([...items, { food: "", unit: "", assignee: "" }]);
+    setItems([...items, { food: "", unit: "", assignee: "", quantity: 0 }]);
   };
 
   // Remove an item
@@ -81,8 +89,8 @@ export const ShoppingListDetail: React.FC = () => {
   };
 
   // Update item values
-  const updateItem = (index: number, key: string, value: string) => {
-    const updatedItems: Array<{ food: string; assignee: string; unit: string;[key: string]: string }> = [...items];
+  const updateItem = (index: number, key: string, value: string | number) => {
+    const updatedItems: Array<{ food: string; assignee: string; unit: string; quantity: number;[key: string]: string | number }> = [...items];
     updatedItems[index][key] = value;
     setItems(updatedItems);
   };
@@ -91,24 +99,6 @@ export const ShoppingListDetail: React.FC = () => {
   const handleModalOpen = (action: "create" | "edit" | "delete", item: Shopping | null = null) => {
     setCurrentAction(action);
     setSelectedItem(item);
-    if (action !== "delete") {
-      loadPickerData();
-      form.resetFields();
-      if (action === "edit" && item) {
-        form.setFieldsValue({ date: moment(item.date).format("MM-DD-YY") });
-        const items = item.tasks.map(item => {
-          return {
-            food: item?.food_id,
-            unit: item?.unit_id,
-            assignee: item?.task?.user_id
-          }
-        })
-        setItems([...items]);
-      }
-      if (action === "create") {
-        setItems([{food: "", assignee: "", unit: ""}]);
-      }
-    }
     setIsModalVisible(true);
   };
   const [showCalendar, setShowCalendar] = useState(false);
@@ -118,51 +108,42 @@ export const ShoppingListDetail: React.FC = () => {
     setIsModalVisible(false);
     setSelectedItem(null);
   };
+  const [date, setDate] = useState(new Date());
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    console.log(currentDate)
+    setDate(currentDate)
+    form.setFieldValue("date", moment(currentDate).format("YYYY-MM-DD"))
+  };
+  const showMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: date,
+      onChange,
+      mode: currentMode,
+      is24Hour: true,
+    });
+  };
+  const toast = useToast();
+  const showDatepicker = () => {
+    showMode('date');
+  };
   // Save shopping list (create or update)
   const saveShoppingList = async () => {
     try {
-      // Validate the items fields
-      let isValid = true;
-      for (const item of items) {
-        if (!item.food || !item.unit || !item.assignee) {
-          isValid = false;
-          break;
-        }
-      }
-      if (!isValid) {
-        Toast.show({ content: "Please fill in all fields for each item.", icon: "fail" });
-        return;
-      }
-
       const values = await form.validateFields();
-      console.log(items);
-      console.log(values)
-      // {name, date, groupId, foods: [{food_id, quantity, user_id, unit_id}]}
       const payload = {
         groupId: groupId,
         date: values.date,
-        name: "Default",
-        foods: items.map(item => {
-          return {
-            food_id: item.food,
-            quantity: 1,
-            user_id: item.assignee,
-            unit_id: item.unit
-          }
-        })
+        name: values.name,
+        foods: []
       }
-      if (currentAction === "create") {
-        await createShoppingList(payload).unwrap();
-        Toast.show({ content: "Shopping list created successfully!", icon: "success" });
-      } else if (currentAction === "edit" && selectedItem) {
-        await updateShoppingList({ id: selectedItem.id, ...payload}).unwrap();
-        Toast.show({ content: "Shopping list updated successfully!", icon: "success" });
-      }
+      await createShoppingList(payload).unwrap();
+      toast.show("Shopping list created successfully!", { placement: "top", type: "success" });
       fetchShoppingList({ groupId, ...pagination });
       handleModalClose();
     } catch (e) {
       console.log(e)
-      Toast.show({ content: "Failed to save shopping list.", icon: "fail" });
+      toast.show("Failed to save shopping list", { placement: "top", type: "warning" });
     }
   };
 
@@ -171,11 +152,11 @@ export const ShoppingListDetail: React.FC = () => {
     if (selectedItem) {
       try {
         await deleteShoppingList(selectedItem.id).unwrap();
-        Toast.show({ content: "Shopping list deleted successfully!", icon: "success" });
+        toast.show("Shopping list deleted successfully!", { placement: "top", type: "success" });
         fetchShoppingList({ groupId, ...pagination });
         handleModalClose();
       } catch {
-        Toast.show({ content: "Failed to delete shopping list.", icon: "fail" });
+        toast.show("Failed to delete shopping list", { placement: "top", type: "warning" });
       }
     }
   };
@@ -183,8 +164,7 @@ export const ShoppingListDetail: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Your Shopping Lists</Text>
-      <Button onClick={() => handleModalOpen("create")}>Create New Shopping List</Button>
-
+      {/* <Button onPress={() => handleModalOpen("create")}>Create New Shopping List</Button> */}
       {isLoading ? (
         <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
       ) : isError ? (
@@ -196,14 +176,24 @@ export const ShoppingListDetail: React.FC = () => {
           data={rows}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={styles.groupItem}>
-              <Text>{moment(item.date).format("MM-DD-YY")}</Text>
-              <Text>{item.name}</Text>
-              <View style={styles.buttonContainer}>
-                <Button onClick={() => { handleModalOpen("edit", item); }}>Edit</Button>
-                <Button onClick={() => { handleModalOpen("delete", item); }}>Delete</Button>
-              </View>
-            </View>
+            <SwipeRow
+              leftOpenValue={70}
+            >
+              {/* Hidden Row (Actions) */}
+              <TouchableOpacity style={styles.deleteButton}  onPress={() => { handleModalOpen("delete", item); }}>
+                 <Trash2></Trash2>
+              </TouchableOpacity>
+              {/* Visible Row */}
+              <TouchableHighlight underlayColor={'#AAA'} onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>
+                <View style={styles.groupItem}>
+                  <View>
+                    <Text>{moment(item.date).format("MM-DD-YY")}</Text>
+                    <Text>{item.name}</Text>
+                  </View>
+                  <ChevronRight></ChevronRight>
+                </View>
+              </TouchableHighlight>
+            </SwipeRow>
           )}
           // onEndReached={() =>
           //   setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
@@ -213,148 +203,103 @@ export const ShoppingListDetail: React.FC = () => {
       ) : (
         <Text>No shopping lists found.</Text>
       )}
-
-      <Popup
-        visible={isModalVisible}
-        onMaskClick={handleModalClose}
-        position="bottom"
-        destroyOnClose
-      >
-        {currentAction === "delete" ? (
-          <View style={styles.modalButtons}>
-            <Button onClick={confirmDelete}>Confirm Delete</Button>
-            <Button onClick={handleModalClose}>Cancel</Button>
-          </View>
-        ) : (
-          <Form form={form} layout="vertical">
-            {/* Date Field */}
-            <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
-            >
-              <Input
-                readOnly
-                value={moment(form.getFieldValue("date")).format("MM-DD-YY")}
-                onClick={() => setShowCalendar(true)}
-              />
-              <Button onClick={() => setShowCalendar(true)}>
-                Choose Date
-              </Button>
-              <DatePicker
-                title='Choose Date'
-                visible={showCalendar}
-                confirmText="Confirm"
-                cancelText="Cancle"
-                onClose={() => {
-                  setShowCalendar(false);
-                }}
-                onConfirm={val => {
-                  form.setFieldValue("date", moment(val).format("MM-DD-YYYY"))
-                  Toast.show(val.toDateString())
-                }}
-              />
-            </Form.Item>
-
-            {/* Scrollable Items */}
-            <ScrollView style={styles.itemsContainer} keyboardShouldPersistTaps="handled">
-              {items.map((item, index) => (
-                <View key={index} style={styles.itemRow}>
-                  <FormControl isInvalid={!item.food}>
-                    <Select
-                      minWidth="200"
-                      placeholder="Select Food"
-                      defaultValue={item.food || undefined}
-                      _selectedItem={{
-                        bg: 'teal.600',
-                        endIcon: <CheckIcon size={5} />,
-                      }}
-                      onValueChange={(value: any) => updateItem(index, "food", value)}
+      <Modal isOpen={isModalVisible} onClose={() => setIsModalVisible(false)}>
+        <Modal.Content>
+          {currentAction == 'delete' && (
+            <>
+              <Modal.CloseButton />
+              <Modal.Header>Delete</Modal.Header>
+              <Modal.Body>
+                <Text> Are you sure you want to delete this?</Text>
+                <Modal.Footer>
+                  <Button.Group space={2}>
+                    <Button onPress={confirmDelete}>Confirm Delete</Button>
+                    <Button onPress={handleModalClose}>Cancel</Button>
+                  </Button.Group>
+                </Modal.Footer>
+              </Modal.Body>
+            </>
+          )}
+          {
+            currentAction == 'create' && (
+              <>
+                <Modal.CloseButton />
+                <Modal.Header>Create</Modal.Header>
+                <Modal.Body>
+                  <Form form={form}>
+                    <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
                     >
-                      {foods.map((food) => (
-                        <Select.Item key={food.id} label={food.name} value={food.id} />
-                      ))}
-                    </Select>
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                      Please select a food item!
-                    </FormControl.ErrorMessage>
-                  </FormControl>
+                      <TouchableOpacity onPress={() => showDatepicker()} style={{display: "flex", flexDirection: "row", gap: 10, justifyContent: "center", alignItems:"center"}}>
+                        <Text style={{fontSize: 20}}>
+                          {moment(date).format("YYYY-MM-DD")}
+                        </Text>
+                        <Calendar/>
+                      </TouchableOpacity>
+                      {/* <Button onPress={() => showDatepicker()}>
+                        Choose Date
+                      </Button> */}
+                    </Form.Item>
 
-                  <FormControl isInvalid={!item.unit}>
-                    <Select
-                      minWidth="200"
-                      placeholder="Select Unit"
-                      defaultValue={item.unit || undefined}
-                      _selectedItem={{
-                        bg: 'teal.600',
-                        endIcon: <CheckIcon size={5} />,
-                      }}
-                      onValueChange={(value: any) => updateItem(index, "unit", value)}
-                    >
-                      {units.map((unit) => (
-                        <Select.Item key={unit.id} label={unit.name} value={unit.id} />
-                      ))}
-                    </Select>
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                      Please select a unit!
-                    </FormControl.ErrorMessage>
-                  </FormControl>
-
-                  {/* <Input
-                    placeholder="Enter Assignee"
-                    value={item.assignee}
-                    onChange={(value) => updateItem(index, "assignee", value)}
-                  /> */}
-
-                  <FormControl isInvalid={!item.assignee}>
-                    <Select
-                      minWidth="200"
-                      placeholder="Select Assignee"
-                      defaultValue={item.assignee || undefined}
-                      _selectedItem={{
-                        bg: 'teal.600',
-                        endIcon: <CheckIcon size={5} />,
-                      }}
-                      onValueChange={(value: any) => updateItem(index, "assignee", value)}
-                    >
-                      {users.map((user) => (
-                        <Select.Item key={user.id} label={user.name} value={user.id} />
-                      ))}
-                    </Select>
-                    <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                      Please select an assignee!
-                    </FormControl.ErrorMessage>
-                  </FormControl>
-
-                  {/* Remove Button */}
-                  <Button onClick={() => removeItem(index)} color="danger" size="small">
-                    Remove
-                  </Button>
-                </View>
-              ))}
-            </ScrollView>
-
-            {/* Add Button */}
-            <Button onClick={addItem} block>
-              Add Item
-            </Button>
-
-            {/* Save Button */}
-            <Button onClick={saveShoppingList} block>
-              Save Shopping List
-            </Button>
-          </Form>
-        )}
-      </Popup>
+                    <Form.Item name="name" label="name" rules={[{ required: true, message: "Please select a date" }]}>
+                      <Input mx="3" placeholder="Input" w="100%" onChangeText={(value) => form.setFieldValue('name', value)} />
+                    </Form.Item>
+                    {/* Save Button */}
+                  </Form>
+                  <Modal.Footer>
+                    <Button.Group space={2}>
+                      <Button onPress={saveShoppingList}>
+                        Save Shopping List
+                      </Button>
+                      <Button onPress={handleModalClose}>Cancel</Button>
+                    </Button.Group>
+                  </Modal.Footer>
+                </Modal.Body>
+              </>
+            )
+          }
+        </Modal.Content>
+      </Modal>
+      <TouchableOpacity style={styles.fab} onPress={() => handleModalOpen("create")}>
+                <Plus color="white" size={25} />
+      </TouchableOpacity>
     </View>
+
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
   title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
-  groupItem: { padding: 12, backgroundColor: "#fff", marginBottom: 8, borderRadius: 8 },
+  groupItem: { padding: 12, backgroundColor: "#fff", marginBottom: 8, borderRadius: 8, flexDirection:"row" , justifyContent:"space-between"},
   buttonContainer: { flexDirection: "row", justifyContent: "space-between" },
+  deleteButton: {
+    padding: 12,
+    alignItems: 'center',
+    // flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    backgroundColor: 'red',
+    marginBottom: 8, borderRadius: 8 
+  },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { color: "red" },
   modalButtons: { flexDirection: "row", justifyContent: "space-between", margin: 16 },
-  itemsContainer: { maxHeight: 400 }, // You can adjust the height based on your needs
-  itemRow: { marginBottom: 12 }, // Add margin for spacing between items
+  itemsContainer: { maxHeight: 400 },
+  itemRow: { marginBottom: 12 },
+  fab: {
+    position: 'absolute',
+    bottom: 25,
+    right: 25,
+    backgroundColor: '#007AFF',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+},
 });

@@ -23,6 +23,16 @@ export interface CreateShoppingPayload {
   foods: Array<any>;
 }
 
+export interface AddItemToFridgePayload {
+  food_id: string,
+  group_id: string,
+  unit_id: string,
+  shopping_id: string,
+  id: string | undefined,
+  quantity: number,
+  expired_at: string
+}
+
 export interface UpdateShoppingPayload {
   id: string;
   name?: string;
@@ -49,6 +59,31 @@ export interface User {
   name: string,
   username: string
 }
+
+// export interface ItemsByShoppingListId {
+//   id: string,
+//   date: string,
+//   quantity: number,
+//   task: any,
+//   unit_id: string,
+//   food_id: string,
+//   shopping: any,
+// }
+
+export interface ItemByShoppingIdResponse {
+  id: string,
+  unit_id: string,
+  food_id: string,
+  quantity: number,
+  shopping: {
+    date: string,
+    id: string,
+    name: string
+  },
+  task: {
+    user_id: string
+  }
+}
 const shoppingListAPI = API.injectEndpoints({
   endpoints: (build) => ({
     getShoppingList: build.query<Shopping[], { per: number; page: number; groupId: string }>({
@@ -59,8 +94,17 @@ const shoppingListAPI = API.injectEndpoints({
       }),
       transformResponse: (response: { rows: Shopping[] }, meta, arg) => response.rows,
     }),
-    getAllFood: build.query<Food[], { userId: string }>({
-      query: ({ userId }) => ({
+    getItemByShoppingListId: build.query<ItemByShoppingIdResponse[], {page: number, per: number, shoppingId: string}>({
+      query: ({per, page, shoppingId}) => ({
+        url: "shopping-list/shopping",
+        method: "GET",
+        params: {per, page, shoppingId}
+      }),
+      transformResponse: (response: {rows: any}, meta, arg) => response.rows
+    }),
+
+    getAllFood: build.query<Food[], {userId: string}>({
+      query: ({userId}) => ({
         url: `shopping-list/all-food/${userId}`,
         method: "GET",
       }),
@@ -107,6 +151,34 @@ const shoppingListAPI = API.injectEndpoints({
       transformResponse: (response: { data: void }, meta, arg) => response.data,
     }),
 
+    deleteShoppingItemById: build.mutation<void, string>({
+      query: (id) => ({
+        url: `shopping-list/shopping-item/${id}`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: { data: void }, meta, arg) => response.data,
+    }),
+    addShoppingItemToFridge: build.mutation<any, AddItemToFridgePayload>({
+      query: (payload) => ({
+        url: 'shopping-list/fridge/add',
+        method: 'POST',
+        body: payload
+      })
+    }),
+    bulkAddShoppingItemToFridge: build.mutation<any, Array<AddItemToFridgePayload>>({
+      query:  (payload) => ({
+        url: 'shopping-list/fridge/bulk-add',
+        method: "POST",
+        body: payload
+      })
+    }),
+    getUserGroup: build.query({
+      query: (id) => `shopping-list/group/${id}`,
+      transformResponse: (response: {groups: any}) => {
+        return response.groups
+      }
+    })
+
   }),
   overrideExisting: true,
 });
@@ -117,7 +189,12 @@ export const {
   useCreateShoppingListMutation,
   useUpdateShoppingListMutation,
   useDeleteShoppingListMutation,
+  useAddShoppingItemToFridgeMutation,
+  useBulkAddShoppingItemToFridgeMutation,
   useLazyGetAllFoodQuery,
   useLazyGetAllUnitQuery,
-  useLazyGetAllUserQuery
+  useLazyGetAllUserQuery,
+  useLazyGetItemByShoppingListIdQuery,
+  useLazyGetUserGroupQuery,
+  useDeleteShoppingItemByIdMutation
 } = shoppingListAPI;
