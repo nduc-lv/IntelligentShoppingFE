@@ -28,7 +28,6 @@ const SignInAndRegisterFragment = {
 export const SignInAndRegister = (props: SignInAndRegisterProps) => {
 
 	const [fragment, setFragment] = useState(SignInAndRegisterFragment.LOGIN);
-	console.log(fragment);
 	switch (fragment) {
 		case SignInAndRegisterFragment.REGISTER:
 			return <RegisterFragment {...props} setFragment={setFragment} />;
@@ -119,7 +118,14 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 				/>
 				<Button
 					style={styles.btnGetStarted}
-					onPress={handleRegister}
+					onPress={(e)=>{
+						try{
+							e.preventDefault()
+						} catch(e){
+
+						}
+						handleRegister()
+					}}
 					isDisabled={
 						isLoading ||
 						!email ||
@@ -143,18 +149,6 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 					<Text>{i18n.t(LocalizationKey.SWITCH_TO_LOGIN)}</Text>
 				</TouchableOpacity>
 			</View>
-			<Button
-				style={styles.btnGetStarted}
-				onPress={() => {
-					Toast.show({
-						description: "Skipping registration for development!",
-						placement: "top",
-					});
-					props.onNavigate(RootScreens.MAIN);
-				}}
-			>
-				Development skip registration
-			</Button>
 		</View>
 	);
 };
@@ -212,7 +206,14 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 				/>
 				<Button
 					style={styles.btnGetStarted}
-					onPress={handleLogin}
+					onPress={(e)=>{
+						try{
+							e.preventDefault()
+						} catch(e){
+							
+						}
+						handleLogin()
+					}}
 					isDisabled={isLoading || !email || !password}
 				>
 					{isLoading ? (

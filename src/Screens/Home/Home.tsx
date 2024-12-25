@@ -10,7 +10,7 @@ import { RootStackParamList } from "@/Navigation";
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 
 export interface IHomeProps {
-  data: User | undefined;
+  data: User | null | undefined;
   isLoading: boolean;
 }
 

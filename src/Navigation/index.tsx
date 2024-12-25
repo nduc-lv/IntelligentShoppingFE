@@ -8,7 +8,7 @@ import { RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/Store";
-import { AuthState, fetchTokens } from "@/Store/reducers";
+import { AuthState, fetchTokens, setMe } from "@/Store/reducers";
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { GroupDetailContainer } from "@/Screens/GroupDetail/GroupDetailContainer";
@@ -28,7 +28,7 @@ import { ManageUnitContainer } from "@/Screens/ManageUnit";
 import WarningBanner from "@/General/Components/WarningBanner";
 import { i18n, LocalizationKey } from "@/Localization";
 import { useNetInfo } from "@react-native-community/netinfo";
-
+import { skipToken } from "@reduxjs/toolkit/dist/query";
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
@@ -79,29 +79,43 @@ const _ApplicationNavigator = () => {
 	const currentRoute = RootNavigationContainerRef.current?.getCurrentRoute()?.name
 
 	const { type, isConnected } = useNetInfo();
-	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
+	const getMeQuery = userApi.useGetMeQuery(accessToken?{} as unknown as void:skipToken);
 	useEffect(()=>{
+		console.log("AccessToken changed " +accessToken)
+		// use cleartokens for logout
 		if(!accessToken){
 			dispatch(fetchTokens())
-		} else{
-			getMe();
 		}
-	},[accessToken])
-	useEffect(() => {
-		console.log(data)
-		if(!PublicScreens.has(currentRoute)){
-			if ( (!isLoading && !data)) {
-				RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
-			} 
-		} else{
-			if(data){
-				RootNavigationContainerRef.navigate(RootScreens.MAIN)
+		console.log(isConnected)
+		console.log(!getMeQuery.isFetching)
+
+		if(accessToken&&isConnected&&!getMeQuery.isFetching){
+			console.log("Refetch issued")
+			getMeQuery.refetch()
+		}
+	},[accessToken,isConnected])
+	useEffect(()=>{
+		console.log(`Fetching state : ${getMeQuery.isFetching}`)
+	},[getMeQuery.isFetching])
+	useEffect(()=>{
+		dispatch(setMe(getMeQuery.data??null))
+	},[getMeQuery.data])
+	useEffect(()=>{
+		if(!getMeQuery.isLoading&&!getMeQuery.isFetching){
+			const isLoggedin=accessToken&&getMeQuery.data&&!getMeQuery.error
+			if(!PublicScreens.has(currentRoute)){
+				if (!isLoggedin) {
+					RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
+				} 
+			} else{
+				if(isLoggedin){
+					RootNavigationContainerRef.navigate(RootScreens.MAIN)
+				}
 			}
 		}
 
-	}, [accessToken, currentRoute, isLoading, data, error]);
-
-	if (isLoading) {
+	},[!getMeQuery.isLoading&&!getMeQuery.isFetching,accessToken&&getMeQuery.data&&!getMeQuery.error])
+	if (getMeQuery.isLoading||getMeQuery.isFetching) {
 		return <Loading />;
 	}
 	return (
@@ -109,7 +123,7 @@ const _ApplicationNavigator = () => {
 			<StatusBar />
 			<WarningBanner hidden={!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)} />
 			<RootStack.Navigator
-				initialRouteName={data ? RootScreens.MAIN : RootScreens.WELCOME}
+				initialRouteName={RootScreens.WELCOME}
 				screenOptions={{ headerShown: false }}
 			>
 				<RootStack.Screen
@@ -144,14 +158,6 @@ const _ApplicationNavigator = () => {
 				<RootStack.Screen
 					name="USERGROUP"
 					component={UsergroupContainer} />
-				<RootStack.Screen
-					name="RECIPE"
-					component={RecipeContainer}
-				/>
-				<RootStack.Screen
-					name="RECIPE_LIST"
-					component={RecipeListContainer}
-				/>
 				<RootStack.Screen
 					name={"MANAGE"}
 					component={ManageContainer}

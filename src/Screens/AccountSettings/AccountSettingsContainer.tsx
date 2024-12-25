@@ -1,6 +1,5 @@
 import { AccountSettings } from "./AccountSettings";
 import React, { useState, useEffect } from "react";
-import { useLazyGetMeQuery } from "@/Services";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { UserTabScreens } from "..";
 import { UserTabStackParamList } from "@/Navigation/Main/UserTab";

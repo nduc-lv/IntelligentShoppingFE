@@ -46,17 +46,6 @@ export const API = createApi({
   // to prevent circular type issues, the return type needs to be annotated as any
   extractRehydrationInfo(action, { reducerPath }): any {
     if (isHydrateAction(action)) {
-      console.log("action")
-      console.log("action")
-      console.log("action")
-      console.log("action")
-      console.log(action)
-      // when persisting the api reducer
-      // if (action.key === 'root') {
-      //   return action.payload
-      // }
-
-      // When persisting the root reducer
       return action.payload[reducerPath]
     }
   },

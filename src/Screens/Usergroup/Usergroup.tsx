@@ -8,7 +8,9 @@ import { Menu, Provider } from "react-native-paper";
 import {
     Toast,
 } from "antd-mobile";
-import { useLazyGetMeQuery, useLazyGetUserByEmailQuery, useLazyGetUserByUsernameQuery } from "@/Services";
+import { useLazyGetUserByEmailQuery, useLazyGetUserByUsernameQuery } from "@/Services";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/Store/reducers";
 
 type GroupRouteParams = {
     Usergroup: { groupId: string, isAdmin: boolean, groupName: string };
@@ -25,7 +27,8 @@ export const UsergroupScreen = () => {
     const { groupId, isAdmin, groupName } = route.params;
 
     const [fetchUserGroupList, { data: users = [], isLoading: isListLoading, isError: isListError }] = useLazyGetAllUserGroupQuery();
-    const [getMe, { data: myInfo }] = useLazyGetMeQuery();
+    const myInfo=useSelector((state:{auth:AuthState})=>(state.auth.user))
+
     const [triggerEmailSearch] = useLazyGetUserByEmailQuery();
     const [triggerUsernameSearch] = useLazyGetUserByUsernameQuery();
     const [deleteUsergroup] = useDeleteUserGroupMutation();

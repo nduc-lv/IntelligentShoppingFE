@@ -5,6 +5,6 @@ export enum RootScreens {
   ADMIN = "Admin"
 }
 export enum UserTabScreens {
-  USER_TAB_MAIN = "User",
+  USER_TAB_MAIN = "User Preference",
   ACCOUNT_SETTING = "Account Settings",
 }

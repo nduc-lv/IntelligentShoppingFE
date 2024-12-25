@@ -22,21 +22,18 @@ import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/Shoppi
 import { RecipeDetailContainer } from "@/Screens/RecipeDetail/RecipeDetailContainer";
 import { EditRecipeContainer } from "@/Screens/EditRecipe/EditRecipeContainer";
 import { RecipeTabNavigation } from "./Recipe";
-
+import { skipToken } from "@reduxjs/toolkit/dist/query";
 const Tab = createBottomTabNavigator();
 
 // @refresh reset
 export const MainNavigator = () => {
 	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-	const [getMe,getMeState] = userApi.useLazyGetMeQuery();
-	const accessToken = useSelector(
-		(state: { auth: AuthState }) => state.auth.accessToken
-	);
+	const user=useSelector((state:{auth:AuthState})=>(state.auth.user))
 	useEffect(()=>{
-		if(getMeState?.data?.user_role?.role?.name=== "admin"){
+		if(user?.user_role?.role?.name=== "admin"){
 			navigation.navigate(RootScreens.ADMIN);
 		}
-	},[getMeState.data])
+	},[user])
 	return (
 		<Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}>
 			{/* <Tab.Screen
