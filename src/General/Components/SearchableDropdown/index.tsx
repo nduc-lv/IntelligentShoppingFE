@@ -13,13 +13,14 @@ interface SearchableDropdownProps {
     options: Option[];
     placeholder?: string;
     onSelect: (value: string) => void;
-    dropdownWidth?: string | number;
+    isDisabled?: boolean;
 }
 
 const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     options,
     placeholder = "Search...",
     onSelect,
+    isDisabled = false
 }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
@@ -27,6 +28,8 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     const filteredOptions = options.filter((option) =>
         option.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // console.log('filteredOptions2', filteredOptions);
 
     const handleSelect = (item: Option) => {
         onSelect(item.value);
@@ -53,48 +56,65 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 position: "relative"
             }}>
                 {/* Input Field */}
-                <Input
-                    placeholder={placeholder}
-                    value={searchTerm}
-                    onChangeText={(text) => {
-                        setSearchTerm(text);
-                        setShowDropdown(true); // Mở dropdown khi tìm kiếm
-
-                        if (filteredOptions.length === 0) {
-                            onSelect(text);
+                <Pressable
+                    onPress={() => {
+                        if (isDisabled) {
+                            setShowDropdown(true); // Mở dropdown khi `isDisabled` bật
                         }
                     }}
-                    onFocus={() => setShowDropdown(true)} // Mở dropdown khi focus
-                    w={{ base: "100%" }}
-                    size={"xl"}
-                    height={12}
-                    bgColor="white"
-                    borderRadius={10}
-                    borderColor={AppData.colors.text[400]}
-                    borderWidth={0.3}
-                    _focus={{
-                        borderColor: AppData.colors.primary,
-                        backgroundColor: "white",
-                    }}
-                    InputRightElement={
-                        // Thêm biểu tượng "clear" (dấu bằng) bên phải
-                        <>
-                            {searchTerm.length > 0 ? (
-                                <Pressable
-                                    style={{ marginRight: 10 }}
-                                    onPress={clearText}>
-                                    <CircleX size={20} color={AppData.colors.text[500]} />
-                                </Pressable>
-                            )
-                                : (
-                                    <View style={{ marginRight: 10 }}>
-                                        <ChevronDown size={20} color={AppData.colors.text[500]} />
-                                    </View>
-                                )
+                >
+                    <Input
+                        placeholder={placeholder}
+                        value={searchTerm}
+                        onChangeText={(text) => {
+                            setSearchTerm(text);
+                            setShowDropdown(true); // Mở dropdown khi tìm kiếm
+
+                            if (!filteredOptions.find((option) => option.label === text)) {
+                                onSelect(text);
+                                setShowDropdown(false);
                             }
-                        </>
-                    }
-                />
+                        }}
+                        onFocus={() => setShowDropdown(true)} // Mở dropdown khi focus
+                        w={{ base: "100%" }}
+                        size={"xl"}
+                        height={12}
+                        bgColor="white"
+                        isDisabled={isDisabled}
+                        borderRadius={10}
+                        borderColor={AppData.colors.text[400]}
+                        borderWidth={0.3}
+                        _focus={{
+                            borderColor: AppData.colors.primary,
+                            backgroundColor: "white",
+                        }}
+                        _disabled={{
+                            bgColor: "white", // Giữ nền màu trắng
+                            opacity: 1,      // Loại bỏ hiệu ứng mờ
+                            borderColor: AppData.colors.text[400], // Giữ màu viền
+                        }}
+                        InputRightElement={
+                            // Thêm biểu tượng "clear" (dấu bằng) bên phải
+                            <>
+                                {searchTerm.length > 0 ? (
+                                    <Pressable
+                                        style={{ marginRight: 10 }}
+                                        onPress={clearText}>
+                                        <CircleX size={20} color={AppData.colors.text[500]} />
+                                    </Pressable>
+                                ) : (
+                                    <Pressable style={{ marginRight: 10 }}
+                                        onPress={() => setShowDropdown(!showDropdown)}
+                                    >
+                                        <ChevronDown size={20} color={AppData.colors.text[500]} />
+                                    </Pressable>
+                                )}
+                            </>
+                        }
+                        pointerEvents={isDisabled ? "none" : "auto"} // Chặn sự kiện trên input khi disable
+                    />
+                </Pressable>
+
 
                 {/* Dropdown List */}
                 {showDropdown && (

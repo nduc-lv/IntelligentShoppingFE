@@ -36,6 +36,13 @@ const foodGroupsApi = API.injectEndpoints({
                 body: payload,
             }),
         }),
+        deleteFoodGroup: build.mutation<void, { id: string }>({
+            query: ({ id }) => ({
+                url: `foodgroup/${id}`,
+                method: "DELETE",
+            }),
+            transformResponse: (response: { data: void }, meta, arg) => response.data,
+        }),
         createFood: build.mutation<any, CreateFoodPayload>({
             query: (payload) => ({
                 url: `food`,
@@ -50,5 +57,6 @@ const foodGroupsApi = API.injectEndpoints({
 export const {
     useLazyGetAllFoodByCategoryQuery,
     useCreateFoodGroupMutation,
-    useCreateFoodMutation
+    useCreateFoodMutation,
+    useDeleteFoodGroupMutation
 } = foodGroupsApi;

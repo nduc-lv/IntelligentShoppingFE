@@ -2,12 +2,14 @@ import AppData from "@/General/Constants/AppData";
 import { ArrowLeft, ChevronDown, Heart, Minus, Plus, ShoppingCart } from "lucide-react-native";
 import { Actionsheet, Input, TextArea } from "native-base";
 import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import SearchableDropdown from "@/General/Components/SearchableDropdown";
 import { useSelector } from "react-redux";
-import { useLazyGetRecipeQuery } from "@/Services/recipe";
+import { useCreateRecipeMutation, useLazyGetRecipeQuery, useUpdateRecipeMutation } from "@/Services/recipe";
+import { useCreateFoodMutation } from "@/Services/foodGroup";
+import { Toast } from "antd-mobile";
 
 export const EditRecipeScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -16,28 +18,62 @@ export const EditRecipeScreen = ({ route }: any) => {
     const [recipeName, setRecipeName] = useState('');
     const [recipeDescription, setRecipeDescription] = useState('');
     const [recipeInstructions, setRecipeInstructions] = useState('');
-    const [recipeIngredients, setRecipeIngredients] = useState([]);
+    const [recipeIngredients, setRecipeIngredients] = useState<any>([]);
     const { categorys, units, foods } = useSelector((state: any) => state.data);
     const [fetchRecipe, { data: recipe, isLoading, isError, error }] = useLazyGetRecipeQuery();
     const [formUnit, setFormUnit] = useState<string>('');
     const [formFood, setFormFood] = useState<string>('');
     const [formQuantity, setFormQuantity] = useState<number>(0);
-    const [formListFood, setFormListFood] = useState<any>([]);
     const isCreateRecipe = recipeId === 'create';
-    const bottomSheetRef = useRef(null);
+    const [createRecipe, { isLoading: isLoadingCreateRecipe, isError: isErrorCreateRecipe }] = useCreateRecipeMutation();
+    const [updateRecipe, { isLoading: isLoadingUpdateRecipe, isError: isErrorUpdateRecipe }] = useUpdateRecipeMutation();
 
     useEffect(() => {
-        fetchRecipe({ recipeId });
+        if (!isCreateRecipe)
+            fetchRecipe({ recipeId });
     }, []);
 
     useEffect(() => {
         if (recipe) {
-            setRecipeName(recipe.name);
-            setRecipeDescription(recipe.description);
-            setRecipeInstructions(recipe.instructions);
-            setRecipeIngredients(recipe.ingredients);
+            setRecipeName(recipe?.name);
+            setRecipeDescription(recipe?.description);
+            setRecipeInstructions(recipe?.instructions);
+            setRecipeIngredients(recipe?.foods.rows);
         }
     }, [recipe]);
+
+    const handleCreateRecipe = async () => {
+        try {
+            await createRecipe({
+                name: recipeName,
+                description: recipeDescription,
+                instructions: recipeInstructions,
+                foods: recipeIngredients
+            }).unwrap().then(() => {
+                Toast.show({ content: "Tạo công thức thành cong", icon: "success" });
+                navigation.goBack();
+            });
+        } catch (error) {
+            Toast.show({ content: "Tạo công thức không thành công", icon: "fail" });
+        }
+    }
+
+    const handleUpdateRecipe = async () => {
+        try {
+            await updateRecipe({
+                recipe_id: recipeId,
+                name: recipeName,
+                description: recipeDescription,
+                instructions: recipeInstructions,
+                foods: recipeIngredients
+            }).unwrap().then(() => {
+                Toast.show({ content: "Cập nhật công thức thành công", icon: "success" });
+                navigation.goBack();
+            });
+        } catch (error) {
+            Toast.show({ content: "Cập nhật công thức không thành công", icon: "fail" });
+        }
+    }
 
 
     const unitOptions = units && units.map((unit: any) => ({
@@ -49,6 +85,7 @@ export const EditRecipeScreen = ({ route }: any) => {
         label: food.name,
         value: food.id,
     }))
+
 
     return (
         <View style={styles.container}>
@@ -206,13 +243,15 @@ export const EditRecipeScreen = ({ route }: any) => {
                             </Text>
 
                             <TouchableOpacity style={{ marginLeft: 'auto' }}
-                                onPress={() => setIsOpenActionSheet(true)}
+                                onPress={() => {
+                                    setIsOpenActionSheet(true)
+                                }}
                             >
                                 <Plus size={26} color={AppData.colors.primary} />
                             </TouchableOpacity>
                         </View>
 
-                        {formListFood.map((item: any, index: number) =>
+                        {recipeIngredients.map((item: any, index: number) =>
                             <View key={index} style={[styles.card, { flexDirection: "row", gap: 16, alignItems: "center" }]}>
                                 <View
                                     style={{
@@ -239,7 +278,7 @@ export const EditRecipeScreen = ({ route }: any) => {
                                     fontWeight: "500",
                                     color: AppData.colors.text[900],
                                 }}>
-                                    {'Cà tím'}
+                                    {foods.find((food: any) => food.id === item?.food_id)?.name}
                                 </Text>
 
                                 <Text style={{
@@ -264,7 +303,7 @@ export const EditRecipeScreen = ({ route }: any) => {
                                     }}
                                     onPress={() => {
                                         //remove item
-                                        setFormListFood([...formListFood.slice(0, index), ...formListFood.slice(index + 1)])
+                                        setRecipeIngredients([...recipeIngredients.slice(0, index), ...recipeIngredients.slice(index + 1)])
                                     }}
                                 >
                                     <Minus size={24} color={AppData.colors.text[100]} fill={AppData.colors.text[100]} />
@@ -283,7 +322,17 @@ export const EditRecipeScreen = ({ route }: any) => {
                         alignItems: 'center',
                     }}
                         onPress={() => {
-                            console.log({ recipeName, recipeDescription, recipeInstructions, recipeIngredients });
+                            if (recipeName && recipeDescription && recipeInstructions && recipeIngredients.length > 0) {
+                                if (isCreateRecipe)
+                                    handleCreateRecipe();
+                                else
+                                    handleUpdateRecipe();
+                            } else {
+                                Toast.show({
+                                    content: 'Hãy nhập đầy đủ thông tin',
+                                    icon: 'fail',
+                                });
+                            }
                         }}
                     >
                         <Text style={{
@@ -298,108 +347,115 @@ export const EditRecipeScreen = ({ route }: any) => {
                     </TouchableOpacity>
                 </ScrollView >
             </View>
+            {isOpenActionSheet &&
+                <Actionsheet isOpen={isOpenActionSheet}
+                    onClose={() => setIsOpenActionSheet(false)}
+                    hideDragIndicator
 
-            <Actionsheet isOpen={isOpenActionSheet}
-                onClose={() => setIsOpenActionSheet(false)}
-                hideDragIndicator
-
-            >
-                <Actionsheet.Content
-                    key={bottomSheetRef.current}
-                    borderTopRadius={24}                >
-                    <View style={{
-                        height: "auto",
-                        padding: 24,
-                        gap: 16
-                    }}>
-
-                        <View style={{ width: "100%", zIndex: 4 }}>
-                            <SearchableDropdown
-                                options={foodsOptions || []}
-                                placeholder="Tên thực phẩm"
-                                onSelect={(value) => setFormFood(value)}
-
-                            />
-                        </View>
-                        <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-                            <Input
-                                width={"40%"}
-                                placeholder="Số lượng"
-                                size={"xl"}
-                                height={12}
-                                bgColor="white"
-                                borderRadius={10}
-                                borderColor={AppData.colors.text[400]}
-                                borderWidth={0.3}
-                                _focus={{
-                                    borderColor: AppData.colors.primary,
-                                    backgroundColor: "white",
-                                }}
-                                keyboardType="numeric" // Hiển thị bàn phím số và dấu chấm
-                                onChangeText={(text) => {
-                                    // Cho phép nhập số thập phân hợp lệ
-                                    let sanitizedText = text.replace(/[^0-9.]/g, ""); // Loại bỏ ký tự không hợp lệ
-
-                                    // Nếu chuỗi bắt đầu bằng '.', thêm '0' trước đó (vd: ".5" thành "0.5")
-                                    if (sanitizedText.startsWith(".")) {
-                                        sanitizedText = "0" + sanitizedText;
-                                    }
-
-                                    // Nếu có nhiều hơn một dấu '.', không cập nhật
-                                    const dotCount = (sanitizedText.match(/\./g) || []).length;
-                                    if (dotCount > 1) {
-                                        return;
-                                    }
-
-                                    // Cập nhật nếu chuỗi hợp lệ
-                                    const numericValue = parseFloat(sanitizedText);
-                                    setFormQuantity(!isNaN(numericValue) ? numericValue : 0);
-                                }}
-
-                            />
-
-
-                            <View style={{ flex: 1 }}>
+                >
+                    <Actionsheet.Content
+                        borderTopRadius={24}                >
+                        <View style={{
+                            height: "auto",
+                            padding: 24,
+                            gap: 16
+                        }}>
+                            <View style={{ width: "100%", zIndex: 4 }}>
                                 <SearchableDropdown
-                                    options={unitOptions || []}
-                                    placeholder="Đơn vị"
-                                    onSelect={(value) => setFormUnit(value)}
-
+                                    options={foodsOptions || []}
+                                    placeholder="Tên thực phẩm"
+                                    onSelect={(value) => setFormFood(value)}
+                                    isDisabled={true}
                                 />
                             </View>
-                        </View>
+                            <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+                                <Input
+                                    width={"40%"}
+                                    placeholder="Số lượng"
+                                    size={"xl"}
+                                    height={12}
+                                    bgColor="white"
+                                    borderRadius={10}
+                                    marginBottom={'auto'}
+                                    borderColor={AppData.colors.text[400]}
+                                    borderWidth={0.3}
+                                    _focus={{
+                                        borderColor: AppData.colors.primary,
+                                        backgroundColor: "white",
+                                    }}
+                                    keyboardType="numeric" // Hiển thị bàn phím số và dấu chấm
+                                    onChangeText={(text) => {
+                                        // Cho phép nhập số thập phân hợp lệ
+                                        let sanitizedText = text.replace(/[^0-9.]/g, ""); // Loại bỏ ký tự không hợp lệ
 
-                        <TouchableOpacity style={{
-                            padding: 16,
-                            height: 60,
-                            alignSelf: 'center',
-                            backgroundColor: AppData.colors.primary,
-                            borderRadius: 16,
-                            alignItems: 'center',
-                            zIndex: 1,
-                            minWidth: 200
-                        }}
-                            onPress={() => {
-                                setFormListFood([...formListFood,
-                                { unit_name: formUnit, food_id: formFood, quantity: formQuantity }
-                                ]);
-                                setIsOpenActionSheet(false);
-                                bottomSheetRef.current = formListFood.length + 1;
+                                        // Nếu chuỗi bắt đầu bằng '.', thêm '0' trước đó (vd: ".5" thành "0.5")
+                                        if (sanitizedText.startsWith(".")) {
+                                            sanitizedText = "0" + sanitizedText;
+                                        }
+
+                                        // Nếu có nhiều hơn một dấu '.', không cập nhật
+                                        const dotCount = (sanitizedText.match(/\./g) || []).length;
+                                        if (dotCount > 1) {
+                                            return;
+                                        }
+
+                                        // Cập nhật nếu chuỗi hợp lệ
+                                        const numericValue = parseFloat(sanitizedText);
+                                        setFormQuantity(!isNaN(numericValue) ? numericValue : 0);
+                                    }}
+
+                                />
+
+
+                                <View style={{ flex: 1 }}>
+                                    <SearchableDropdown
+                                        options={unitOptions || []}
+                                        placeholder="Đơn vị"
+                                        onSelect={(value) => setFormUnit(value)}
+
+                                    />
+                                </View>
+                            </View>
+
+                            <TouchableOpacity style={{
+                                padding: 16,
+                                height: 60,
+                                alignSelf: 'center',
+                                backgroundColor: AppData.colors.primary,
+                                borderRadius: 16,
+                                alignItems: 'center',
+                                zIndex: 1,
+                                minWidth: 200
                             }}
-                        >
-                            <Text style={{
-                                fontSize: AppData.fontSizes.medium,
-                                fontWeight: "500",
-                                color: AppData.colors.text[100],
-                            }}>
-                                {'Lưu'}
-                            </Text>
-                        </TouchableOpacity>
+                                onPress={() => {
+                                    if (formUnit && formFood && formQuantity) {
+                                        setRecipeIngredients([...recipeIngredients,
+                                        { unit_name: formUnit, food_id: formFood, quantity: formQuantity }
+                                        ]);
+                                        setIsOpenActionSheet(false);
 
-                    </View>
-                </Actionsheet.Content>
-            </Actionsheet>
-        </View>
+                                    } else
+                                        Toast.show({
+                                            content: 'Hãy nhập đầy đủ thông tin',
+                                            icon: 'fail',
+                                        });
+                                }}
+                            >
+                                <Text style={{
+                                    fontSize: AppData.fontSizes.medium,
+                                    fontWeight: "500",
+                                    color: AppData.colors.text[100],
+                                }}>
+                                    {'Lưu'}
+                                </Text>
+                            </TouchableOpacity>
+
+                        </View>
+                    </Actionsheet.Content>
+                </Actionsheet>
+            }
+
+        </View >
 
     );
 };
