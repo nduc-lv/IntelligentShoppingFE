@@ -8,9 +8,8 @@ import {
   Toast,
 } from "antd-mobile";
 import { useLazyGetAllCategoryQuery } from "@/Services/category";
-import { useLazyGetAllFoodQuery } from "@/Services/shoppingList";
+import { useLazyGetAllFoodQuery } from "@/Services/food";
 import { useLazyGetUnitsQuery } from "@/Services/unit";
-import { useLazyGetAllFood2Query } from "@/Services/food";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/Store";
 import { setCategory, setUnit, setFood } from "@/Store/reducers/data";
@@ -24,7 +23,7 @@ export const GroupScreen = () => {
   const [createGroup] = useCreateGroupMutation();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [fetchAllCategory, { data: categorys, isLoading: isLoadingAllCategory, isError: isErrorAllCategory }] = useLazyGetAllCategoryQuery();
-  const [fetchAllFood, { data: foods, isLoading: isLoadingAllFood, isError: isErrorAllFood }] = useLazyGetAllFood2Query();
+  const [fetchAllFood, { data: foods, isLoading: isLoadingAllFood, isError: isErrorAllFood }] = useLazyGetAllFoodQuery();
   const [fetchAllUnit, { data: units, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetUnitsQuery();
 
   useEffect(() => {
@@ -194,11 +193,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    width: '90%',
-    backgroundColor: '#fff',
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 8,
     padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
+    elevation: 5,
   },
   modalTitle: {
     fontSize: 18,

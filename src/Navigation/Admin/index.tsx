@@ -7,7 +7,6 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "..";
 import { useSelector } from "react-redux";
 import { AuthState } from "@/Store/reducers";
-import { userApi } from "@/Services";
 import { UserTabNavigation } from "../Main/UserTab";
 
 const Tab = createBottomTabNavigator();
@@ -15,15 +14,16 @@ const Tab = createBottomTabNavigator();
 // @refresh reset
 export const AdminNavigator = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [getMe,getMeState] = userApi.useLazyGetMeQuery();
+	const user=useSelector((state:{auth:AuthState})=>(state.auth.user))
+
   const accessToken = useSelector(
     (state: { auth: AuthState }) => state.auth.accessToken
   );
   useEffect(()=>{
-    if(getMeState.data?.user_role?.role?.name!='admin'){
+    if(user?.user_role?.role?.name!='admin'){
       navigation.navigate(RootScreens.MAIN);
     }
-  },[getMeState.data])
+  },[user])
 
   return (
     <Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}

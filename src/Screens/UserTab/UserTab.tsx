@@ -15,26 +15,16 @@ import { useDispatch } from "react-redux";
 import { clearTokens } from "@/Store/reducers";
 import { RootScreens,UserTabScreens } from "..";
 import Loading from "@/General/Components/Loading";
-import { AppDispatch } from "@/Store";
+import { AppDispatch, persistor } from "@/Store";
 import { RootNavigationContainerRef } from "@/Navigation";
 type UserTabListItem ={ title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void } 
 export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoading: boolean, onNavigate: (screen: UserTabScreens) => void }) => {
-  useEffect(()=>{
-    console.log(data)
-  },[data])
   const dispatch=useDispatch<AppDispatch>();
-
   if (isLoading) {
     return (
       <Loading/>
     );
   }
-
-  if (!data&& !isLoading) {
-    RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
-    return <></>
-  }
-
   const renderSetting = ({ item }: { item: UserTabListItem}) => (
     <TouchableOpacity style={styles.settingItem} onPress={item.onClick}>
       <item.icon size={24} color="#555" />

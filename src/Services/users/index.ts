@@ -75,5 +75,4 @@ export const userApi = API
     }),
     overrideExisting: true,
   });
-
-export const { useLazyGetUserQuery, useLazyGetMeQuery, useLazyGetUserByEmailQuery, useLazyGetUserByUsernameQuery, useRegisterMutation, useLoginMutation, useUpdateUserMutation, useUpdateMeMutation,  } = userApi;
+export const { useGetMeQuery, useLazyGetUserQuery, useLazyGetUserByEmailQuery, useLazyGetUserByUsernameQuery, useRegisterMutation, useLoginMutation, useUpdateUserMutation, useUpdateMeMutation,  } = userApi;

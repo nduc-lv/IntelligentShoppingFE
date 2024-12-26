@@ -1,11 +1,13 @@
 import { Home } from "./Home";
 import React, { useState, useEffect } from "react";
-import { useLazyGetMeQuery } from "@/Services";
+import { userApi } from "@/Services";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/Store/reducers";
 
 export const HomeContainer = () => {
 
-  const [getMe, { data, isSuccess, isUninitialized, isFetching, error }] =
-    useLazyGetMeQuery();
+  const user=useSelector((state:{auth:AuthState})=>(state.auth.user))
 
-  return <Home data={data} isLoading={isUninitialized} />;
+
+  return <Home data={user} isLoading={!user} />;
 };

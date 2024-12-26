@@ -5,16 +5,22 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
 import { RootScreens } from "..";
 import { ArrowLeft } from "lucide-react-native";
+import { Actionsheet, Avatar, Input } from "native-base";
 import {
     Toast,
 } from "antd-mobile";
+import AppData from "@/General/Constants/AppData";
+import { useUpdateUserMutation } from "@/Services";
 
 export const ManageAccountScreen = () => {
     const [fetchUserrole, { data, isLoading, isError }] = useLazyGetAllUserroleQuery();
+    const [updateUser] = useUpdateUserMutation();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedUser, setSelectedUser] = useState<UserRoleResponse>();
     const [dialogVisible, setDialogVisible] = useState(false);
+    const [updateDialogVisible, setUpdateDialogVisible] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
     const [banUser] = useBanUserMutation();
     const [unbanUser] = useUnbanUserMutation();
     const [deleteUser] = useDeleteUserMutation();
@@ -33,27 +39,55 @@ export const ManageAccountScreen = () => {
         setDialogVisible(false);
     };
 
+    const handleOpenUpdateDialog = () => {
+        setDialogVisible(false);
+        setUpdateDialogVisible(true);
+    }
+
+    const handleCloseUpdateDialog = () => {
+        setUpdateDialogVisible(false);
+        setDialogVisible(true);
+        setNewPassword('');
+    }
+
     const handleBanUnban = async () => {
         try {
             if (selectedUser) {
-                if(selectedUser.is_active) await banUser({ id: selectedUser.id }).unwrap();
+                if (selectedUser.is_active) await banUser({ id: selectedUser.id }).unwrap();
                 else await unbanUser({ id: selectedUser.id }).unwrap();
-                Toast.show({ content: "User banned successfully!", icon: "success" });
+                Toast.show({ content: "Cấm người dùng thành công!", icon: "success" });
                 fetchUserrole();
-                handleCloseDialog();
             }
-            else{
-                Toast.show({ content: "User not found!", icon: "fail" });
+            else {
+                Toast.show({ content: "Người dùng không tồn tại!", icon: "fail" });
             }
+            handleCloseDialog();
         }
         catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to ban user.", icon: "fail" });
+            Toast.show({ content: "Cấm thất bại.", icon: "fail" });
         }
     };
 
-    const handleChangePassword = () => {
-        if (selectedUser) console.log('Change password for', selectedUser.email);
+    const handleChangePassword = async () => {
+        try{
+            if (selectedUser){
+                if(!newPassword){
+                    Toast.show({ content: "Hãy nhập mật khẩu mới!", icon: "fail" });
+                    return;
+                }
+                const payload = {
+                    password: newPassword
+                }
+                await updateUser({id: selectedUser.id, ...payload}).unwrap();
+                Toast.show({ content: "Đổi mật khẩu thành công!", icon: "success" });
+            }
+            handleCloseUpdateDialog();
+        }
+        catch (e) {
+            console.log(e)
+            Toast.show({ content: "Failed to update password.", icon: "fail" });
+        }
     };
 
     const handleDeleteAccount = async () => {
@@ -64,7 +98,7 @@ export const ManageAccountScreen = () => {
                 fetchUserrole();
                 handleCloseDialog();
             }
-            else{
+            else {
                 Toast.show({ content: "User not found!", icon: "fail" });
             }
         }
@@ -122,7 +156,7 @@ export const ManageAccountScreen = () => {
                     </View>
                     <TextInput
                         style={styles.searchBar}
-                        placeholder="Search for account..."
+                        placeholder="Tìm kiếm tài khoản..."
                         value={searchQuery}
                         onChangeText={handleSearch}
                     />
@@ -132,64 +166,142 @@ export const ManageAccountScreen = () => {
                         renderItem={({ item }) => renderUserItem(item)}
                         contentContainerStyle={styles.listContainer}
                     />
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={dialogVisible}
-                        onRequestClose={handleCloseDialog}
+                    <Actionsheet isOpen={dialogVisible}
+                        onClose={() => handleCloseDialog()}
+                        hideDragIndicator
+
                     >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContent}>
-                                {selectedUser && (
-                                    <>
+                        <Actionsheet.Content borderTopRadius={24}                >
+                            {selectedUser && (
+                                <View style={{
+                                    height: 500,
+                                    padding: 24,
+                                    gap: 16
+                                }}>
+                                    <View style={{ width: "100%", zIndex: 3, flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
                                         <Image source={{ uri: selectedUser.link_avatar }} style={styles.dialogAvatar} />
-                                        <Text style={styles.dialogTitle}>{selectedUser.name}</Text>
                                         <Text style={styles.dialogText}>Email: {selectedUser.email}</Text>
                                         <Text style={styles.dialogText}>Username: {selectedUser.username}</Text>
                                         <Text style={styles.dialogText}>
                                             Created At: {new Date(selectedUser.created_at).toLocaleDateString()}
                                         </Text>
-
-                                        <View style={styles.dialogButtons}>
-                                            <TouchableOpacity
-                                                style={[
-                                                    styles.dialogButton,
-                                                    { backgroundColor: selectedUser.is_active ? 'red' : 'green' },
-                                                ]}
-                                                onPress={handleBanUnban}
-                                            >
-                                                <Text style={styles.dialogButtonText}>
-                                                    {selectedUser.is_active ? 'Ban' : 'Unban'}
-                                                </Text>
-                                            </TouchableOpacity>
-
-                                            <TouchableOpacity
-                                                style={[styles.dialogButton, { backgroundColor: 'red' }]}
-                                                onPress={handleChangePassword}
-                                            >
-                                                <Text style={styles.dialogButtonText}>Change Password</Text>
-                                            </TouchableOpacity>
-
-                                            <TouchableOpacity
-                                                style={[styles.dialogButton, { backgroundColor: 'red' }]}
-                                                onPress={handleDeleteAccount}
-                                            >
-                                                <Text style={styles.dialogButtonText}>Delete Account</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                style={[styles.dialogButton]}
-                                                onPress={handleCloseDialog}
-                                            >
-                                                <Text style={styles.dialogButtonText}>Close</Text>
-                                            </TouchableOpacity>
-                                        </View>
-
-
-                                    </>
-                                )}
+                                    </View>
+                                    <TouchableOpacity style={{
+                                        padding: 16,
+                                        height: 60,
+                                        alignSelf: 'center',
+                                        backgroundColor: selectedUser.is_active ? AppData.colors.danger : AppData.colors.primary,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        zIndex: 1,
+                                        minWidth: 200
+                                    }}
+                                        onPress={() => handleBanUnban()}
+                                    >
+                                        <Text style={{
+                                            fontSize: AppData.fontSizes.medium,
+                                            fontWeight: "500",
+                                            color: AppData.colors.text[100],
+                                        }}>
+                                            {selectedUser.is_active ? 'Cấm' : 'Gỡ cấm'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={{
+                                        padding: 16,
+                                        height: 60,
+                                        alignSelf: 'center',
+                                        backgroundColor: AppData.colors.danger,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        zIndex: 1,
+                                        minWidth: 200
+                                    }}
+                                        onPress={() => handleOpenUpdateDialog()}
+                                    >
+                                        <Text style={{
+                                            fontSize: AppData.fontSizes.medium,
+                                            fontWeight: "500",
+                                            color: AppData.colors.text[100],
+                                        }}>
+                                            {"Đổi mật khẩu"}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={{
+                                        padding: 16,
+                                        height: 60,
+                                        alignSelf: 'center',
+                                        backgroundColor: AppData.colors.danger,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        zIndex: 1,
+                                        minWidth: 200
+                                    }}
+                                        onPress={() => handleDeleteAccount()}
+                                    >
+                                        <Text style={{
+                                            fontSize: AppData.fontSizes.medium,
+                                            fontWeight: "500",
+                                            color: AppData.colors.text[100],
+                                        }}>
+                                            {"Xóa tài khoản"}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </Actionsheet.Content>
+                    </Actionsheet>
+                    <Actionsheet isOpen={updateDialogVisible}
+                        onClose={() => handleCloseUpdateDialog()}
+                        hideDragIndicator
+                    >
+                        <Actionsheet.Content borderTopRadius={24}                >
+                            <View style={{
+                                height: 200,
+                                padding: 24,
+                                gap: 16
+                            }}>
+                                <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                                    <Input
+                                        width={"100%"}
+                                        placeholder="Mật khẩu mới"
+                                        size={"xl"}
+                                        height={12}
+                                        bgColor="white"
+                                        borderRadius={10}
+                                        borderColor={AppData.colors.text[400]}
+                                        borderWidth={0.3}
+                                        marginBottom={4}
+                                        _focus={{
+                                            borderColor: AppData.colors.primary,
+                                            backgroundColor: "white",
+                                        }}
+                                        value={newPassword}
+                                        onChangeText={setNewPassword}
+                                    />
+                                </View>
+                                <TouchableOpacity style={{
+                                    padding: 16,
+                                    height: 60,
+                                    alignSelf: 'center',
+                                    backgroundColor: AppData.colors.danger,
+                                    borderRadius: 16,
+                                    alignItems: 'center',
+                                    zIndex: 1,
+                                    minWidth: 200
+                                }}
+                                    onPress={() => handleChangePassword()}
+                                >
+                                    <Text style={{
+                                        fontSize: AppData.fontSizes.medium,
+                                        fontWeight: "500",
+                                        color: AppData.colors.text[100],
+                                    }}>
+                                        {"Lưu"}
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
-                        </View>
-                    </Modal>
+                        </Actionsheet.Content>
+                    </Actionsheet>
                 </View>
             ) : (
                 <Text>No info found.</Text>
@@ -297,9 +409,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     dialogAvatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 100,
+        height: 100,
+        borderRadius: 8,
         marginBottom: 16,
     },
     dialogTitle: {

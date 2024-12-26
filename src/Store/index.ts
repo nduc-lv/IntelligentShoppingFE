@@ -14,7 +14,7 @@ import {
 } from "redux-persist";
 import { homeReducers, themeReducers, authReducer } from "./reducers";
 import { dataReducer } from "./reducers/data";
-import NetInfo from '@react-native-community/netinfo';
+import { useSelector } from "react-redux";
 const reducers = combineReducers({
   api: API.reducer,
   theme: themeReducers,
@@ -23,12 +23,14 @@ const reducers = combineReducers({
   data: dataReducer
 });
 
-const persistConfig = {
-  key: "root",
-  storage: AsyncStorage,
-};
 
-const persistedReducer = persistReducer(persistConfig, reducers);
+const persistedReducer = persistReducer(
+  {
+    key: "root",
+    storage: AsyncStorage,
+    blacklist:[`user/me`]
+  }
+  , reducers);
 
 const store = configureStore({
   reducer: persistedReducer,

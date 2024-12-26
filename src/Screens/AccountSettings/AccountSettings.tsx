@@ -10,9 +10,12 @@ import {
 	Alert,
 } from "react-native";
 import { User } from "@/Store/types";
-import { useLazyGetMeQuery, useUpdateMeMutation } from "@/Services";
+import { userApi, useUpdateMeMutation } from "@/Services";
 import { Toast } from "native-base";
 import { UserTabScreens } from "..";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/Store/reducers";
+import Loading from "@/General/Components/Loading";
 export interface AccountSettingsProps {
 	onNavigate: (screen: UserTabScreens) => void;
 	goBack: () => void;
@@ -23,7 +26,9 @@ export const AccountSettings = ({
 	goBack,
 	canGoBack,
 }: AccountSettingsProps) => {
-	const [fetchMe, { data: user, isFetching }] = useLazyGetMeQuery();
+	const user=useSelector((state:{auth:AuthState})=>(state.auth.user))
+
+	
 	const [updateMe, { isLoading }] = useUpdateMeMutation();
 	const [formData, setFormData] = useState({
 		name: "",
@@ -32,10 +37,6 @@ export const AccountSettings = ({
 		link_avatar: "",
     password:""
 	});
-
-	useEffect(() => {
-		fetchMe();
-	}, []);
 
 	useEffect(() => {
 		if (user) {
@@ -80,11 +81,9 @@ export const AccountSettings = ({
 		}
 	};
 
-	if (isFetching) {
+	if (!user) {
 		return (
-			<View style={styles.container}>
-				<Text>Loading...</Text>
-			</View>
+			<Loading/>
 		);
 	}
 

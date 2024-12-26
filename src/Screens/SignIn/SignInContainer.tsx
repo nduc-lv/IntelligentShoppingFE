@@ -14,10 +14,6 @@ type SignInScreenNavigatorProps = NativeStackScreenProps<
 >;
 
 export const SignInContainer = ({ navigation }: SignInScreenNavigatorProps) => {
-	const [getMe, { isLoading, error, data }] = userApi.useLazyGetMeQuery();
-	const accessToken = useSelector(
-		(state: { auth: AuthState }) => state.auth.accessToken
-	);
 	const onNavigate = (screen: RootScreens) => {
 		navigation.dispatch(
 			CommonActions.reset({
