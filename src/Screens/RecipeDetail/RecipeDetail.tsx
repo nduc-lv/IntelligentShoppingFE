@@ -1,13 +1,13 @@
 import AppData from "@/General/Constants/AppData";
-import { ArrowLeft, Heart, Pencil, Plus, ShoppingCart } from "lucide-react-native";
-import { TextArea } from "native-base";
-import React, { useEffect } from "react";
+import { ArrowLeft, Heart, Pencil, Plus, ShoppingCart, Trash2 } from "lucide-react-native";
+import { Button, Modal, TextArea } from "native-base";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import UploadImage from "@/General/Components/UploadImage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useLazyGetRecipeQuery, useSaveRecipeMutation, useUnsaveRecipeMutation } from "@/Services/recipe";
+import { useDeleteRecipeMutation, useLazyGetRecipeQuery, useSaveRecipeMutation, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
 
 export const RecipeDetailScreen = ({ route }: any) => {
@@ -15,28 +15,46 @@ export const RecipeDetailScreen = ({ route }: any) => {
     const [fetchRecipe, { data: recipe, isLoading, isError, error }] = useLazyGetRecipeQuery();
     const [unSavedRecipe, { data: unsavedRecipe }] = useUnsaveRecipeMutation();
     const recipeId = route.params.recipeId;
+    const isMyRecipe = route.params.isMyRecipe
     const [saveRecipe, { data: savedRecipe }] = useSaveRecipeMutation();
+    const [deleteRecipe, { data: deletedRecipe }] = useDeleteRecipeMutation();
+    const [isOpenModalDelete, setIsOpenModalDelete] = useState(false);
     useEffect(() => {
-        fetchRecipe({ recipeId });
+        const unsubscribeFocus = navigation.addListener('focus', () => {
+            fetchRecipe({ recipeId });
+        });
+        return unsubscribeFocus;
+
     }, [recipeId]);
 
-    console.log(recipe)
     const handleSaveRecipe = async (recipeId: string) => {
         try {
             await saveRecipe({ recipe_id: recipeId }).unwrap();
             fetchRecipe({ recipeId });
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to save recipe.", icon: "fail" });
+            Toast.show({ content: "Không thể lưu công thức", icon: "fail" });
         }
     }
+
     const handleUnSavedRecipe = async (recipeId: string) => {
         try {
             await unSavedRecipe({ recipe_id: recipeId }).unwrap();
             fetchRecipe({ recipeId });
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
+            Toast.show({ content: "Không thể bỏ lưu công thức", icon: "fail" });
+        }
+    }
+
+    const handleDeleteRecipe = async (recipeId: string) => {
+        try {
+            await deleteRecipe({ recipe_id: recipeId }).unwrap();
+            Toast.show({ content: "Xóa công thức thành công", icon: "success" });
+            navigation.goBack();
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Không thể xóa công thức", icon: "fail" });
         }
     }
 
@@ -72,46 +90,69 @@ export const RecipeDetailScreen = ({ route }: any) => {
                         <ArrowLeft size={24} color={AppData.colors.text[900]} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={{
-                            height: 48,
-                            width: 48,
-                            backgroundColor: AppData.colors.background,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderRadius: 16,
-                            marginLeft: 'auto'
-                        }}
-                        onPress={() => {
-                            navigation.navigate("EDIT_RECIPE", { recipeId: recipeId });
-                        }}
-                    >
-                        <Pencil size={24} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
-                    </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={{
-                            height: 48,
-                            width: 48,
-                            backgroundColor: AppData.colors.background,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderRadius: 16,
-                        }}
-                        onPress={() => {
-                            if (recipe?.isSaved) {
-                                handleUnSavedRecipe(recipeId)
-                            } else
-                                handleSaveRecipe(recipeId)
-                        }}
-                    >
-                        {recipe?.isSaved
-                            ? <Heart size={32} color={AppData.colors.primary} fill={AppData.colors.primary} />
-                            : <Heart size={32} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
-                        }
-                    </TouchableOpacity>
+                    {isMyRecipe ?
+                        <>
+                            <TouchableOpacity
+                                style={{
+                                    height: 48,
+                                    width: 48,
+                                    backgroundColor: AppData.colors.background,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: 16,
+                                    marginLeft: 'auto'
+                                }}
+                                onPress={() => {
+                                    navigation.navigate("EDIT_RECIPE", { recipeId: recipeId });
+                                }}
+                            >
+                                <Pencil size={24} color={AppData.colors.text[500]} />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={{
+                                    height: 48,
+                                    width: 48,
+                                    backgroundColor: AppData.colors.background,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: 16,
+                                }}
+                                onPress={() => {
+                                    setIsOpenModalDelete(true)
+                                }}
+                            >
+                                <Trash2 size={24} color={AppData.colors.danger} />
+                            </TouchableOpacity>
+                        </>
+                        :
+                        <TouchableOpacity
+                            style={{
+                                height: 48,
+                                width: 48,
+                                backgroundColor: AppData.colors.background,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: 16,
+                                marginLeft: 'auto'
+                            }}
+                            onPress={() => {
+                                if (recipe?.isSaved) {
+                                    handleUnSavedRecipe(recipeId)
+                                } else
+                                    handleSaveRecipe(recipeId)
+                            }}
+                        >
+                            {recipe?.isSaved
+                                ? <Heart size={32} color={AppData.colors.primary} fill={AppData.colors.primary} />
+                                : <Heart size={32} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
+                            }
+                        </TouchableOpacity>
+                    }
                 </View>
             </ImageBackground>
             {/* Content of your screen */}
@@ -222,11 +263,12 @@ export const RecipeDetailScreen = ({ route }: any) => {
                                     fontSize: AppData.fontSizes.medium,
                                     fontWeight: "500",
                                     color: AppData.colors.text[900],
-                                    marginLeft: 'auto'
+                                    marginLeft: 'auto',
+                                    marginRight: 16
                                 }}>
                                     {item?.quantity + " " + item?.unit_name}
                                 </Text>
-
+                                {/* 
                                 <TouchableOpacity
                                     style={{
                                         height: 48,
@@ -239,15 +281,15 @@ export const RecipeDetailScreen = ({ route }: any) => {
                                     }}
                                 >
                                     <Plus size={24} color={AppData.colors.text[100]} fill={AppData.colors.text[100]} />
-                                </TouchableOpacity>
+                                </TouchableOpacity> */}
                             </View>
                         )}
 
                     </View>
 
-                    <UploadImage />
+                    {/* <UploadImage /> */}
 
-                    <TouchableOpacity style={{
+                    {/* <TouchableOpacity style={{
                         padding: 16,
                         height: 60,
                         alignSelf: 'center',
@@ -262,9 +304,75 @@ export const RecipeDetailScreen = ({ route }: any) => {
                         }}>
                             {'Thêm vào danh sách mua'}
                         </Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </ScrollView >
             </View>
+            {
+                isOpenModalDelete &&
+                <Modal isOpen={isOpenModalDelete} onClose={() => setIsOpenModalDelete(false)}>
+                    <Modal.Content maxWidth="400px">
+                        <Modal.CloseButton />
+                        <Modal.Header>Xác nhận</Modal.Header>
+                        <Modal.Body>
+                            <Text style={{
+                                fontSize: AppData.fontSizes.medium,
+                                fontWeight: "500",
+                                color: AppData.colors.text[900],
+                                marginLeft: 'auto'
+                            }}>
+                                {'Bạn có muốn xóa công thức nấu ăn này không?'}
+                            </Text>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <View style={{ flexDirection: "row", gap: 16, justifyContent: "space-around", width: '100%' }}>
+                                <TouchableOpacity
+                                    style={{
+                                        padding: 8,
+                                        alignSelf: 'center',
+                                        backgroundColor: AppData.colors.danger,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        height: 'auto',
+                                        width: 100,
+                                    }}
+                                    onPress={() => handleDeleteRecipe(recipeId)}
+                                >
+                                    <Text style={{
+                                        fontSize: AppData.fontSizes.medium,
+                                        fontWeight: "500",
+                                        color: AppData.colors.text[100],
+                                    }}>
+                                        {'Xóa'}
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        padding: 8,
+                                        alignSelf: 'center',
+                                        backgroundColor: AppData.colors.text[100],
+                                        borderColor: AppData.colors.primary,
+                                        borderWidth: 0.2,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        height: 'auto',
+                                        width: 100,
+                                    }}
+                                    onPress={() => setIsOpenModalDelete(false)}
+                                >
+                                    <Text style={{
+                                        fontSize: AppData.fontSizes.medium,
+                                        fontWeight: "500",
+                                        color: AppData.colors.primary,
+                                    }}>
+                                        {'Hủy'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Modal.Footer>
+                    </Modal.Content>
+                </Modal>
+            }
+
         </View>
 
     );

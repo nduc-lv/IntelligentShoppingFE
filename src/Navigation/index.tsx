@@ -39,7 +39,7 @@ export type RootStackParamList = {
 	[RootScreens.ADMIN]: undefined;
 	SHOPPING_LIST: undefined;
 	SHOPPING_LIST_DETAIL: { groupId: string };
-	SHOPPING_LIST_BY_ID: {groupId: string, shoppingId: string};
+	SHOPPING_LIST_BY_ID: { groupId: string, shoppingId: string };
 	GROUP_DETAIL: { groupId: string, isAdmin: boolean };
 	GROUP: undefined;
 	GROUP_INFO: { groupId: string, isAdmin: boolean };
@@ -49,7 +49,7 @@ export type RootStackParamList = {
 	MANAGE_FOOD: undefined;
 	MANAGE_UNIT: undefined;
 	RECIPE: undefined;
-	RECIPE_DETAIL: { recipeId: string };
+	RECIPE_DETAIL: { recipeId: string, isMyRecipe: boolean };
 	RECIPE_LIST: undefined;
 	EDIT_RECIPE: { recipeId: string };
 };
@@ -179,8 +179,8 @@ const _ApplicationNavigator = () => {
 				/>
 
 				<RootStack.Screen
-				name="SHOPPING_LIST_BY_ID"
-				component={ShoppingListByIdContainer}/>
+					name="SHOPPING_LIST_BY_ID"
+					component={ShoppingListByIdContainer} />
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);

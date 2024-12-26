@@ -6,22 +6,24 @@ import { Avatar } from "native-base";
 import { StatusBar } from "expo-status-bar";
 import { ArrowRight, Heart, Plus } from "lucide-react-native";
 import AppData from "@/General/Constants/AppData";
-import { useLazyGetSavedRecipeQuery, useUnsaveRecipeMutation } from "@/Services/recipe";
+import { useLazyGetMyRecipeQuery, useLazyGetSavedRecipeQuery, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
 
 export const RecipeScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-    const [fetchSavedRecipe, { data: recipes, isLoading, isError, error }] = useLazyGetSavedRecipeQuery();
-
+    const [fetchSavedRecipe, { data: savedRecipes, isLoading, isError, error }] = useLazyGetSavedRecipeQuery();
+    const [fetchMyRecipe, { data: myRecipes, isLoading: isLoadingMyRecipe, isError: isErrorMyRecipe, error: errorMyRecipe }] = useLazyGetMyRecipeQuery();
+    const [unSavedRecipe, { data: unsavedRecipe }] = useUnsaveRecipeMutation();
 
     useEffect(() => {
         const unsubscribeFocus = navigation.addListener('focus', () => {
             fetchSavedRecipe();
+            fetchMyRecipe();
         });
         return unsubscribeFocus;
     }, []);
 
-    const [unSavedRecipe, { data: unsavedRecipe }] = useUnsaveRecipeMutation();
+
     const handleUnSavedRecipe = async (recipeId: string) => {
         try {
             await unSavedRecipe({ recipe_id: recipeId }).unwrap();
@@ -31,7 +33,7 @@ export const RecipeScreen = () => {
             Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
         }
     }
-    const renderItem = (item: any) => (
+    const renderSavedRecipe = (item: any) => (
         <TouchableOpacity
             key={item.id}
             style={[styles.card, {
@@ -44,7 +46,7 @@ export const RecipeScreen = () => {
                 gap: 10,
                 marginBottom: 10,
             }]}
-            onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id })}
+            onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id, isMyRecipe: false })}
         >
             <View style={{ position: "relative" }}>
                 <Image
@@ -75,6 +77,56 @@ export const RecipeScreen = () => {
                 >
                     <Heart color={AppData.colors.primary} fill={AppData.colors.primary} />
                 </TouchableOpacity>
+            </View>
+            <Text style={{
+                fontSize: AppData.fontSizes.default,
+                fontWeight: "500",
+                color: AppData.colors.text[900],
+                textAlign: 'center',
+            }}>
+                {item.name}
+            </Text>
+            <View style={{ flexDirection: 'row', marginTop: 'auto', marginBottom: 8 }}>
+                <Avatar
+                    source={{ uri: item?.user?.avatar || "https://i.pinimg.com/736x/a8/68/32/a86832051be6aa81cdf163e4d03919dd.jpg" }}
+                    size="xs"
+                />
+                <Text style={{
+                    fontSize: AppData.fontSizes.default,
+                    fontWeight: "500",
+                    color: AppData.colors.text[500],
+                    marginLeft: 10,
+                }}>
+                    {item?.user?.name}
+                </Text>
+            </View>
+        </TouchableOpacity>
+    );
+
+    const renderMyRecipe = (item: any) => (
+        <TouchableOpacity
+            key={item.id}
+            style={[styles.card, {
+                width: "47%",
+                maxWidth: 200,
+                height: 200,
+                borderWidth: 1,
+                borderColor: '#FBFBFB',
+                padding: 10,
+                gap: 10,
+                marginBottom: 10,
+            }]}
+            onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id, isMyRecipe: true })}
+        >
+            <View style={{ position: "relative" }}>
+                <Image
+                    style={{
+                        width: "100%",
+                        height: 90,
+                        borderRadius: 16,
+                    }}
+                    source={{ uri: item?.image_url || "https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg" }}
+                />
             </View>
             <Text style={{
                 fontSize: AppData.fontSizes.default,
@@ -132,7 +184,33 @@ export const RecipeScreen = () => {
                     <ArrowRight color="white" />
                 </View>
             </TouchableOpacity>
-            <View style={{ flex: 1, marginTop: 10, gap: 10 }}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ flex: 1, marginTop: 10, gap: 10 }}
+            >
+                <View style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    alignItems: "center",
+                }}>
+                    <Text style={{
+                        fontSize: AppData.fontSizes.large,
+                        fontWeight: "500",
+                        color: AppData.colors.text[900],
+                    }}>
+                        {'Công thức của tôi'}
+                    </Text>
+                </View>
+                <View style={{
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                    marginTop: 10,
+                    gap: 10,
+                }}
+                >
+                    {myRecipes && myRecipes.map((item: any) => renderMyRecipe(item))}
+                </View>
                 <View style={{
                     width: "100%",
                     flexDirection: "row",
@@ -145,28 +223,18 @@ export const RecipeScreen = () => {
                     }}>
                         {'Công thức đã lưu'}
                     </Text>
-                    {/* <Text style={{
-                        fontSize: AppData.fontSizes.default,
-                        fontWeight: "bold",
-                        color: AppData.colors.primary,
-                        marginLeft: 'auto',
-                    }}>
-                        {'Xem thêm'}
-                    </Text> */}
                 </View>
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{
-                        flexDirection: "row",
-                        flexWrap: "wrap",
-                        justifyContent: "space-between",
-                        marginTop: 10,
-                        gap: 10,
-                    }}
+                <View style={{
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                    marginTop: 10,
+                    gap: 10,
+                }}
                 >
-                    {recipes && recipes.map((item: any) => renderItem(item))}
-                </ScrollView>
-            </View>
+                    {savedRecipes && savedRecipes.map((item: any) => renderSavedRecipe(item))}
+                </View>
+            </ScrollView>
             <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("EDIT_RECIPE", { recipeId: 'create' })}>
                 <Plus color="white" size={25} />
             </TouchableOpacity>

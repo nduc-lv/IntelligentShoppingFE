@@ -7,47 +7,26 @@ export interface Food {
     category: any;
 }
 
-export interface Shopping {
-    id: string;
+export interface CreateRecipePayload {
     name: string;
-    date: string;
-    group: any;
-    foods: any[];
-    tasks: any[];
-}
-
-export interface CreateShoppingPayload {
-    name: string;
-    date: string;
-    groupId: string;
+    description: string;
+    instructions: string;
     foods: Array<any>;
 }
 
-export interface UpdateShoppingPayload {
-    id: string;
-    name?: string;
-    date?: string;
-    groupId?: string;
-    foods?: Array<any>;
+export interface UpdateRecipePayload {
+    recipe_id: string;
+    name: string;
+    description: string;
+    instructions: string;
+    foods: Array<any>;
 }
-export interface Food {
-    id: string,
-    name: string,
-    image_url: string,
-    user_id: string,
-    category: any
-}
+
 
 export interface Unit {
     name: string,
     id: string,
     user_id: string
-}
-
-export interface User {
-    id: string,
-    name: string,
-    username: string
 }
 
 export interface Recipe {
@@ -63,7 +42,6 @@ export interface Recipe {
     isSaved: boolean,
     ingredients: any
 }
-
 
 const recipeAPI = API.injectEndpoints({
     endpoints: (build) => ({
@@ -108,7 +86,7 @@ const recipeAPI = API.injectEndpoints({
                 method: "DELETE",
             }),
         }),
-        createRecipe: build.mutation<Recipe, CreateShoppingPayload>({
+        createRecipe: build.mutation<Recipe, CreateRecipePayload>({
             query: (payload) => ({
                 url: "recipe",
                 method: "POST",
@@ -117,18 +95,18 @@ const recipeAPI = API.injectEndpoints({
             transformResponse: (response: { recipe: any }, meta, arg) => response.recipe,
         }),
 
-        updateRecipe: build.mutation<any, UpdateShoppingPayload>({
-            query: ({ id, ...payload }) => ({
-                url: `recipe/${id}`,
-                method: "PUT",
+        updateRecipe: build.mutation<any, UpdateRecipePayload>({
+            query: ({ recipe_id, ...payload }) => ({
+                url: `recipe/${recipe_id}`,
+                method: "PATCH",
                 body: payload,
             }),
             transformResponse: (response: { recipe: Recipe[] }, meta, arg) => response.recipe,
         }),
 
-        deleteRecipe: build.mutation<void, string>({
-            query: (id) => ({
-                url: `recipe/${id}`,
+        deleteRecipe: build.mutation<void, { recipe_id: string }>({
+            query: ({ recipe_id }) => ({
+                url: `recipe/${recipe_id}`,
                 method: "DELETE",
             }),
             transformResponse: (response: { data: void }, meta, arg) => response.data,

@@ -7,17 +7,18 @@ import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "..";
 import { useLazyGetGroupInfoQuery } from "@/Services/group";
 import AppData from "@/General/Constants/AppData";
-import { Actionsheet, Avatar, Input } from "native-base";
+import { Actionsheet, Avatar, Input, Menu, Modal, Pressable } from "native-base";
 import { FlatList } from "react-native";
 import { useLazyGetAllCategoryQuery } from "@/Services/category";
-import { useCreateFoodGroupMutation, useCreateFoodMutation, useLazyGetAllFoodByCategoryQuery } from "@/Services/foodGroup";
+import { useCreateFoodGroupMutation, useCreateFoodMutation, useDeleteFoodGroupMutation, useLazyGetAllFoodByCategoryQuery } from "@/Services/foodGroup";
 import { useLazyGetUnitsQuery } from "@/Services/unit";
 import SearchableDropdown from "@/General/Components/SearchableDropdown";
-import { DatePicker } from "antd-mobile";
+import { DatePicker, Toast } from "antd-mobile";
 import DateTimePickerInput from "@/General/Components/DateTimePicker";
 import { useLazyGetAllFoodQuery } from "@/Services/shoppingList";
 import { useSelector } from "react-redux";
 import { Utils } from "@/General/Utils/Utils";
+import { set } from "lodash";
 
 type GroupRouteParams = {
     GroupDetail: { groupId: string, isAdmin: boolean };
@@ -39,6 +40,9 @@ export const GroupDetailScreen = () => {
     const [formQuantity, setFormQuantity] = useState<number>(0);
     const [createFood, { isLoading: isLoadingCreateFood, isError: isErrorCreateFood }] = useCreateFoodMutation();
     const [createFoodGroup, { isLoading: isLoadingCreateFoodGroup, isError: isErrorCreateFoodGroup }] = useCreateFoodGroupMutation();
+    const [deleteFoodGroup, { data: deletedFoodGroup }] = useDeleteFoodGroupMutation();
+    const [isOpenModalDelete, setIsOpenModalDelete] = useState(false);
+    const [selectedFoodGroupId, setSelectedFoodGroupId] = useState<string>('');
 
     useEffect(() => {
         fetchGroupInfo({ groupId });
@@ -50,29 +54,33 @@ export const GroupDetailScreen = () => {
 
     const handleCreateFoodGroup = async () => {
         try {
-            if (foods.find((food: any) => food.id === formFood)) {
-                await createFoodGroup({ group_id: groupId, food_id: formFood, category_id: formCategory, unit_name: formUnit, quantity: formQuantity, exprire_date: formExpiredate }).unwrap();
-            } else {
-                await createFood({ name: formFood, category_id: formCategory }).unwrap().then(async (res: any) => {
-                    await createFoodGroup({
-                        group_id: groupId,
-                        food_id: res?.dataValues?.id,
-                        category_id: formCategory,
-                        unit_name: formUnit,
-                        quantity: formQuantity,
-                        exprire_date: formExpiredate
-                    }).unwrap().then(() => {
-                        fetchFoodByCategory({ group_id: groupId, category_id: selectedCategory });
-                    })
-                })
-            }
-
+            await createFoodGroup({
+                group_id: groupId,
+                food_id: formFood,
+                category_id: formCategory,
+                unit_name: formUnit,
+                quantity: formQuantity,
+                exprire_date: formExpiredate
+            }).unwrap().then(() => {
+                Toast.show({ content: "Thêm thức ăn thành công", icon: "success" });
+                fetchFoodByCategory({ group_id: groupId, category_id: selectedCategory });
+            });
         } catch (error) {
-
+            Toast.show({ content: "Thêm thức ăn không thành công", icon: "fail" });
         }
     }
-
-    const renderRecipeItem = ({ item }: { item: any }) => (
+    const handleDeleteFoodGroup = async (id: string) => {
+        try {
+            await deleteFoodGroup({ id: id }).unwrap();
+            Toast.show({ content: "Loại bỏ thức ăn thành công", icon: "success" });
+            fetchFoodByCategory({ group_id: groupId, category_id: selectedCategory });
+            setIsOpenModalDelete(false);
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Không thể loại bỏ thức ăn", icon: "fail" });
+        }
+    }
+    const renderFoodGroupItem = ({ item }: { item: any }) => (
         <View key={item.id} style={[{ width: 290, height: 270, padding: 0 }]}
         >
             <ImageBackground
@@ -107,15 +115,29 @@ export const GroupDetailScreen = () => {
                     </View>
                 </View>
 
-                <TouchableOpacity
-                    style={{
-                        marginLeft: 'auto'
+                <Menu
+                    marginLeft={'auto'}
+                    width={100}
+                    style={{ padding: 0 }}
+                    trigger={(triggerProps) => {
+                        return (
+                            <Pressable {...triggerProps} style={{ marginLeft: 'auto' }}>
+                                <EllipsisVertical size={24} color={AppData.colors.text[400]} />
+                            </Pressable>
+                        );
                     }}
-                    onPress={() => {
-
-                    }}>
-                    <EllipsisVertical size={24} color={AppData.colors.text[400]} />
-                </TouchableOpacity>
+                >
+                    <Menu.Item height={12} alignItems={'center'} justifyContent={'center'} onPress={() => console.log(`Edit ${item.id}`)}>
+                        <Text style={{ fontSize: AppData.fontSizes.medium, fontWeight: "600", color: AppData.colors.text[800] }}>{'Sửa'}</Text>
+                    </Menu.Item>
+                    <Menu.Item height={12} alignItems={'center'} justifyContent={'center'}
+                        onPress={() => {
+                            setSelectedFoodGroupId(item.id);
+                            setIsOpenModalDelete(true);
+                        }}>
+                        <Text style={{ fontSize: AppData.fontSizes.medium, fontWeight: "600", color: AppData.colors.danger }}>{'Xóa'}</Text>
+                    </Menu.Item>
+                </Menu>
             </View>
 
 
@@ -124,14 +146,16 @@ export const GroupDetailScreen = () => {
 
     const renderItem = (item: any) => {
         return (
-            <View key={item.id}
+            <View
+                key={item.id}
                 style={[{
                     width: "47%",
                     maxWidth: 200,
                     height: 230,
                     gap: 10,
                     marginBottom: 10,
-                }]}>
+                }]}
+            >
                 <View
                     style={[styles.card, {
                         width: "100%",
@@ -140,7 +164,8 @@ export const GroupDetailScreen = () => {
                         borderColor: '#FBFBFB',
                         padding: 10,
                         gap: 10,
-                    }]}>
+                    }]}
+                >
                     <ImageBackground
                         source={{ uri: 'https://i.pinimg.com/736x/80/68/e7/8068e7170f2457e0cbf0c9556caec3e6.jpg' }}
                         style={[StyleSheet.absoluteFillObject, {
@@ -152,21 +177,20 @@ export const GroupDetailScreen = () => {
                     >
                         <View style={{
                             marginTop: 10,
-                            padding: 10,
-                            backgroundColor: AppData.colors.text[500],
+                            padding: 8,
+                            backgroundColor: AppData.colors.text[100],
                             borderRadius: 16,
                             alignItems: 'center',
-                            width: 80,
+                            width: 100,
                         }}>
                             <Text style={{
                                 fontSize: AppData.fontSizes.medium,
                                 fontWeight: "500",
-                                color: AppData.colors.text[100],
+                                color: AppData.colors.text[500],
                             }}>
                                 {item?.quantity + ' ' + item?.unit_name}
                             </Text>
                         </View>
-
 
                         <Text style={{
                             fontSize: AppData.fontSizes.medium,
@@ -182,7 +206,6 @@ export const GroupDetailScreen = () => {
                 <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-
                 }}>
                     <Text style={{
                         fontSize: AppData.fontSizes.large,
@@ -190,34 +213,47 @@ export const GroupDetailScreen = () => {
                         color: AppData.colors.text[900],
                         marginTop: 'auto',
                         textAlign: 'center',
-                        flex: 1
+                        flex: 1,
                     }}>
                         {item?.food?.name}
                     </Text>
 
-                    <TouchableOpacity
-                        style={{
-                            marginLeft: 'auto'
+                    <Menu
+                        width={100}
+                        style={{ padding: 0 }}
+                        trigger={(triggerProps) => {
+                            return (
+                                <Pressable {...triggerProps} style={{ marginLeft: 'auto' }}>
+                                    <EllipsisVertical size={24} color={AppData.colors.text[400]} />
+                                </Pressable>
+                            );
                         }}
-                        onPress={() => {
-
-                        }}>
-                        <EllipsisVertical size={24} color={AppData.colors.text[400]} />
-                    </TouchableOpacity>
-
+                    >
+                        <Menu.Item height={12} alignItems={'center'} justifyContent={'center'} onPress={() => console.log(`Edit ${item.id}`)}>
+                            <Text style={{ fontSize: AppData.fontSizes.medium, fontWeight: "600", color: AppData.colors.text[800] }}>{'Sửa'}</Text>
+                        </Menu.Item>
+                        <Menu.Item height={12} alignItems={'center'} justifyContent={'center'}
+                            onPress={() => {
+                                setSelectedFoodGroupId(item.id);
+                                setIsOpenModalDelete(true);
+                            }}>
+                            <Text style={{ fontSize: AppData.fontSizes.medium, fontWeight: "600", color: AppData.colors.danger }}>{'Xóa'}</Text>
+                        </Menu.Item>
+                    </Menu>
                 </View>
             </View>
         );
     };
 
-    const data1 = [
-        { id: '1', name: 'Cơm gà chiên trứng' },
-        { id: '2', name: 'Pasta with Tomato Sauce' },
-        { id: '3', name: 'Grilled Chicken Salad' },
-        { id: '4', name: 'Vegan Burrito' },
-        { id: '5', name: 'Vegetable Stir Fry' },
-        { id: '6', name: 'Chicken Tacos' },
-    ];
+
+    // const data1 = [
+    //     { id: '1', name: 'Cơm gà chiên trứng' },
+    //     { id: '2', name: 'Pasta with Tomato Sauce' },
+    //     { id: '3', name: 'Grilled Chicken Salad' },
+    //     { id: '4', name: 'Vegan Burrito' },
+    //     { id: '5', name: 'Vegetable Stir Fry' },
+    //     { id: '6', name: 'Chicken Tacos' },
+    // ];
 
     const categoryOptions = categorys && categorys.map((category: any) => ({
         label: category.name,  // Dùng name làm label
@@ -231,7 +267,7 @@ export const GroupDetailScreen = () => {
 
     const foodsOptions = foods && foods.map((food: any) => ({
         label: food.name,  // Dùng name làm label
-        value: food.name,    // Dùng id làm value
+        value: food.id,    // Dùng id làm value
     }))
 
     return (
@@ -251,7 +287,7 @@ export const GroupDetailScreen = () => {
                 <>
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => navigation.navigate(RootScreens.MAIN)}>
-                            <ArrowLeft size={24} color="#000" />
+                            <ArrowLeft size={24} color={AppData.colors.text[900]} />
                         </TouchableOpacity>
                         <Image
                             // source={{
@@ -262,12 +298,12 @@ export const GroupDetailScreen = () => {
                         />
                         <Text style={styles.title}>{data.rows[0].group.name ?? "Unknown"}</Text>
                         <TouchableOpacity onPress={() => navigation.navigate("GROUP_INFO", { groupId: groupId, isAdmin: isAdmin })}>
-                            <Info size={24} color="#000" />
+                            <Info size={24} color={AppData.colors.text[900]} />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.content}>
                         <ScrollView
-                            contentContainerStyle={{ gap: 24 }}
+                            contentContainerStyle={{ gap: 24, padding: 2 }}
                             showsVerticalScrollIndicator={false}>
                             <View style={{ flexDirection: "row", alignItems: "center" }}>
                                 <Input
@@ -300,7 +336,7 @@ export const GroupDetailScreen = () => {
                                 </View>
                             </View>
 
-                            <View>
+                            {/* <View>
                                 <Text style={{
                                     fontSize: AppData.fontSizes.large,
                                     fontWeight: "500",
@@ -309,13 +345,13 @@ export const GroupDetailScreen = () => {
                                 }}>{'Thức ăn còn lại'}</Text>
                                 <FlatList
                                     data={data1}
-                                    renderItem={renderRecipeItem}
+                                    renderItem={renderFoodGroupItem}
                                     horizontal
                                     keyExtractor={(item) => item.id}
                                     contentContainerStyle={{ gap: 16 }}
                                     showsHorizontalScrollIndicator={false}
                                 />
-                            </View>
+                            </View> */}
 
                             <View style={{ gap: 10 }}>
                                 <Text style={{
@@ -387,8 +423,6 @@ export const GroupDetailScreen = () => {
                             </View>
                         </ScrollView>
                     </View>
-
-
                 </>
             ) : (
                 <Text>No info found.</Text>
@@ -396,112 +430,187 @@ export const GroupDetailScreen = () => {
             <TouchableOpacity style={styles.fab} onPress={() => setIsOpenActionSheet(true)}>
                 <Plus color="white" size={25} />
             </TouchableOpacity>
-            <Actionsheet isOpen={isOpenActionSheet}
-                onClose={() => setIsOpenActionSheet(false)}
-                hideDragIndicator
-            >
-                <Actionsheet.Content borderTopRadius={24}                >
-                    <View style={{
-                        height: "auto",
-                        padding: 24,
-                        gap: 16
-                    }}>
-                        <View style={{ width: "100%", zIndex: 5 }}>
-                            <Text style={{
-                                fontSize: AppData.fontSizes.large,
-                                fontWeight: "500",
-                                color: AppData.colors.text[900],
-                                textAlign: "center",
-                            }}>
-                                {'Tạo thực phẩm'}
-                            </Text>
-                        </View>
-                        <View style={{ width: "100%", zIndex: 5 }}>
-                            <SearchableDropdown
-                                options={categoryOptions || []}
-                                placeholder="Phân loại"
-                                onSelect={(value) => setFormCategory(value)}
 
-                            />
-                        </View>
-                        <View style={{ width: "100%", zIndex: 4 }}>
-                            <SearchableDropdown
-                                options={foodsOptions || []}
-                                placeholder="Tên thực phẩm"
-                                onSelect={(value) => setFormFood(value)}
-
-                            />
-                        </View>
-                        <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-                            <Input
-                                width={"40%"}
-                                placeholder="Số lượng"
-                                size={"xl"}
-                                height={12}
-                                bgColor="white"
-                                borderRadius={10}
-                                borderColor={AppData.colors.text[400]}
-                                borderWidth={0.3}
-                                _focus={{
-                                    borderColor: AppData.colors.primary,
-                                    backgroundColor: "white",
-                                }}
-                                keyboardType="numeric" // Hiển thị bàn phím số và dấu chấm (trên một số thiết bị)
-                                onChangeText={(text) => {
-                                    const numericValue = parseFloat(text.replace(/[^0-9.]/g, "")); // Loại bỏ ký tự không phải số, chuyển thành số
-                                    if (!isNaN(numericValue)) {
-                                        setFormQuantity(numericValue); // Cập nhật giá trị
-                                    } else {
-                                        setFormQuantity(0); // Trường hợp nhập không hợp lệ, đặt giá trị mặc định là 0
-                                    }
-                                }}
-                                value={formQuantity ? String(formQuantity) : ""}
-                            />
-
-
-                            <View style={{ flex: 1 }}>
+            {isOpenActionSheet &&
+                <Actionsheet isOpen={isOpenActionSheet}
+                    onClose={() => setIsOpenActionSheet(false)}
+                    hideDragIndicator
+                >
+                    <Actionsheet.Content borderTopRadius={24}                >
+                        <View style={{
+                            height: "auto",
+                            padding: 24,
+                            gap: 16
+                        }}>
+                            <View style={{ width: "100%", zIndex: 5 }}>
+                                <Text style={{
+                                    fontSize: AppData.fontSizes.large,
+                                    fontWeight: "500",
+                                    color: AppData.colors.text[900],
+                                    textAlign: "center",
+                                }}>
+                                    {'Tạo thực phẩm'}
+                                </Text>
+                            </View>
+                            <View style={{ width: "100%", zIndex: 5 }}>
                                 <SearchableDropdown
-                                    options={unitOptions || []}
-                                    placeholder="Đơn vị"
-                                    onSelect={(value) => setFormUnit(value)}
-
+                                    options={categoryOptions || []}
+                                    placeholder="Phân loại"
+                                    onSelect={(value) => setFormCategory(value)}
+                                    isDisabled={true}
                                 />
                             </View>
-                        </View>
+                            <View style={{ width: "100%", zIndex: 4 }}>
+                                <SearchableDropdown
+                                    options={foodsOptions || []}
+                                    placeholder="Tên thực phẩm"
+                                    isDisabled={true}
+                                    onSelect={(value) => setFormFood(value)}
+                                />
+                            </View>
+                            <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                                <Input
+                                    width={"40%"}
+                                    placeholder="Số lượng"
+                                    size={"xl"}
+                                    height={12}
+                                    bgColor="white"
+                                    borderRadius={10}
+                                    borderColor={AppData.colors.text[400]}
+                                    borderWidth={0.3}
+                                    _focus={{
+                                        borderColor: AppData.colors.primary,
+                                        backgroundColor: "white",
+                                    }}
+                                    keyboardType="numeric" // Hiển thị bàn phím số và dấu chấm (trên một số thiết bị)
+                                    onChangeText={(text) => {
+                                        const numericValue = parseFloat(text.replace(/[^0-9.]/g, "")); // Loại bỏ ký tự không phải số, chuyển thành số
+                                        if (!isNaN(numericValue)) {
+                                            setFormQuantity(numericValue); // Cập nhật giá trị
+                                        } else {
+                                            setFormQuantity(0); // Trường hợp nhập không hợp lệ, đặt giá trị mặc định là 0
+                                        }
+                                    }}
+                                    value={formQuantity ? String(formQuantity) : ""}
+                                />
 
-                        <View style={{ width: "100%", zIndex: 2 }}>
-                            < DateTimePickerInput
-                                onChange={(value) => setFormExpiredate(value?.toString())}
-                                placeholder="Ngày hết hạn"
-                            />
-                        </View>
 
-                        <TouchableOpacity style={{
-                            padding: 16,
-                            height: 60,
-                            alignSelf: 'center',
-                            backgroundColor: AppData.colors.primary,
-                            borderRadius: 16,
-                            alignItems: 'center',
-                            zIndex: 1,
-                            minWidth: 200
-                        }}
-                            onPress={() => {
-                                handleCreateFoodGroup();
+                                <View style={{ flex: 1 }}>
+                                    <SearchableDropdown
+                                        options={unitOptions || []}
+                                        placeholder="Đơn vị"
+                                        onSelect={(value) => setFormUnit(value)}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={{ width: "100%", zIndex: 2 }}>
+                                < DateTimePickerInput
+                                    onChange={(value) => setFormExpiredate(value?.toString())}
+                                    placeholder="Ngày hết hạn"
+                                />
+                            </View>
+
+                            <TouchableOpacity style={{
+                                padding: 16,
+                                height: 60,
+                                alignSelf: 'center',
+                                backgroundColor: AppData.colors.primary,
+                                borderRadius: 16,
+                                alignItems: 'center',
+                                zIndex: 1,
+                                minWidth: 200
                             }}
-                        >
+                                onPress={() => {
+                                    console.log("formCategory", formCategory, "formFood", formFood, "formQuantity", formQuantity, "formUnit", formUnit, "formExpiredate", formExpiredate);
+                                    if (formCategory && formFood && formQuantity && formUnit && formExpiredate)
+                                        handleCreateFoodGroup();
+                                    else
+                                        Toast.show({
+                                            content: 'Hãy nhập đầy đủ thông tin',
+                                            icon: 'fail',
+                                        });
+                                }}
+                            >
+                                <Text style={{
+                                    fontSize: AppData.fontSizes.medium,
+                                    fontWeight: "500",
+                                    color: AppData.colors.text[100],
+                                }}>
+                                    {'Lưu'}
+                                </Text>
+                            </TouchableOpacity>
+
+                        </View>
+                    </Actionsheet.Content>
+                </Actionsheet>
+            }
+            {
+                isOpenModalDelete &&
+                <Modal isOpen={isOpenModalDelete} onClose={() => setIsOpenModalDelete(false)}>
+                    <Modal.Content maxWidth="400px">
+                        <Modal.CloseButton />
+                        <Modal.Header>Xác nhận</Modal.Header>
+                        <Modal.Body>
                             <Text style={{
                                 fontSize: AppData.fontSizes.medium,
                                 fontWeight: "500",
-                                color: AppData.colors.text[100],
+                                color: AppData.colors.text[900],
+                                marginLeft: 'auto'
                             }}>
-                                {'Lưu'}
+                                {'Bạn có muốn xóa thực phẩm này không?'}
                             </Text>
-                        </TouchableOpacity>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <View style={{ flexDirection: "row", gap: 16, justifyContent: "space-around", width: '100%' }}>
+                                <TouchableOpacity
+                                    style={{
+                                        padding: 8,
+                                        alignSelf: 'center',
+                                        backgroundColor: AppData.colors.danger,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        height: 'auto',
+                                        width: 100,
+                                    }}
+                                    onPress={() => handleDeleteFoodGroup(selectedFoodGroupId)}
+                                >
+                                    <Text style={{
+                                        fontSize: AppData.fontSizes.medium,
+                                        fontWeight: "500",
+                                        color: AppData.colors.text[100],
+                                    }}>
+                                        {'Xóa'}
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        padding: 8,
+                                        alignSelf: 'center',
+                                        backgroundColor: AppData.colors.text[100],
+                                        borderColor: AppData.colors.primary,
+                                        borderWidth: 0.2,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        height: 'auto',
+                                        width: 100,
+                                    }}
+                                    onPress={() => setIsOpenModalDelete(false)}
+                                >
+                                    <Text style={{
+                                        fontSize: AppData.fontSizes.medium,
+                                        fontWeight: "500",
+                                        color: AppData.colors.primary,
+                                    }}>
+                                        {'Hủy'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Modal.Footer>
+                    </Modal.Content>
+                </Modal>
+            }
 
-                    </View>
-                </Actionsheet.Content>
-            </Actionsheet>
         </View>
     );
 }

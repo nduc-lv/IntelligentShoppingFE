@@ -28,35 +28,48 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = ({
 
     return (
         <View style={{ width: "100%" }}>
-            <Input
-                value={text}
-                placeholder={placeholder}
-                onChangeText={(val) => setText(val)} // Cho phép người dùng nhập
-                width={"100%"}
-                w={{ base: "100%" }}
-                size={"xl"}
-                height={12}
-                bgColor="white"
-                isDisabled
-                borderRadius={10}
-                borderColor={AppData.colors.text[900]}
-                borderWidth={0.3}
-                _focus={{
-                    borderColor: AppData.colors.primary,
-                    backgroundColor: "white",
+            <Pressable
+                onPress={() => {
+                    setShowPicker(true);
                 }}
-                InputRightElement={
-                    <Pressable onPress={() => setShowPicker(true)}>
-                        <Icon
-                            as={MaterialIcons}
-                            name="date-range"
-                            size={5}
-                            mr={2}
-                            color={AppData.colors.text[400]}
-                        />
-                    </Pressable>
-                }
-            />
+            >
+                <Input
+                    value={text}
+                    placeholder={placeholder}
+                    onChangeText={(val) => setText(val)} // Cho phép người dùng nhập
+                    width={"100%"}
+                    w={{ base: "100%" }}
+                    size={"xl"}
+                    height={12}
+                    bgColor="white"
+                    isDisabled
+                    borderRadius={10}
+                    borderColor={AppData.colors.text[900]}
+                    borderWidth={0.3}
+                    _focus={{
+                        borderColor: AppData.colors.primary,
+                        backgroundColor: "white",
+                    }}
+                    _disabled={{
+                        bgColor: "white", // Giữ nền màu trắng
+                        opacity: 1,      // Loại bỏ hiệu ứng mờ
+                        borderColor: AppData.colors.text[400], // Giữ màu viền
+                    }}
+                    InputRightElement={
+                        <Pressable onPress={() => setShowPicker(true)}>
+                            <Icon
+                                as={MaterialIcons}
+                                name="date-range"
+                                size={5}
+                                mr={2}
+                                color={AppData.colors.text[400]}
+                            />
+                        </Pressable>
+                    }
+                />
+            </Pressable>
+
+
 
             {/* Show DateTimePicker only when needed */}
             {showPicker && (
