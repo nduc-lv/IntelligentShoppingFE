@@ -5,6 +5,7 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 
 import { Platform } from "react-native";
+import { Toast } from "native-base";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -43,7 +44,10 @@ export const usePushNotifications = (): PushNotificationState => {
         finalStatus = status;
       }
       if (finalStatus !== "granted") {
-        alert("Failed to get push token for push notification");
+        Toast.show({
+          placement: "top",
+          description: "Failed to get push token for push notification.",
+        });
         return;
       }
 
@@ -52,7 +56,10 @@ export const usePushNotifications = (): PushNotificationState => {
       });
       console.log(token);
     } else {
-      alert("Must be using a physical device for Push notifications");
+      Toast.show({
+				placement: "top",
+				description: "Must be using a physical device for Push notifications.",
+			});
     }
 
     if (Platform.OS === "android") {
