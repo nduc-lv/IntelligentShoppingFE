@@ -67,6 +67,7 @@ const authSlice = createSlice({
 export const selectAccessToken = (state: { auth: AuthState }) =>
 	state.auth.accessToken;
 // export const selectRefreshToken = (state: { auth: AuthState }) => state.auth.refreshToken;
-
+export const selectUser = (state: {auth: AuthState}) => 
+  state.auth.user
 export const authReducer = authSlice.reducer;
 export const {clearMe,setMe}=authSlice.actions;

@@ -15,11 +15,13 @@ import {
 import { useSelector } from "react-redux";
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import { Calendar } from "lucide-react-native";
+import { clearTokens } from "@/Store/reducers";
 import {
   Form,
   Toast,
   DatePicker
 } from "@ant-design/react-native";
+import { useDispatch } from "react-redux";
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
@@ -70,7 +72,7 @@ export const ShoppingListDetail: React.FC = () => {
   }, [])
 
   const [items, setItems] = useState([{ food: "", unit: "", assignee: "", quantity: 0 }]);
-
+  clearTokens()
   // Fetch food and unit data only when needed
   const loadPickerData = useCallback(() => {
     fetchFoodList({ userId: "" });
@@ -140,6 +142,8 @@ export const ShoppingListDetail: React.FC = () => {
       }
       await createShoppingList(payload).unwrap();
       toast.show("Shopping list created successfully!", { placement: "top", type: "success" });
+      form.resetFields();
+      setDate(new Date())
       fetchShoppingList({ groupId, ...pagination });
       handleModalClose();
     } catch (e) {
@@ -232,7 +236,7 @@ export const ShoppingListDetail: React.FC = () => {
                     >
                       <TouchableOpacity onPress={() => showDatepicker()} style={{display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems:"center"}}>
                         <Text style={{fontSize: 20}}>
-                          {moment(form.getFieldValue("date")).format("YYYY-MM-DD")}
+                          {moment(date).format("YYYY-MM-DD")}
                         </Text>
                         <Calendar/>
                       </TouchableOpacity>

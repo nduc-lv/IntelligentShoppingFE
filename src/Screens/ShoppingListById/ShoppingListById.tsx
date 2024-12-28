@@ -251,6 +251,7 @@ export const ShoppingListById: React.FC = () => {
     const showDatepicker = () => {
         showMode('date');
     };
+    const [formDate, setFormDate] = useState(moment(new Date()).format("YYYY-MM-DD"))
     const { groupId, shoppingId } = route.params;
     const [pagination, setPagination] = useState({ page: 1, per: 10 });
     const [selectedItem, setSelectedItem] = useState<Item>();
@@ -293,8 +294,8 @@ export const ShoppingListById: React.FC = () => {
     }
     useEffect(() => {
         fetchShoppingListById({ shoppingId, ...pagination });
-        fetchFoodList({ userId: "" });
-        fetchUnitList({ userId: "" });
+        fetchFoodList();
+        fetchUnitList();
         fetchUserList({ groupId });
     }, [groupId, shoppingId, fetchShoppingListById, fetchFoodList, fetchUnitList, fetchUserList]);
     useEffect(() => {
@@ -386,7 +387,7 @@ export const ShoppingListById: React.FC = () => {
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate;
         console.log(currentDate)
-        setDate(currentDate)
+        setFormDate(moment(currentDate).format("YYYY-MM-DD"))
         formAddFridge.setFieldValue("date", moment(currentDate).format("YYYY-MM-DD"))
     };
 
@@ -418,6 +419,7 @@ export const ShoppingListById: React.FC = () => {
 		} finally {
 			await fetchShoppingListById({ shoppingId, ...pagination });
 			formAddFridge.resetFields();
+            setFormDate(moment(new Date()).format("YYYY-MM-DD"))
 			setIsModalVisible(false);
 		}
 	};
@@ -629,7 +631,7 @@ export const ShoppingListById: React.FC = () => {
                                         </Text>
                                         <TouchableOpacity onPress={() => showDatepicker()} style={{ display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
                                             <Text style={{ fontSize: 20 }}>
-                                                {moment(form.getFieldValue("date")).format("YYYY-MM-DD")}
+                                                {formDate}
                                             </Text>
                                             <Calendar />
                                         </TouchableOpacity>

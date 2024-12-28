@@ -46,7 +46,7 @@ export const ShoppingListScreen: React.FC = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>Failed to load groups. Please try again.</Text>
-        <Button onPress={() => fetchGroups(userInfo.id)}>
+        <Button onPress={() => fetchGroups({})}>
           Retry
         </Button>
       </View>

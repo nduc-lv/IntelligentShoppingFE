@@ -31,6 +31,10 @@ import WarningBanner from "@/General/Components/WarningBanner";
 import { i18n, LocalizationKey } from "@/Localization";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { selectAccessToken, selectUser } from "@/Store/reducers";
+import { Config } from "@/General/Config";
+import axios from 'axios'
+import { usePushNotifications } from "usePushNotification";
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
@@ -62,6 +66,17 @@ const PublicScreens: Set<string | undefined> = new Set(
 export const RootStack = createNativeStackNavigator<RootStackParamList>();
 export const RootNavigationContainerRef = createNavigationContainerRef<RootStackParamList>()
 
+const pushToken = async (token, userId) => {
+	try {
+	  await axios.post(
+		`${Config.API_URL}/token/add/:${userId}`, // Replace with your backend URL
+		{ token: token.data },
+	  );
+	  console.log("Push token sent to the backend successfully!");
+	} catch (error) {
+	  console.error("Failed to send push token to backend:", error);
+	}
+}
 // @refresh reset
 const ApplicationNavigator = () => {
 	return <_ApplicationNavigator />
@@ -74,6 +89,11 @@ const _ApplicationNavigator = () => {
 	const initializedAuth = useSelector(
 		(state: { auth: AuthState }) => state.auth.initialized
 	);
+	const user = useSelector(selectUser)
+	const {expoPushToken, notification} = usePushNotifications();
+	if (user && user.id && expoPushToken) {
+		pushToken(expoPushToken, accessToken)
+	}
 	const currentRoute = RootNavigationContainerRef.current?.getCurrentRoute()?.name
 
 	const { type, isConnected } = useNetInfo();
