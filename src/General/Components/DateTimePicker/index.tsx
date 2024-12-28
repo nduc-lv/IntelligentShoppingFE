@@ -78,6 +78,7 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = ({
                     mode="date" // Chế độ chọn ngày
                     display={Platform.OS === "ios" ? "spinner" : "default"} // Hiển thị dạng spinner hoặc modal
                     onChange={handleDateChange}
+                    minimumDate={new Date()}
                 />
             )}
         </View>

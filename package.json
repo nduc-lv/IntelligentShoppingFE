@@ -5,9 +5,7 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
-    "ip-android": "API_HOST=$(hostname -I | awk '{print $1}')  npm run android",
-    "ip-web": "API_HOST=$(hostname -I | awk '{print $1}') npm run web",
+    "android": "expo start --android --offline",
     "ios": "expo run:ios",
     "web": "expo start --web"
   },

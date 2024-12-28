@@ -5,7 +5,7 @@ import { RootStackParamList } from "@/Navigation";
 import {
     Toast,
 } from "antd-mobile";
-import { Food, useCreateFoodMutation, useDeleteFoodMutation, useLazyGetAllFoodQuery, useUpdateFoodMutation } from "@/Services/food";
+import { Food, useCreateFoodMutation, useDeleteFoodMutation, useLazyGetAllFood2Query, useUpdateFoodMutation } from "@/Services/food";
 import { ArrowLeft, Edit, Plus, Trash } from "lucide-react-native";
 import { RootScreens } from "..";
 import { Category } from "@/Services/food";
@@ -15,7 +15,7 @@ import { Actionsheet, Avatar, Input } from "native-base";
 import AppData from "@/General/Constants/AppData";
 
 export const ManageFoodScreen = () => {
-    const [fetchFood, { data: foodData, isLoading: isFoodLoading, isError: isFoodError }] = useLazyGetAllFoodQuery();
+    const [fetchFood, { data: foodData, isLoading: isFoodLoading, isError: isFoodError }] = useLazyGetAllFood2Query();
     const [fetchCategory, { data: categoryData, isLoading: isCategoryLoading, isError: isCategoryError }] = useLazyGetAllCategoryQuery();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [searchQuery, setSearchQuery] = useState('');
