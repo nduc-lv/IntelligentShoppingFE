@@ -570,7 +570,7 @@ export const GroupDetailScreen = () => {
                                     console.log("formQuantity", formQuantity, "formUnit", formUnit);
                                     if (formQuantity && formUnit) {
                                         handleUpdateFoodGroup();
-                                        setIsOpenActionSheet(false);
+                                        setIsOpenUpdateActionSheet(false);
                                     } else
                                         toast.show("Hãy nhập đày đủ thông tin", { placement: "top", type: "warning" });
                                 }}

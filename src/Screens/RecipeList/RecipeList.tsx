@@ -231,7 +231,6 @@ export const RecipeListScreen = () => {
             <View>
                 <Text style={styles.title}>{'Đề xuất món ăn'}</Text>
                 <FlatList
-                    key={Math.random()}
                     data={recipes}
                     renderItem={renderRecipeItem}
                     horizontal
@@ -245,7 +244,6 @@ export const RecipeListScreen = () => {
             <View>
                 <Text style={styles.title}>{'Nguyên liệu'}</Text>
                 <FlatList
-                    key={Math.random()}
                     data={food_recipes}
                     renderItem={renderIngredientItem}
                     horizontal

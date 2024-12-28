@@ -290,9 +290,6 @@ export const RecipeDetailScreen = ({ route }: any) => {
 
                     </View>
 
-                    <UploadImage />
-
-
                 </ScrollView >
             </View>
             {

@@ -1,5 +1,5 @@
 import AppData from "@/General/Constants/AppData";
-import { ArrowLeft, ChevronDown, Heart, Minus, Plus, ShoppingCart } from "lucide-react-native";
+import { ArrowLeft, Camera, ChevronDown, Heart, Minus, Plus, ShoppingCart } from "lucide-react-native";
 import { Actionsheet, Input, TextArea } from "native-base";
 import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, ImageBackground, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
@@ -11,6 +11,8 @@ import { useCreateRecipeMutation, useLazyGetRecipeQuery, useUpdateRecipeMutation
 import { useCreateFoodMutation } from "@/Services/foodGroup";
 import { Toast } from "antd-mobile";
 import { useToast } from "react-native-toast-notifications";
+import { set } from "lodash";
+import ImageUploader from "@/General/Components/ImageUploader";
 
 export const EditRecipeScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -25,6 +27,7 @@ export const EditRecipeScreen = ({ route }: any) => {
     const [formUnit, setFormUnit] = useState<string>('');
     const [formFood, setFormFood] = useState<string>('');
     const [formQuantity, setFormQuantity] = useState<number>(0);
+    const [image_url, setImageUrl] = useState<any>(null);
     const isCreateRecipe = recipeId === 'create';
     const [createRecipe, { isLoading: isLoadingCreateRecipe, isError: isErrorCreateRecipe }] = useCreateRecipeMutation();
     const [updateRecipe, { isLoading: isLoadingUpdateRecipe, isError: isErrorUpdateRecipe }] = useUpdateRecipeMutation();
@@ -41,6 +44,7 @@ export const EditRecipeScreen = ({ route }: any) => {
             setRecipeDescription(recipe?.description);
             setRecipeInstructions(recipe?.instructions);
             setRecipeIngredients(recipe?.foods.rows);
+            setImageUrl(recipe?.image_url);
         }
     }, [recipe]);
 
@@ -50,7 +54,8 @@ export const EditRecipeScreen = ({ route }: any) => {
                 name: recipeName,
                 description: recipeDescription,
                 instructions: recipeInstructions,
-                foods: recipeIngredients
+                foods: recipeIngredients,
+                image_url: image_url
             }).unwrap().then(() => {
                 toast.show("Tạo công thức thành công", { placement: "top", type: "success" });
                 navigation.goBack();
@@ -67,7 +72,8 @@ export const EditRecipeScreen = ({ route }: any) => {
                 name: recipeName,
                 description: recipeDescription,
                 instructions: recipeInstructions,
-                foods: recipeIngredients
+                foods: recipeIngredients,
+                image_url: image_url
             }).unwrap().then(() => {
                 toast.show("Cập nhật công thức thành công", { placement: "top", type: "success" });
                 navigation.goBack();
@@ -93,7 +99,7 @@ export const EditRecipeScreen = ({ route }: any) => {
         <View style={styles.container}>
             {/* Background image with absolute position */}
             <ImageBackground
-                source={{ uri: recipe?.image_url || 'https://i.pinimg.com/236x/62/38/08/6238083cdbed4e1243890eb8f4e53867.jpg' }}
+                source={{ uri: image_url || 'https://i.pinimg.com/236x/62/38/08/6238083cdbed4e1243890eb8f4e53867.jpg' }}
                 style={styles.backgroundImage}
             >
                 <View style={{
@@ -120,26 +126,26 @@ export const EditRecipeScreen = ({ route }: any) => {
                     >
                         <ArrowLeft size={24} color={AppData.colors.text[900]} />
                     </TouchableOpacity>
-                    {!isCreateRecipe &&
-                        <TouchableOpacity
-                            style={{
-                                height: 48,
-                                width: 48,
-                                backgroundColor: AppData.colors.background,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                borderRadius: 16,
-                                marginLeft: 'auto'
-                            }}
-                            onPress={() => {
 
-                            }}
-                        >
-                            <Heart size={24} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
-                        </TouchableOpacity>
-                    }
+                    {/* <TouchableOpacity
+                        style={{
+                            height: 48,
+                            width: 48,
+                            backgroundColor: AppData.colors.background,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: 16,
+                            marginLeft: 'auto'
+                        }}
+                        onPress={() => {
 
+                        }}
+                    >
+                        <Camera size={24} color={AppData.colors.text[400]} fill={AppData.colors.text[400]} />
+                    </TouchableOpacity> */}
+
+                    <ImageUploader onImageUpload={setImageUrl} />
                 </View>
             </ImageBackground>
             {/* Content of your screen */}
