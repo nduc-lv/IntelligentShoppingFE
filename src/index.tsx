@@ -14,6 +14,9 @@ i18n.defaultLocale = Language.ENGLISH;
 
 export default function App() {
   const {expoPushToken, notification} = usePushNotifications();
+
+  // add a query here to push to backend 
+  // then it will update date
   return (
     <NativeBaseProvider>
       <ToastProvider>

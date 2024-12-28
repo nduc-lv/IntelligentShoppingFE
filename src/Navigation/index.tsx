@@ -150,13 +150,13 @@ const _ApplicationNavigator = () => {
 					name={RootScreens.ADMIN}
 					component={AdminNavigator}
 				/>
-				<RootStack.Screen
+				{/* <RootStack.Screen
 					name={'SHOPPING_LIST'}
 					component={ShoppingListContainer}
 				/>
 				<RootStack.Screen
 					name="SHOPPING_LIST_DETAIL"
-					component={ShoppingListDetailContainer} />
+					component={ShoppingListDetailContainer} /> */}
 				<RootStack.Screen
 					name="GROUP_DETAIL"
 					component={GroupDetailContainer} />

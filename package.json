@@ -6,6 +6,8 @@
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
+    "ip-android": "API_HOST=$(hostname -I | awk '{print $1}')  npm run android",
+    "ip-web": "API_HOST=$(hostname -I | awk '{print $1}') npm run web",
     "ios": "expo run:ios",
     "web": "expo start --web"
   },

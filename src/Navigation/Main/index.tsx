@@ -23,6 +23,8 @@ import { RecipeDetailContainer } from "@/Screens/RecipeDetail/RecipeDetailContai
 import { EditRecipeContainer } from "@/Screens/EditRecipe/EditRecipeContainer";
 import { RecipeTabNavigation } from "./Recipe";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { ShoppingListByIdContainer } from "@/Screens/ShoppingListById/ShoppingListByIdContainer";
+import { ShoppingListTabNavigation } from "./ShoppingList";
 const Tab = createBottomTabNavigator();
 
 const RecipeStack = () => (
@@ -106,7 +108,7 @@ export const MainNavigator = () => {
 
 			<Tab.Screen
 				name="Shopping List"
-				component={ShoppingListContainer}
+				component={ShoppingListTabNavigation}
 				options={{
 					tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
 					tabBarLabelPosition: "below-icon",

@@ -27,6 +27,7 @@ export interface AddItemToFridgePayload {
   food_id: string,
   group_id: string,
   unit_id: string,
+  unit_name: string,
   shopping_id: string,
   id: string | undefined,
   quantity: number,
@@ -73,6 +74,7 @@ export interface User {
 export interface ItemByShoppingIdResponse {
   id: string,
   unit_id: string,
+  unit_name: string,
   food_id: string,
   quantity: number,
   shopping: {
@@ -173,7 +175,7 @@ const shoppingListAPI = API.injectEndpoints({
       })
     }),
     getUserGroup: build.query({
-      query: (id) => `shopping-list/group/${id}`,
+      query: ({}) => `shopping-list/group/`,
       transformResponse: (response: {groups: any}) => {
         return response.groups
       }
