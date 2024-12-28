@@ -69,7 +69,7 @@ export const RootNavigationContainerRef = createNavigationContainerRef<RootStack
 const pushToken = async (token, userId) => {
 	try {
 	  await axios.post(
-		`${Config.API_URL}/token/add/:${userId}`, // Replace with your backend URL
+		`${Config.API_URL}/token/add/${userId}`,
 		{ token: token.data },
 	  );
 	  console.log("Push token sent to the backend successfully!");
@@ -79,6 +79,11 @@ const pushToken = async (token, userId) => {
 }
 // @refresh reset
 const ApplicationNavigator = () => {
+	const user = useSelector(selectUser)
+	const {expoPushToken, notification} = usePushNotifications();
+	if (user && user.id && expoPushToken) {
+		pushToken(expoPushToken, user.id)
+	}
 	return <_ApplicationNavigator />
 }
 const _ApplicationNavigator = () => {
@@ -89,11 +94,6 @@ const _ApplicationNavigator = () => {
 	const initializedAuth = useSelector(
 		(state: { auth: AuthState }) => state.auth.initialized
 	);
-	const user = useSelector(selectUser)
-	const {expoPushToken, notification} = usePushNotifications();
-	if (user && user.id && expoPushToken) {
-		pushToken(expoPushToken, accessToken)
-	}
 	const currentRoute = RootNavigationContainerRef.current?.getCurrentRoute()?.name
 
 	const { type, isConnected } = useNetInfo();

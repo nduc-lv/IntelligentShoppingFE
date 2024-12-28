@@ -73,31 +73,6 @@ export const ShoppingListDetail: React.FC = () => {
 
   const [items, setItems] = useState([{ food: "", unit: "", assignee: "", quantity: 0 }]);
   clearTokens()
-  // Fetch food and unit data only when needed
-  const loadPickerData = useCallback(() => {
-    fetchFoodList({ userId: "" });
-    fetchUnitList({ userId: "" });
-    fetchUserList({ groupId: groupId });
-  }, [fetchFoodList, fetchUnitList, fetchUserList]);
-
-  // Add new item
-  const addItem = () => {
-    setItems([...items, { food: "", unit: "", assignee: "", quantity: 0 }]);
-  };
-
-  // Remove an item
-  const removeItem = (index: number) => {
-    const updatedItems = items.filter((_, i) => i !== index);
-    setItems(updatedItems);
-  };
-
-  // Update item values
-  const updateItem = (index: number, key: string, value: string | number) => {
-    const updatedItems: Array<{ food: string; assignee: string; unit: string; quantity: number;[key: string]: string | number }> = [...items];
-    updatedItems[index][key] = value;
-    setItems(updatedItems);
-  };
-
   // Handle modal actions
   const handleModalOpen = (action: "create" | "edit" | "delete", item: Shopping | null = null) => {
     setCurrentAction(action);

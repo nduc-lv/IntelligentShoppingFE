@@ -292,30 +292,33 @@ export const ShoppingListById: React.FC = () => {
             setIsModalVisible(false)
         }
     }
+    const refresh = async () => {
+        await fetchShoppingListById({shoppingId, ...pagination});
+    }
     useEffect(() => {
         fetchShoppingListById({ shoppingId, ...pagination });
-        fetchFoodList();
-        fetchUnitList();
+        fetchFoodList({});
+        fetchUnitList({});
         fetchUserList({ groupId });
-    }, [groupId, shoppingId, fetchShoppingListById, fetchFoodList, fetchUnitList, fetchUserList]);
-    useEffect(() => {
-        if (rows && rows.length >= 0) {
-            const updatedItems = rows.map((row, index) => {
-                if (index == 0) {
-                    form.setFieldValue('date', row.shopping.date);
-                    form.setFieldValue('name', row.shopping.name)
-                }
-                return ({
-                    id: row.id,
-                    food: row.food_id || "",
-                    unit: row.unit_name || "",
-                    assignee: row.task.user_id || "",
-                    quantity: row.quantity || 0,
-                })
-            });
-            setItems((prev) => [...updatedItems]);
-        }
-    }, [rows]);
+    }, []);
+    // useEffect(() => {
+    //     if (rows && rows.length >= 0) {
+    //         const updatedItems = rows.map((row, index) => {
+    //             if (index == 0) {
+    //                 form.setFieldValue('date', row.shopping.date);
+    //                 form.setFieldValue('name', row.shopping.name)
+    //             }
+    //             return ({
+    //                 id: row.id,
+    //                 food: row.food_id || "",
+    //                 unit: row.unit_name || "",
+    //                 assignee: row.task.user_id || "",
+    //                 quantity: row.quantity || 0,
+    //             })
+    //         });
+    //         setItems((prev) => [...updatedItems]);
+    //     }
+    // }, [reload]);
     const [action, setAction] = useState<"addToFridge" | "delete" | "edit" | 'create' | null>(null);
     const showEditModal = (item: Item) => {
         editForm.setFieldsValue(item)
@@ -348,7 +351,8 @@ export const ShoppingListById: React.FC = () => {
             }
             setIsModalVisible(false);
             editForm.resetFields();
-            await fetchShoppingListById({ shoppingId, ...pagination });
+            // await fetchShoppingListById({ shoppingId, ...pagination });
+            await refresh()
         }
         catch (e) {
             Toast.show("Failed")
@@ -378,7 +382,8 @@ export const ShoppingListById: React.FC = () => {
             }
             setIsModalVisible(false)
             createForm.resetFields();
-            await fetchShoppingListById({ shoppingId, ...pagination });
+            // await fetchShoppingListById({ shoppingId, ...pagination });
+            await refresh();
         }
         catch (e) {
             Toast.show("Failed")
@@ -417,7 +422,8 @@ export const ShoppingListById: React.FC = () => {
 		} catch (e) {
 			Toast.show("Failed");
 		} finally {
-			await fetchShoppingListById({ shoppingId, ...pagination });
+			// await fetchShoppingListById({ shoppingId, ...pagination });
+            await refresh()
 			formAddFridge.resetFields();
             setFormDate(moment(new Date()).format("YYYY-MM-DD"))
 			setIsModalVisible(false);
@@ -433,7 +439,7 @@ export const ShoppingListById: React.FC = () => {
                 // <Text style={styles.errorText}>Failed to load data</Text>
                 <View style={styles.centered}>
                     <Text style={styles.errorText}>Failed to load groups. Please try again.</Text>
-                    <Button onPress={() => fetchShoppingListById({ shoppingId, ...pagination })}>
+                    <Button onPress={() => refresh()}>
                         Retry
                     </Button>
                 </View>
@@ -463,7 +469,7 @@ export const ShoppingListById: React.FC = () => {
                             ))}
                         </View>
                     </Form> */}
-                        {users && foods && units && items && !items.length
+                        {users && foods && units && rows && !rows.length
                             &&
                             <View>
                                 <Text>
@@ -472,7 +478,13 @@ export const ShoppingListById: React.FC = () => {
                             </View>
                         }
                         <FlatList
-                            data={items}
+                            data={rows.map(row => ({
+                                id: row.id,
+                                food: row.food_id || "",
+                                unit: row.unit_name || "",
+                                assignee: row.task.user_id || "",
+                                quantity: row.quantity || 0,
+                            }))}
                             keyExtractor={(item) => item.id}
                             renderItem={({ item }) => {
                                 return (

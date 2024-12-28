@@ -110,15 +110,15 @@ const shoppingListAPI = API.injectEndpoints({
     }),
 
     getAllFood: build.query<Food[], {}>({
-      query: () => ({
-        url: `shopping-list/all-food/any`,
+      query: ({}) => ({
+        url: `shopping-list/all-food/`,
         method: "GET",
       }),
       transformResponse: (response: { foods: Food[] }, meta, arg) => response.foods
     }),
     getAllUnit: build.query<Unit[], any>({
-      query: () => ({
-        url: `shopping-list/all-unit/any`,
+      query: ({}) => ({
+        url: `shopping-list/all-unit/`,
         method: "GET"
       }),
       transformResponse: (response: { units: Unit[] }, meta, arg) => response.units
