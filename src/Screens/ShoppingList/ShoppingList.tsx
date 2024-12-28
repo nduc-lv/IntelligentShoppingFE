@@ -4,8 +4,9 @@ import { useLazyGetUserGroupQuery } from "@/Services/shoppingList";
 import { Button, Spinner } from "native-base";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
-import { useLazyGetMeQuery } from "@/Services";
 import { ChevronRight } from "lucide-react-native";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/Store/reducers";
 // Type definition for Group
 interface Group {
   id: string;
@@ -17,7 +18,7 @@ interface Group {
 export const ShoppingListScreen: React.FC = () => {
   // Lazy loading the groups with user ID
   const [fetchGroups, { data, isLoading, isError, currentData }] = useLazyGetUserGroupQuery();
-  const [getMe, {data: userInfo}] = useLazyGetMeQuery();
+	const userInfo=useSelector((state:{auth:AuthState})=>(state.auth.user))
   const [userId, setUserId] = useState<string>("");
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
@@ -29,9 +30,6 @@ export const ShoppingListScreen: React.FC = () => {
     // fetchGroups(userInfo.id);
   }, [fetchGroups, userInfo]);
 
-  useEffect(() => {
-    getMe()
-  }, [getMe])
   useEffect(() => {
     console.log("data",data)
   }, [data])

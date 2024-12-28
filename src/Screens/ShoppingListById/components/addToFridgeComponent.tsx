@@ -24,7 +24,6 @@ import {
     useLazyGetAllUserQuery,
 } from "@/Services/shoppingList";
 
-import { useLazyGetMeQuery } from "@/Services";
 
 type ShoppingListRouteParams = {
     ShoppingListById: { shoppingId: string; groupId: string };

@@ -3,46 +3,59 @@ import { Trash2, Check } from "lucide-react-native";
 import { Plus } from "lucide-react-native";
 import moment from "moment";
 import lodash from "lodash";
-import { Dropdown } from 'react-native-searchable-dropdown-kj'
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { Dropdown } from "react-native-searchable-dropdown-kj";
 import {
-    View,
-    Text,
-    StyleSheet,
-    ActivityIndicator,
-    TouchableOpacity,
-    ScrollView,
-    TextInput,
-    TouchableHighlight
+	DateTimePickerAndroid,
+	DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import {
+	View,
+	Text,
+	StyleSheet,
+	ActivityIndicator,
+	TouchableOpacity,
+	ScrollView,
+	TextInput,
+	TouchableHighlight,
 } from "react-native";
 import { SwipeRow } from "react-native-swipe-list-view";
 import { Toast, Form, Input } from "@ant-design/react-native";
-import { FormControl, Select, WarningOutlineIcon, CheckIcon, Modal, Button, Image, FlatList } from "native-base";
+import {
+	FormControl,
+	Select,
+	WarningOutlineIcon,
+	CheckIcon,
+	Modal,
+	Button,
+	Image,
+	FlatList,
+} from "native-base";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import {
-    useLazyGetItemByShoppingListIdQuery,
-    useUpdateShoppingListMutation,
-    useLazyGetAllUnitQuery,
-    useLazyGetAllFoodQuery,
-    useLazyGetAllUserQuery,
-    useAddShoppingItemToFridgeMutation,
-    useDeleteShoppingItemByIdMutation,
+	useLazyGetItemByShoppingListIdQuery,
+	useUpdateShoppingListMutation,
+	useLazyGetAllUnitQuery,
+	useLazyGetAllFoodQuery,
+	useLazyGetAllUserQuery,
+	useAddShoppingItemToFridgeMutation,
+	useDeleteShoppingItemByIdMutation,
 } from "@/Services/shoppingList";
 
-import { useLazyGetMeQuery } from "@/Services";
 import { useFocus } from "native-base/lib/typescript/components/primitives";
+import { AuthState } from "@/Store/reducers";
+import { useSelector } from "react-redux";
 
 type ShoppingListRouteParams = {
-    ShoppingListById: { shoppingId: string; groupId: string };
+	ShoppingListById: { shoppingId: string; groupId: string };
 };
 
 type Item = {
-    id: string;
-    food: string;
-    unit: string;
-    assignee: string;
-    quantity: number;
-    [key: string]: string | number | undefined
+	id: string;
+	food: string;
+	unit: string;
+	assignee: string;
+	quantity: number;
+	[key: string]: string | number | undefined;
 };
 
 // const ItemRow: React.FC<{
@@ -204,7 +217,6 @@ type Item = {
 //                             </FormControl.ErrorMessage>
 //                         </FormControl>
 
-
 //                         {/* {!item.id && <Button onPress={onRemove} colorScheme="danger" size="sm">
 //                         Remove
 //                         </Button>}
@@ -231,206 +243,218 @@ type Item = {
 
 // const mockerUserId = '67ecf6e5-c4aa-461f-930f-e03fe0f8f6b2'
 export const ShoppingListById: React.FC = () => {
-    const route = useRoute<RouteProp<ShoppingListRouteParams, "ShoppingListById">>();
-    // const userData = useSelector((state:any) => state?.userApi?.queries[`getMe`]?.data);
-    const [date, setDate] = useState(new Date())
+	const route =
+		useRoute<RouteProp<ShoppingListRouteParams, "ShoppingListById">>();
+	// const userData = useSelector((state:any) => state?.userApi?.queries[`getMe`]?.data);
+	const [date, setDate] = useState(new Date());
 
-    const showDatepicker = () => {
-        showMode('date');
-    };
-    const [getMe, { data: userInfo }] = useLazyGetMeQuery();
-    // const mockerUserId = userData?.id;
-    const { groupId, shoppingId } = route.params;
-    const [pagination, setPagination] = useState({ page: 1, per: 10 });
-    const [selectedItem, setSelectedItem] = useState<Item>();
-    const [fetchShoppingListById, { data: rows = [], isLoading, isError }] = useLazyGetItemByShoppingListIdQuery();
-    const [updateShoppingList, { isError: isUpdateError, isLoading: isUpdateLoading }] = useUpdateShoppingListMutation();
-    const [addItemToFridge, { isError: isAddError }] = useAddShoppingItemToFridgeMutation();
-    const [deleteShoppingItem, { isError: isDeleteError }] = useDeleteShoppingItemByIdMutation();
-    const [form] = Form.useForm();
-    const [editForm] = Form.useForm();
-    const [createForm] = Form.useForm();
-    const [fetchUnitList, { data: units = [] }] = useLazyGetAllUnitQuery();
-    const [fetchFoodList, { data: foods = [] }] = useLazyGetAllFoodQuery();
-    const [fetchUserList, { data: users = [] }] = useLazyGetAllUserQuery();
-    const [formAddFridge] = Form.useForm();
-    const [items, setItems] = useState<Item[]>([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [showCalendar, setShowCalendar] = useState(false);
-    const deleteShoppingItemById = async (item: Item) => {
-        try {
-            await deleteShoppingItem(item.id)
-            if (isDeleteError) {
-                Toast.show("Failed");
-                return;
-            }
-            Toast.show("success")
-        }
-        catch (e) {
-            console.log(e);
-            Toast.show("FAILED")
-        }
-        finally {
-            await fetchShoppingListById({ shoppingId, ...pagination });
-            setIsModalVisible(false)
-        }
-    }
-    useEffect(() => {
-        if (userInfo) {
-            fetchShoppingListById({ shoppingId, ...pagination });
-            fetchFoodList({ userId: userInfo.id });
-            fetchUnitList({ userId: userInfo.id });
-            fetchUserList({ groupId });
-        }
-    }, [userInfo, groupId, shoppingId, fetchShoppingListById, fetchFoodList, fetchUnitList, fetchUserList]);
+	const showDatepicker = () => {
+		showMode("date");
+	};
+	const userInfo = useSelector((state: { auth: AuthState }) => state.auth.user);
+	// const mockerUserId = userData?.id;
+	const { groupId, shoppingId } = route.params;
+	const [pagination, setPagination] = useState({ page: 1, per: 10 });
+	const [selectedItem, setSelectedItem] = useState<Item>();
+	const [fetchShoppingListById, { data: rows = [], isLoading, isError }] =
+		useLazyGetItemByShoppingListIdQuery();
+	const [
+		updateShoppingList,
+		{ isError: isUpdateError, isLoading: isUpdateLoading },
+	] = useUpdateShoppingListMutation();
+	const [addItemToFridge, { isError: isAddError }] =
+		useAddShoppingItemToFridgeMutation();
+	const [deleteShoppingItem, { isError: isDeleteError }] =
+		useDeleteShoppingItemByIdMutation();
+	const [form] = Form.useForm();
+	const [editForm] = Form.useForm();
+	const [createForm] = Form.useForm();
+	const [fetchUnitList, { data: units = [] }] = useLazyGetAllUnitQuery();
+	const [fetchFoodList, { data: foods = [] }] = useLazyGetAllFoodQuery();
+	const [fetchUserList, { data: users = [] }] = useLazyGetAllUserQuery();
+	const [formAddFridge] = Form.useForm();
+	const [items, setItems] = useState<Item[]>([]);
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [showCalendar, setShowCalendar] = useState(false);
+	const deleteShoppingItemById = async (item: Item) => {
+		try {
+			await deleteShoppingItem(item.id);
+			if (isDeleteError) {
+				Toast.show("Failed");
+				return;
+			}
+			Toast.show("success");
+		} catch (e) {
+			console.log(e);
+			Toast.show("FAILED");
+		} finally {
+			await fetchShoppingListById({ shoppingId, ...pagination });
+			setIsModalVisible(false);
+		}
+	};
+	useEffect(() => {
+		if (userInfo) {
+			fetchShoppingListById({ shoppingId, ...pagination });
+			fetchFoodList({ userId: userInfo.id });
+			fetchUnitList({ userId: userInfo.id });
+			fetchUserList({ groupId });
+		}
+	}, [
+		userInfo,
+		groupId,
+		shoppingId,
+		fetchShoppingListById,
+		fetchFoodList,
+		fetchUnitList,
+		fetchUserList,
+	]);
 
-    useEffect(() => {
-        getMe()
-    }, [])
-    useEffect(() => {
-        if (rows && rows.length >= 0) {
-            const updatedItems = rows.map((row, index) => {
-                if (index == 0) {
-                    form.setFieldValue('date', row.shopping.date);
-                    form.setFieldValue('name', row.shopping.name)
-                }
-                return ({
-                    id: row.id,
-                    food: row.food_id || "",
-                    unit: row.unit_id || "",
-                    assignee: row.task.user_id || "",
-                    quantity: row.quantity || 0,
-                })
-            });
-            setItems((prev) => [...updatedItems]);
-        }
-    }, [rows]);
-    const [action, setAction] = useState<"addToFridge" | "delete" | "edit" | 'create' | null>(null);
-    const showEditModal = (item: Item) => {
-        editForm.setFieldsValue(item)
-        setSelectedItem(item);
-        setAction("edit");
-        setIsModalVisible(true);
-    }
-    const handleEditItem = async () => {
-        try {
-            const values = await editForm.validateFields();
-            const payload = {
-                groupId: groupId,
-                foods: [
-                    {
-                        food_id: values.food_id,
-                        quantity: values.quantity,
-                        user_id: values.assignee,
-                        unit_id: values.unit
-                    }
-                ]
-            }
-            await updateShoppingList({ id: shoppingId, ...payload });
-            if (isUpdateError) {
-                Toast.show("Failed")
-            }
-            else {
-                Toast.show("Success")
-                console.log("successfully save shopping list")
-            }
-            setIsModalVisible(false);
-            await fetchShoppingListById({ shoppingId, ...pagination });
-        }
-        catch (e) {
-            Toast.show("Failed")
-        }
-    }
-    const handleCreateItem = async () => {
-        try {
-            const values = await createForm.validateFields();
-            const payload = {
-                groupId: groupId,
-                foods: [
-                    {
-                        food_id: values.food,
-                        quantity: values.quantity,
-                        user_id: values.assignee,
-                        unit_id: values.unit
-                    }
-                ]
-            }
-            await updateShoppingList({ id: shoppingId, ...payload });
-            if (isUpdateError) {
-                Toast.show("Failed")
-            }
-            else {
-                Toast.show("Success")
-                console.log("successfully save shopping list")
-            }
-            setIsModalVisible(false)
-            await fetchShoppingListById({ shoppingId, ...pagination });
-        }
-        catch (e) {
-            Toast.show("Failed")
-        }
-    }
-    const onChange = (event, selectedDate) => {
-        const currentDate = selectedDate;
-        console.log(currentDate)
-        setDate(currentDate)
-        formAddFridge.setFieldValue("date", moment(currentDate).format("YYYY-MM-DD"))
-    };
+	useEffect(() => {
+		if (rows && rows.length >= 0) {
+			const updatedItems = rows.map((row, index) => {
+				if (index == 0) {
+					form.setFieldValue("date", row.shopping.date);
+					form.setFieldValue("name", row.shopping.name);
+				}
+				return {
+					id: row.id,
+					food: row.food_id || "",
+					unit: row.unit_id || "",
+					assignee: row.task.user_id || "",
+					quantity: row.quantity || 0,
+				};
+			});
+			setItems((prev) => [...updatedItems]);
+		}
+	}, [rows]);
+	const [action, setAction] = useState<
+		"addToFridge" | "delete" | "edit" | "create" | null
+	>(null);
+	const showEditModal = (item: Item) => {
+		editForm.setFieldsValue(item);
+		setSelectedItem(item);
+		setAction("edit");
+		setIsModalVisible(true);
+	};
+	const handleEditItem = async () => {
+		try {
+			const values = await editForm.validateFields();
+			const payload = {
+				groupId: groupId,
+				foods: [
+					{
+						food_id: values.food_id,
+						quantity: values.quantity,
+						user_id: values.assignee,
+						unit_id: values.unit,
+					},
+				],
+			};
+			await updateShoppingList({ id: shoppingId, ...payload });
+			if (isUpdateError) {
+				Toast.show("Failed");
+			} else {
+				Toast.show("Success");
+				console.log("successfully save shopping list");
+			}
+			setIsModalVisible(false);
+			await fetchShoppingListById({ shoppingId, ...pagination });
+		} catch (e) {
+			Toast.show("Failed");
+		}
+	};
+	const handleCreateItem = async () => {
+		try {
+			const values = await createForm.validateFields();
+			const payload = {
+				groupId: groupId,
+				foods: [
+					{
+						food_id: values.food,
+						quantity: values.quantity,
+						user_id: values.assignee,
+						unit_id: values.unit,
+					},
+				],
+			};
+			await updateShoppingList({ id: shoppingId, ...payload });
+			if (isUpdateError) {
+				Toast.show("Failed");
+			} else {
+				Toast.show("Success");
+				console.log("successfully save shopping list");
+			}
+			setIsModalVisible(false);
+			await fetchShoppingListById({ shoppingId, ...pagination });
+		} catch (e) {
+			Toast.show("Failed");
+		}
+	};
 
+	const showMode = (currentMode: "date" | "time" | undefined) => {
+		const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+			if (selectedDate) {
+				const currentDate = selectedDate;
+				console.log(currentDate);
+				setDate(currentDate);
+				formAddFridge.setFieldValue(
+					"date",
+					moment(currentDate).format("YYYY-MM-DD")
+				);
+			}
+		};
+		DateTimePickerAndroid.open({
+			value: date,
+			onChange,
+			mode: currentMode,
+			is24Hour: true,
+		});
+	};
 
-    const showMode = (currentMode) => {
-        DateTimePickerAndroid.open({
-            value: date,
-            onChange,
-            mode: currentMode,
-            is24Hour: true,
-        });
-    };
+	const showCreateModal = () => {
+		setAction("create");
+		setIsModalVisible(true);
+	};
+	const saveItemToFridge = async (record: any) => {
+		try {
+			await addItemToFridge(record);
+			if (isAddError) {
+				Toast.show("failed to add");
+				return;
+			}
+			Toast.show("Success");
+		} catch (e) {
+			Toast.show("Failed");
+		} finally {
+			await fetchShoppingListById({ shoppingId, ...pagination });
+			formAddFridge.resetFields();
+			setIsModalVisible(false);
+		}
+	};
 
-    const showCreateModal = () => {
-        setAction("create")
-        setIsModalVisible(true)
-    }
-    const saveItemToFridge = async (record: any) => {
-        try {
-            await addItemToFridge(record);
-            if (isAddError) {
-                Toast.show("failed to add");
-                return;
-            }
-            Toast.show("Success");
-        }
-        catch (e) {
-            Toast.show("Failed")
-        }
-        finally {
-            await fetchShoppingListById({ shoppingId, ...pagination })
-            formAddFridge.resetFields();
-            setIsModalVisible(false)
-        }
-    }
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Shopping List</Text>
-            {!userInfo || isLoading ? (
-                <ActivityIndicator size="large" />
-            ) : isError ? (
-                // <Text style={styles.errorText}>Failed to load data</Text>
-                <ScrollView style={styles.centered}>
-                    <Text style={styles.errorText}>Failed to load groups. Please try again.</Text>
-                    <Button onPress={() => fetchShoppingListById({ shoppingId, ...pagination })}>
-                        Retry
-                    </Button>
-                </ScrollView>
-            ) :
-                (
-                    <>
-
-                        {/* <TouchableOpacity style={styles.addToCartButton} onPress={showCreateModal}>
+	return (
+		<View style={styles.container}>
+			<Text style={styles.title}>Shopping List</Text>
+			{!userInfo || isLoading ? (
+				<ActivityIndicator size="large" />
+			) : isError ? (
+				// <Text style={styles.errorText}>Failed to load data</Text>
+				<ScrollView style={styles.centered}>
+					<Text style={styles.errorText}>
+						Failed to load groups. Please try again.
+					</Text>
+					<Button
+						onPress={() => fetchShoppingListById({ shoppingId, ...pagination })}
+					>
+						Retry
+					</Button>
+				</ScrollView>
+			) : (
+				<>
+					{/* <TouchableOpacity style={styles.addToCartButton} onPress={showCreateModal}>
                         <Text style={styles.addToCartText}>Add New</Text>
                     </TouchableOpacity> */}
-                        {/* <Form form={form}>
+					{/* <Form form={form}>
                         <View style={{ flex: 1 }}>
                             {items.map((item, index) => (
                                 <ItemRow
@@ -449,232 +473,284 @@ export const ShoppingListById: React.FC = () => {
                             ))}
                         </View>
                     </Form> */}
-                        <FlatList
-                            data={items}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({ item }) => {
-                                return (
-                                    <SwipeRow
-                                        rightOpenValue={-150}
-                                    >
-                                        <View style={styles.rowBack}>
-                                            <TouchableOpacity
-                                                style={[styles.backRightBtn, styles.backRightBtnLeft]}
-                                                onPress={() => {
-                                                    setIsModalVisible(true);
-                                                    setSelectedItem(curr => item);
-                                                    setAction(curr => 'addToFridge')
-                                                }}
-                                            >
-                                                <Check color={"white"}></Check>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                style={[styles.backRightBtn, styles.backRightBtnRight]}
-                                                onPress={() => {
-                                                    setIsModalVisible(true);
-                                                    setSelectedItem(curr => item);
-                                                    setAction(curr => 'delete')
-                                                }}
-                                            >
-                                                <Trash2 color={'white'}></Trash2>
-                                            </TouchableOpacity>
-                                        </View>
-                                        {/* <TouchableOpacity style={styles.deleteButton} onPress={() => {
+					<FlatList
+						data={items}
+						keyExtractor={(item) => item.id}
+						renderItem={({ item }) => {
+							return (
+                                //@ts-ignore
+								<SwipeRow rightOpenValue={-150}>
+									<View style={styles.rowBack}>
+										<TouchableOpacity
+											style={[styles.backRightBtn, styles.backRightBtnLeft]}
+											onPress={() => {
+												setIsModalVisible(true);
+												setSelectedItem((curr) => item);
+												setAction((curr) => "addToFridge");
+											}}
+										>
+											<Check color={"white"}></Check>
+										</TouchableOpacity>
+										<TouchableOpacity
+											style={[styles.backRightBtn, styles.backRightBtnRight]}
+											onPress={() => {
+												setIsModalVisible(true);
+												setSelectedItem((curr) => item);
+												setAction((curr) => "delete");
+											}}
+										>
+											<Trash2 color={"white"}></Trash2>
+										</TouchableOpacity>
+									</View>
+									{/* <TouchableOpacity style={styles.deleteButton} onPress={() => {
                                             setIsModalVisible(true);
                                             setSelectedItem(curr => item);
                                             setAction(curr => 'delete')
                                         }}>
                                             <Trash2></Trash2>
                                         </TouchableOpacity> */}
-                                        <TouchableHighlight onPress={() => { showEditModal(item) }}>
-                                            <View style={styles.itemContainer} >
-                                                <Image
-                                                    source={{
-                                                        uri: "https://wallpaperaccess.com/full/317501.jpg"
-                                                    }}
-                                                    alt="Image description"
-                                                    size={"xl"}
-                                                    borderRadius={10}
-                                                />
-                                                <View style={{ flexGrow: 1, justifyContent: "center", alignItems:"center" }}>
-                                                    <Text style={{fontWeight:"bold"}}>
-                                                        {item.food}
-                                                    </Text>
-                                                    <View style={{flexDirection: "row", margin: 10, justifyContent:"space-between", gap:5}}>
-                                                        <Text>
-                                                            {item.quantity}
-                                                        </Text>
-                                                        <Text ellipsizeMode="clip" numberOfLines={1}>
-                                                            {item.unit}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-                                            </View>
-                                        </TouchableHighlight>
-                                    </SwipeRow>
-                                )
-                            }}
-                        >
-                        </FlatList>
+                                    <View>
+                                    <TouchableHighlight
+										onPress={() => {
+											showEditModal(item);
+										}}
+									>
+										<View style={styles.itemContainer}>
+											<Image
+												source={{
+													uri: "https://wallpaperaccess.com/full/317501.jpg",
+												}}
+												alt="Image description"
+												size={"xl"}
+												borderRadius={10}
+											/>
+											<View
+												style={{
+													flexGrow: 1,
+													justifyContent: "center",
+													alignItems: "center",
+												}}
+											>
+												<Text style={{ fontWeight: "bold" }}>{item.food}</Text>
+												<View
+													style={{
+														flexDirection: "row",
+														margin: 10,
+														justifyContent: "space-between",
+														gap: 5,
+													}}
+												>
+													<Text>{item.quantity}</Text>
+													<Text ellipsizeMode="clip" numberOfLines={1}>
+														{item.unit}
+													</Text>
+												</View>
+											</View>
+										</View>
+									</TouchableHighlight>
+                                    </View>
+								</SwipeRow>
+							);
+						}}
+					></FlatList>
+				</>
+			)}
+			<TouchableOpacity style={styles.fab} onPress={showCreateModal}>
+				<Plus color="white" size={25} />
+			</TouchableOpacity>
+			<Modal isOpen={isModalVisible} onClose={() => setIsModalVisible(false)}>
+				<Modal.Content>
+					{action == "addToFridge" && selectedItem && (
+						<>
+							<Modal.CloseButton />
+							<Modal.Header>Add Item To The Fridge</Modal.Header>
+							<Modal.Body>
+								<Form form={formAddFridge}>
+									<FormControl isInvalid={!selectedItem.food}>
+										<Select
+											placeholder="Select Food"
+											selectedValue={selectedItem.food}
+											isDisabled={true}
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+										>
+											{foods.map((food) => (
+												<Select.Item
+													key={food.id}
+													label={food.name}
+													value={food.id}
+												/>
+											))}
+										</Select>
+										<FormControl.ErrorMessage
+											leftIcon={<WarningOutlineIcon size="xs" />}
+										>
+											Please select a food item!
+										</FormControl.ErrorMessage>
+									</FormControl>
+									<FormControl isInvalid={!selectedItem.quantity}>
+										<Input
+											type="number"
+											placeholder="Enter Quantity"
+											// keyboardType="numeric"
+											disabled={true}
+											value={`${selectedItem.quantity}`}
+										/>
+									</FormControl>
+									<FormControl isInvalid={!selectedItem.unit}>
+										<Select
+											placeholder="Select Unit"
+											selectedValue={selectedItem.unit}
+											isDisabled={true}
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+										>
+											{units.map((unit) => (
+												<Select.Item
+													key={unit.id}
+													label={unit.name}
+													value={unit.id}
+												/>
+											))}
+										</Select>
+										<FormControl.ErrorMessage
+											leftIcon={<WarningOutlineIcon size="xs" />}
+										>
+											Please select a unit!
+										</FormControl.ErrorMessage>
+									</FormControl>
 
-                    </>
-                )}
-            <TouchableOpacity style={styles.fab} onPress={showCreateModal}>
-                <Plus color="white" size={25} />
-            </TouchableOpacity>
-            <Modal
-                isOpen={isModalVisible}
-                onClose={() => setIsModalVisible(false)}
-            >
-                <Modal.Content>
-                    {action == 'addToFridge' && selectedItem &&
-                        <>
-                            <Modal.CloseButton />
-                            <Modal.Header>
-                                Add Item To The Fridge
-                            </Modal.Header>
-                            <Modal.Body>
-                                <Form form={formAddFridge}>
-                                    <FormControl isInvalid={!selectedItem.food}>
-
-                                        <Select
-                                            placeholder="Select Food"
-                                            selectedValue={selectedItem.food}
-                                            isDisabled={true}
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                        >
-                                            {foods.map((food) => (
-                                                <Select.Item key={food.id} label={food.name} value={food.id} />
-                                            ))}
-                                        </Select>
-                                        <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                                            Please select a food item!
-                                        </FormControl.ErrorMessage>
-                                    </FormControl>
-                                    <FormControl isInvalid={!selectedItem.quantity}>
-                                        <Input
-                                            type="number"
-                                            placeholder="Enter Quantity"
-                                            // keyboardType="numeric"
-                                            disabled={true}
-                                            value={`${selectedItem.quantity}`}
-                                        />
-                                    </FormControl>
-                                    <FormControl isInvalid={!selectedItem.unit}>
-                                        <Select
-                                            placeholder="Select Unit"
-                                            selectedValue={selectedItem.unit}
-                                            isDisabled={true}
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                        >
-                                            {units.map((unit) => (
-                                                <Select.Item key={unit.id} label={unit.name} value={unit.id} />
-                                            ))}
-                                        </Select>
-                                        <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                                            Please select a unit!
-                                        </FormControl.ErrorMessage>
-                                    </FormControl>
-
-                                    <FormControl isInvalid={!selectedItem.assignee}>
-                                        <Select
-                                            placeholder="Select Assignee"
-                                            selectedValue={selectedItem.assignee}
-                                            isDisabled={true}
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                        >
-                                            {users.map((user) => (
-                                                <Select.Item key={user.id} label={user.name} value={user.id} />
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                    <Form.Item name="date" label="Expired Date" rules={[{ required: true, message: "Please select a date" }]}
-                                    >
-                                        <Text>
-                                            {moment(date).format("YYYY-DD-MM")}
-                                        </Text>
-                                    </Form.Item>
-                                    <Button onPress={() => showDatepicker()}>
-                                        Choose Date
-                                    </Button>
-                                </Form>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <Button.Group space={2}>
-                                    <Button variant="ghost" colorScheme="blueGray" onPress={() => {
-                                        setIsModalVisible(false);
-                                    }}>
-                                        Cancel
-                                    </Button>
-                                    <Button onPress={async () => {
-                                        setIsModalVisible(false);
-                                        const values = await formAddFridge.validateFields();
-                                        await saveItemToFridge({
-                                            expired_at: values.date,
-                                            food_id: selectedItem.food,
-                                            unit_id: selectedItem.unit,
-                                            quantity: selectedItem.quantity,
-                                            group_id: groupId,
-                                            shopping_id: selectedItem.id
-                                        })
-                                    }}>
-                                        Save To Fridge
-                                    </Button>
-                                </Button.Group>
-                            </Modal.Footer>
-                        </>
-                    }
-                    {action == 'delete' && selectedItem &&
-                        <>
-                            <Modal.CloseButton />
-                            <Modal.Header>
-                                Delete Item
-                            </Modal.Header>
-                            <Modal.Body>
-                                <Text>
-                                    Are you sure you want to delete this item?
-                                </Text>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <Button.Group space={2}>
-                                    <Button variant="ghost" colorScheme="blueGray" onPress={() => {
-                                        setIsModalVisible(false);
-                                    }}>
-                                        Cancel
-                                    </Button>
-                                    <Button onPress={async () => {
-                                        await deleteShoppingItemById(selectedItem)
-                                    }}>
-                                        Delete
-                                    </Button>
-                                </Button.Group>
-                            </Modal.Footer>
-                        </>}
-                    {action == 'edit' && selectedItem &&
-                        <>
-                            <Modal.CloseButton />
-                            <Modal.Header>
-                                Edit
-                            </Modal.Header>
-                            <Modal.Body>
-                                <Form form={editForm}>
-                                    <Form.Item name={'food'} rules={[{ required: true, message: "Must not Empty" }]}>
-                                        <Select
-                                            placeholder="Select Food"
-                                            defaultValue={selectedItem.food}
-                                            // selectedValue={editForm.getFieldValue('food') || selectedItem.food}
-                                            onValueChange={(value) => {
-                                                editForm.setFieldValue('food', value)
-                                            }}
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                        >
-                                            {foods.map((food) => (
-                                                <Select.Item key={food.id} label={food.name} value={food.id} />
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-                                    <Form.Item name={'quantity'} rules={[{ required: true, message: 'Must not empty' }]}>
-                                        {/* <Input
+									<FormControl isInvalid={!selectedItem.assignee}>
+										<Select
+											placeholder="Select Assignee"
+											selectedValue={selectedItem.assignee}
+											isDisabled={true}
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+										>
+											{users.map((user) => (
+												<Select.Item
+													key={user.id}
+													label={user.name}
+													value={user.id}
+												/>
+											))}
+										</Select>
+									</FormControl>
+									<Form.Item
+										name="date"
+										label="Expired Date"
+										rules={[
+											{ required: true, message: "Please select a date" },
+										]}
+									>
+										<Text>{moment(date).format("YYYY-DD-MM")}</Text>
+									</Form.Item>
+									<Button onPress={() => showDatepicker()}>Choose Date</Button>
+								</Form>
+							</Modal.Body>
+							<Modal.Footer>
+								<Button.Group space={2}>
+									<Button
+										variant="ghost"
+										colorScheme="blueGray"
+										onPress={() => {
+											setIsModalVisible(false);
+										}}
+									>
+										Cancel
+									</Button>
+									<Button
+										onPress={async () => {
+											setIsModalVisible(false);
+											const values = await formAddFridge.validateFields();
+											await saveItemToFridge({
+												expired_at: values.date,
+												food_id: selectedItem.food,
+												unit_id: selectedItem.unit,
+												quantity: selectedItem.quantity,
+												group_id: groupId,
+												shopping_id: selectedItem.id,
+											});
+										}}
+									>
+										Save To Fridge
+									</Button>
+								</Button.Group>
+							</Modal.Footer>
+						</>
+					)}
+					{action == "delete" && selectedItem && (
+						<>
+							<Modal.CloseButton />
+							<Modal.Header>Delete Item</Modal.Header>
+							<Modal.Body>
+								<Text>Are you sure you want to delete this item?</Text>
+							</Modal.Body>
+							<Modal.Footer>
+								<Button.Group space={2}>
+									<Button
+										variant="ghost"
+										colorScheme="blueGray"
+										onPress={() => {
+											setIsModalVisible(false);
+										}}
+									>
+										Cancel
+									</Button>
+									<Button
+										onPress={async () => {
+											await deleteShoppingItemById(selectedItem);
+										}}
+									>
+										Delete
+									</Button>
+								</Button.Group>
+							</Modal.Footer>
+						</>
+					)}
+					{action == "edit" && selectedItem && (
+						<>
+							<Modal.CloseButton />
+							<Modal.Header>Edit</Modal.Header>
+							<Modal.Body>
+								<Form form={editForm}>
+									<Form.Item
+										name={"food"}
+										rules={[{ required: true, message: "Must not Empty" }]}
+									>
+										<Select
+											placeholder="Select Food"
+											defaultValue={selectedItem.food}
+											// selectedValue={editForm.getFieldValue('food') || selectedItem.food}
+											onValueChange={(value) => {
+												editForm.setFieldValue("food", value);
+											}}
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+										>
+											{foods.map((food) => (
+												<Select.Item
+													key={food.id}
+													label={food.name}
+													value={food.id}
+												/>
+											))}
+										</Select>
+									</Form.Item>
+									<Form.Item
+										name={"quantity"}
+										rules={[{ required: true, message: "Must not empty" }]}
+									>
+										{/* <Input
                                             type="number"
                                             placeholder="Enter Quantity"
                                             defaultValue={`${selectedItem.quantity}`}
@@ -686,327 +762,396 @@ export const ShoppingListById: React.FC = () => {
                                                 }
                                             }}
                                         /> */}
-                                        <TextInput
-                                            style={styles.inputNumber}
-                                            onChangeText={(text) => {
-                                                if (text) {
-                                                    createForm.setFieldValue('quantity', Number(text))
-                                                }
-                                            }}
-                                            defaultValue={`${selectedItem.quantity}`}
-                                            keyboardType="numeric"
-                                            placeholder="Enter number"
-                                            placeholderTextColor="#999"
-                                        />
-                                    </Form.Item>
-                                    <Form.Item name={'unit'} rules={[{ required: true, message: 'Must not empty' }]}>
-                                        <Select
-                                            placeholder="Select Unit"
-                                            defaultValue={selectedItem.unit}
-                                            onValueChange={(itemVlue) => editForm.setFieldValue("unit", itemVlue)}
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                        >
-                                            {units.map((unit) => (
-                                                <Select.Item key={unit.id} label={unit.name} value={unit.id} />
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
+										<TextInput
+											style={styles.inputNumber}
+											onChangeText={(text) => {
+												if (text) {
+													createForm.setFieldValue("quantity", Number(text));
+												}
+											}}
+											defaultValue={`${selectedItem.quantity}`}
+											keyboardType="numeric"
+											placeholder="Enter number"
+											placeholderTextColor="#999"
+										/>
+									</Form.Item>
+									<Form.Item
+										name={"unit"}
+										rules={[{ required: true, message: "Must not empty" }]}
+									>
+										<Select
+											placeholder="Select Unit"
+											defaultValue={selectedItem.unit}
+											onValueChange={(itemVlue) =>
+												editForm.setFieldValue("unit", itemVlue)
+											}
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+										>
+											{units.map((unit) => (
+												<Select.Item
+													key={unit.id}
+													label={unit.name}
+													value={unit.id}
+												/>
+											))}
+										</Select>
+									</Form.Item>
 
-                                    <Form.Item name={'assignee'} rules={[{ required: true, message: "Must not empty" }]}>
-                                        <Select
-                                            placeholder="Select Assignee"
-                                            defaultValue={selectedItem.assignee}
-                                            onValueChange={(itemValue) => {
-                                                editForm.setFieldValue("assignee", itemValue)
-                                            }}
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                        >
-                                            {users.map((user) => (
-                                                <Select.Item key={user.id} label={user.name} value={user.id} />
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-                                </Form>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <Button.Group space={2}>
-                                    <Button variant="ghost" colorScheme="blueGray" onPress={() => {
-                                        setIsModalVisible(false);
-                                    }}>
-                                        Cancel
-                                    </Button>
-                                    <Button onPress={handleEditItem}>
-                                        Save Item
-                                    </Button>
-                                </Button.Group>
-                            </Modal.Footer>
-                        </>
-                    }
-                    {action == 'create' &&
-                        <>
-                            <Modal.CloseButton />
-                            <Modal.Header>
-                                Add Item
-                            </Modal.Header>
-                            <Modal.Body>
-                                <Form form={createForm}>
-                                    <Form.Item name={'food'} rules={[{ required: true, message: "Must not Empty" }]}>
-                                        <Select
-                                            placeholder="Select Food"
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                            onValueChange={(itemValue) => createForm.setFieldValue('food', itemValue)}
-                                        >
-                                            {foods.map((food) => (
-                                                <Select.Item key={food.id} label={food.name} value={food.id} />
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-                                    <Form.Item name={'quantity'} rules={[{ required: true, message: 'Must not empty' }]}>
-                                        <Input
-                                            type="number"
-                                            placeholder="Enter Quantity"
-                                            onChangeText={(value) => {
-                                                if (value) {
-                                                    createForm.setFieldValue('quantity', Number(value))
-                                                }
-                                            }}
-                                        // keyboardType="numeric"
-                                        />
-                                    </Form.Item>
-                                    <Form.Item name={'unit'} rules={[{ required: true, message: 'Must not empty' }]}>
-                                        <Select
-                                            placeholder="Select Unit"
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                            onValueChange={(value) => createForm.setFieldValue('unit', value)}
-                                        >
-                                            {units.map((unit) => (
-                                                <Select.Item key={unit.id} label={unit.name} value={unit.id} />
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
+									<Form.Item
+										name={"assignee"}
+										rules={[{ required: true, message: "Must not empty" }]}
+									>
+										<Select
+											placeholder="Select Assignee"
+											defaultValue={selectedItem.assignee}
+											onValueChange={(itemValue) => {
+												editForm.setFieldValue("assignee", itemValue);
+											}}
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+										>
+											{users.map((user) => (
+												<Select.Item
+													key={user.id}
+													label={user.name}
+													value={user.id}
+												/>
+											))}
+										</Select>
+									</Form.Item>
+								</Form>
+							</Modal.Body>
+							<Modal.Footer>
+								<Button.Group space={2}>
+									<Button
+										variant="ghost"
+										colorScheme="blueGray"
+										onPress={() => {
+											setIsModalVisible(false);
+										}}
+									>
+										Cancel
+									</Button>
+									<Button onPress={handleEditItem}>Save Item</Button>
+								</Button.Group>
+							</Modal.Footer>
+						</>
+					)}
+					{action == "create" && (
+						<>
+							<Modal.CloseButton />
+							<Modal.Header>Add Item</Modal.Header>
+							<Modal.Body>
+								<Form form={createForm}>
+									<Form.Item
+										name={"food"}
+										rules={[{ required: true, message: "Must not Empty" }]}
+									>
+										<Select
+											placeholder="Select Food"
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+											onValueChange={(itemValue) =>
+												createForm.setFieldValue("food", itemValue)
+											}
+										>
+											{foods.map((food) => (
+												<Select.Item
+													key={food.id}
+													label={food.name}
+													value={food.id}
+												/>
+											))}
+										</Select>
+									</Form.Item>
+									<Form.Item
+										name={"quantity"}
+										rules={[{ required: true, message: "Must not empty" }]}
+									>
+										<Input
+											type="number"
+											placeholder="Enter Quantity"
+											onChangeText={(value:string) => {
+												if (value) {
+													createForm.setFieldValue("quantity", Number(value));
+												}
+											}}
+											// keyboardType="numeric"
+										/>
+									</Form.Item>
+									<Form.Item
+										name={"unit"}
+										rules={[{ required: true, message: "Must not empty" }]}
+									>
+										<Select
+											placeholder="Select Unit"
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+											onValueChange={(value) =>
+												createForm.setFieldValue("unit", value)
+											}
+										>
+											{units.map((unit) => (
+												<Select.Item
+													key={unit.id}
+													label={unit.name}
+													value={unit.id}
+												/>
+											))}
+										</Select>
+									</Form.Item>
 
-                                    <Form.Item name={'assignee'} rules={[{ required: true, message: "Must not empty" }]}>
-                                        <Select
-                                            placeholder="Select Assignee"
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
-                                            onValueChange={(value) => createForm.setFieldValue('assignee', value)}
-                                        >
-                                            {users.map((user) => (
-                                                <Select.Item key={user.id} label={user.name} value={user.id} />
-                                            ))}
-                                        </Select>
-                                    </Form.Item>
-
-
-                                </Form>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <Button.Group space={2}>
-                                    <Button variant="ghost" colorScheme="blueGray" onPress={() => {
-                                        setIsModalVisible(false);
-                                    }}>
-                                        Cancel
-                                    </Button>
-                                    <Button isLoading={isUpdateLoading} onPress={handleCreateItem}>
-                                        Save Item
-                                    </Button>
-                                </Button.Group>
-                            </Modal.Footer>
-                        </>
-
-                    }
-                </Modal.Content>
-            </Modal>
-        </View>
-
-    );
+									<Form.Item
+										name={"assignee"}
+										rules={[{ required: true, message: "Must not empty" }]}
+									>
+										<Select
+											placeholder="Select Assignee"
+											_selectedItem={{
+												bg: "teal.600",
+												endIcon: <CheckIcon size={5} />,
+											}}
+											onValueChange={(value) =>
+												createForm.setFieldValue("assignee", value)
+											}
+										>
+											{users.map((user) => (
+												<Select.Item
+													key={user.id}
+													label={user.name}
+													value={user.id}
+												/>
+											))}
+										</Select>
+									</Form.Item>
+								</Form>
+							</Modal.Body>
+							<Modal.Footer>
+								<Button.Group space={2}>
+									<Button
+										variant="ghost"
+										colorScheme="blueGray"
+										onPress={() => {
+											setIsModalVisible(false);
+										}}
+									>
+										Cancel
+									</Button>
+									<Button
+										isLoading={isUpdateLoading}
+										onPress={handleCreateItem}
+									>
+										Save Item
+									</Button>
+								</Button.Group>
+							</Modal.Footer>
+						</>
+					)}
+				</Modal.Content>
+			</Modal>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f9f9f9',
-        padding: 20,
-    },
-    header: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    subHeader: {
-        fontSize: 14,
-        color: '#888',
-        marginBottom: 20,
-    },
-    list: {
-        marginBottom: 20,
-    },
-    rowBack: {
-        alignItems: 'center',
-        backgroundColor: '#DDD',
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        padding: 15,
-        marginBottom: 10,
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    itemContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: "space-between",
-        backgroundColor: '#fff',
-        padding: 15,
-        marginBottom: 10,
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    textContainer: {
-        padding: 10,
-        flex: 1,
-    },
-    itemName: {
-        fontSize: 25,
-        fontWeight: "bold"
-    },
-    quantityContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    button: {
-        width: 30,
-        height: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#eee',
-        borderRadius: 15,
-    },
-    buttonText: {
-        fontSize: 20,
-        color: '#333',
-    },
-    quantity: {
-        marginHorizontal: 10,
-        fontSize: 20,
-    },
-    addToCartButton: {
-        backgroundColor: '#00b894',
-        paddingVertical: 15,
-        alignItems: 'center',
-        borderRadius: 8,
-        marginBottom: 20
-    },
-    addToCartText: {
-        fontSize: 16,
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
-    itemRow: { marginBottom: 16, padding: 10, backgroundColor: "#fff", borderRadius: 8 },
-    errorText: { color: "red", textAlign: "center", marginVertical: 10 },
-    centered: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    dropdown: {
-        margin: 16,
-        height: 50,
-        borderBottomColor: 'gray',
-        borderBottomWidth: 0.5,
-    },
-    fab: {
-        position: 'absolute',
-        bottom: 25,
-        right: 25,
-        backgroundColor: '#007AFF',
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-    },
-    icon: {
-        marginRight: 5,
-    },
-    placeholderStyle: {
-        fontSize: 16,
-    },
-    selectedTextStyle: {
-        fontSize: 16,
-    },
-    iconStyle: {
-        width: 20,
-        height: 20,
-    },
-    inputSearchStyle: {
-        height: 40,
-        fontSize: 16,
-    },
-    deleteButton: {
-        padding: 12,
-        alignItems: 'center',
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        backgroundColor: 'red',
-        marginBottom: 10,
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    inputNumber: {
-        borderWidth: 2,
-        borderColor: "#3498db",
-        borderRadius: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        fontSize: 18,
-        color: "#333",
-        backgroundColor: "#fff",
-    },
-    backTextWhite: {
-        color: '#FFF',
-    },
-    rowFront: {
-        alignItems: 'center',
-        backgroundColor: '#CCC',
-        borderBottomColor: 'black',
-        borderBottomWidth: 1,
-        justifyContent: 'center',
-        height: 50,
-    },
-    backRightBtn: {
-        alignItems: 'center',
-        bottom: 0,
-        justifyContent: 'center',
-        position: 'absolute',
-        top: 0,
-        width: 75,
-    },
-    backRightBtnLeft: {
-        backgroundColor: 'blue',
-        right: 75,
-    },
-    backRightBtnRight: {
-        backgroundColor: 'red',
-        borderRadius: 8,
-        right: 0,
-    },
+	container: {
+		flex: 1,
+		backgroundColor: "#f9f9f9",
+		padding: 20,
+	},
+	header: {
+		fontSize: 18,
+		fontWeight: "bold",
+	},
+	subHeader: {
+		fontSize: 14,
+		color: "#888",
+		marginBottom: 20,
+	},
+	list: {
+		marginBottom: 20,
+	},
+	rowBack: {
+		alignItems: "center",
+		backgroundColor: "#DDD",
+		flex: 1,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		padding: 15,
+		marginBottom: 10,
+		borderRadius: 8,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
+	},
+	itemContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		backgroundColor: "#fff",
+		padding: 15,
+		marginBottom: 10,
+		borderRadius: 8,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
+	},
+	textContainer: {
+		padding: 10,
+		flex: 1,
+	},
+	itemName: {
+		fontSize: 25,
+		fontWeight: "bold",
+	},
+	quantityContainer: {
+		flexDirection: "row",
+		alignItems: "center",
+	},
+	button: {
+		width: 30,
+		height: 30,
+		alignItems: "center",
+		justifyContent: "center",
+		backgroundColor: "#eee",
+		borderRadius: 15,
+	},
+	buttonText: {
+		fontSize: 20,
+		color: "#333",
+	},
+	quantity: {
+		marginHorizontal: 10,
+		fontSize: 20,
+	},
+	addToCartButton: {
+		backgroundColor: "#00b894",
+		paddingVertical: 15,
+		alignItems: "center",
+		borderRadius: 8,
+		marginBottom: 20,
+	},
+	addToCartText: {
+		fontSize: 16,
+		color: "#fff",
+		fontWeight: "bold",
+	},
+	title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
+	itemRow: {
+		marginBottom: 16,
+		padding: 10,
+		backgroundColor: "#fff",
+		borderRadius: 8,
+	},
+	errorText: { color: "red", textAlign: "center", marginVertical: 10 },
+	centered: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	dropdown: {
+		margin: 16,
+		height: 50,
+		borderBottomColor: "gray",
+		borderBottomWidth: 0.5,
+	},
+	fab: {
+		position: "absolute",
+		bottom: 25,
+		right: 25,
+		backgroundColor: "#007AFF",
+		width: 60,
+		height: 60,
+		borderRadius: 30,
+		justifyContent: "center",
+		alignItems: "center",
+		elevation: 5,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.3,
+		shadowRadius: 3,
+	},
+	icon: {
+		marginRight: 5,
+	},
+	placeholderStyle: {
+		fontSize: 16,
+	},
+	selectedTextStyle: {
+		fontSize: 16,
+	},
+	iconStyle: {
+		width: 20,
+		height: 20,
+	},
+	inputSearchStyle: {
+		height: 40,
+		fontSize: 16,
+	},
+	deleteButton: {
+		padding: 12,
+		alignItems: "center",
+		flex: 1,
+		flexDirection: "row",
+		justifyContent: "space-between",
+		backgroundColor: "red",
+		marginBottom: 10,
+		borderRadius: 8,
+		shadowColor: "#000",
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
+	},
+	inputNumber: {
+		borderWidth: 2,
+		borderColor: "#3498db",
+		borderRadius: 10,
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		fontSize: 18,
+		color: "#333",
+		backgroundColor: "#fff",
+	},
+	backTextWhite: {
+		color: "#FFF",
+	},
+	rowFront: {
+		alignItems: "center",
+		backgroundColor: "#CCC",
+		borderBottomColor: "black",
+		borderBottomWidth: 1,
+		justifyContent: "center",
+		height: 50,
+	},
+	backRightBtn: {
+		alignItems: "center",
+		bottom: 0,
+		justifyContent: "center",
+		position: "absolute",
+		top: 0,
+		width: 75,
+	},
+	backRightBtnLeft: {
+		backgroundColor: "blue",
+		right: 75,
+	},
+	backRightBtnRight: {
+		backgroundColor: "red",
+		borderRadius: 8,
+		right: 0,
+	},
 });
