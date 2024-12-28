@@ -8,12 +8,14 @@ import { ArrowRight, Heart, Plus } from "lucide-react-native";
 import AppData from "@/General/Constants/AppData";
 import { useLazyGetMyRecipeQuery, useLazyGetSavedRecipeQuery, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
+import { useToast } from "react-native-toast-notifications";
 
 export const RecipeScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [fetchSavedRecipe, { data: savedRecipes, isLoading, isError, error }] = useLazyGetSavedRecipeQuery();
     const [fetchMyRecipe, { data: myRecipes, isLoading: isLoadingMyRecipe, isError: isErrorMyRecipe, error: errorMyRecipe }] = useLazyGetMyRecipeQuery();
     const [unSavedRecipe, { data: unsavedRecipe }] = useUnsaveRecipeMutation();
+    const toast = useToast();
 
     useEffect(() => {
         const unsubscribeFocus = navigation.addListener('focus', () => {
@@ -30,7 +32,7 @@ export const RecipeScreen = () => {
             fetchSavedRecipe();
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
+            toast.show("Không thể lưu công thức", { placement: "top", type: "warning" });
         }
     }
     const renderSavedRecipe = (item: any) => (
@@ -184,57 +186,59 @@ export const RecipeScreen = () => {
                     <ArrowRight color="white" />
                 </View>
             </TouchableOpacity>
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ flex: 1, marginTop: 10, gap: 10 }}
-            >
-                <View style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    alignItems: "center",
-                }}>
-                    <Text style={{
-                        fontSize: AppData.fontSizes.large,
-                        fontWeight: "500",
-                        color: AppData.colors.text[900],
-                    }}>
-                        {'Công thức của tôi'}
-                    </Text>
-                </View>
-                <View style={{
-                    flexDirection: "row",
-                    flexWrap: "wrap",
-                    justifyContent: "space-between",
-                    marginTop: 10,
-                    gap: 10,
-                }}
+            <View style={{ flex: 1 }}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ marginTop: 10, gap: 10 }}
                 >
-                    {myRecipes && myRecipes.map((item: any) => renderMyRecipe(item))}
-                </View>
-                <View style={{
-                    width: "100%",
-                    flexDirection: "row",
-                    alignItems: "center",
-                }}>
-                    <Text style={{
-                        fontSize: AppData.fontSizes.large,
-                        fontWeight: "500",
-                        color: AppData.colors.text[900],
+                    <View style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        alignItems: "center",
                     }}>
-                        {'Công thức đã lưu'}
-                    </Text>
-                </View>
-                <View style={{
-                    flexDirection: "row",
-                    flexWrap: "wrap",
-                    justifyContent: "space-between",
-                    marginTop: 10,
-                    gap: 10,
-                }}
-                >
-                    {savedRecipes && savedRecipes.map((item: any) => renderSavedRecipe(item))}
-                </View>
-            </ScrollView>
+                        <Text style={{
+                            fontSize: AppData.fontSizes.large,
+                            fontWeight: "500",
+                            color: AppData.colors.text[900],
+                        }}>
+                            {'Công thức của tôi'}
+                        </Text>
+                    </View>
+                    <View style={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                        marginTop: 10,
+                        gap: 10,
+                    }}
+                    >
+                        {myRecipes && myRecipes.map((item: any) => renderMyRecipe(item))}
+                    </View>
+                    <View style={{
+                        width: "100%",
+                        flexDirection: "row",
+                        alignItems: "center",
+                    }}>
+                        <Text style={{
+                            fontSize: AppData.fontSizes.large,
+                            fontWeight: "500",
+                            color: AppData.colors.text[900],
+                        }}>
+                            {'Công thức đã lưu'}
+                        </Text>
+                    </View>
+                    <View style={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                        marginTop: 10,
+                        gap: 10,
+                    }}
+                    >
+                        {savedRecipes && savedRecipes.map((item: any) => renderSavedRecipe(item))}
+                    </View>
+                </ScrollView>
+            </View>
             <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("EDIT_RECIPE", { recipeId: 'create' })}>
                 <Plus color="white" size={25} />
             </TouchableOpacity>

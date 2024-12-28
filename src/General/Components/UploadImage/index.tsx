@@ -1,48 +1,50 @@
-import { uploadImageToCloudinary } from '@/Services/uploadImage';
 import React, { useState } from 'react';
-import { View, Text, Button, Image, ActivityIndicator, Alert } from 'react-native';
-import { launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
+import { View, Text, Button, Image, Alert, ActivityIndicator } from 'react-native';
+import { launchImageLibrary, Asset, ImagePickerResponse } from 'react-native-image-picker';
 
 const UploadImage: React.FC = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [imageUrl, setImageUrl] = useState<string>('');
 
-  // Chọn ảnh từ thư viện
   const selectImage = () => {
     launchImageLibrary(
-      { mediaType: 'photo', quality: 1 }, // chỉ chọn ảnh
+      {
+        mediaType: 'photo', // Chỉ cho phép chọn ảnh
+        quality: 1,         // Chất lượng ảnh
+      },
       (response: ImagePickerResponse) => {
         if (response.didCancel) {
-          console.log('User cancelled image picker');
+          Alert.alert('Thông báo', 'Bạn đã hủy chọn ảnh');
         } else if (response.errorCode) {
-          console.log('ImagePicker Error: ', response.errorMessage);
-        } else {
-          const selectedImage = response.assets ? response.assets[0] : null;
-          if (selectedImage && selectedImage.uri) {
-            setImageUri(selectedImage.uri); // Lưu URI ảnh đã chọn
-          }
+          Alert.alert('Lỗi', `Có lỗi xảy ra: ${response.errorMessage}`);
+        } else if (response.assets && response.assets.length > 0) {
+          const selectedImage: Asset = response.assets[0];
+          setImageUri(selectedImage.uri || null); // Lưu URI của ảnh
         }
       }
     );
   };
 
-  // Xử lý upload ảnh (nếu có chọn ảnh)
   const handleUploadImage = async () => {
-    if (imageUri) { // Kiểm tra nếu có ảnh
-      try {
-        setLoading(true);
-        const uploadedUrl = await uploadImageToCloudinary(imageUri, 'image.jpg');
-        setImageUrl(uploadedUrl); // Lưu URL ảnh đã tải lên
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        Alert.alert('Error', 'Upload ảnh không thành công!');
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      // Nếu không chọn ảnh, thông báo cho người dùng
-      Alert.alert('Thông báo', 'Bạn chưa chọn ảnh!');
+    if (!imageUri) {
+      Alert.alert('Thông báo', 'Vui lòng chọn ảnh trước!');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Upload ảnh lên server (Cloudinary hoặc server của bạn)
+      // Đây là ví dụ giả lập
+      const fakeUploadUrl = `https://my-server.com/uploaded-image-${Date.now()}`;
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Giả lập thời gian upload
+
+      Alert.alert('Thành công', `Ảnh đã được tải lên: ${fakeUploadUrl}`);
+    } catch (error) {
+      console.error('Upload Error:', error);
+      Alert.alert('Lỗi', 'Upload ảnh không thành công!');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,11 +52,10 @@ const UploadImage: React.FC = () => {
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Button title="Chọn ảnh" onPress={selectImage} />
       {imageUri && <Image source={{ uri: imageUri }} style={{ width: 200, height: 200, marginTop: 10 }} />}
-      {loading ? <ActivityIndicator size="large" color="#0000ff" /> : null}
+      {loading && <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 20 }} />}
       <View style={{ marginTop: 20 }}>
-        <Button title="Upload ảnh lên Cloudinary" onPress={handleUploadImage} />
+        <Button title="Upload ảnh" onPress={handleUploadImage} />
       </View>
-      {imageUrl ? <Text>Ảnh đã được upload: {imageUrl}</Text> : null}
     </View>
   );
 };

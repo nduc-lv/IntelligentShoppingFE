@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { useCreateRecipeMutation, useLazyGetRecipeQuery, useUpdateRecipeMutation } from "@/Services/recipe";
 import { useCreateFoodMutation } from "@/Services/foodGroup";
 import { Toast } from "antd-mobile";
+import { useToast } from "react-native-toast-notifications";
 
 export const EditRecipeScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -27,6 +28,7 @@ export const EditRecipeScreen = ({ route }: any) => {
     const isCreateRecipe = recipeId === 'create';
     const [createRecipe, { isLoading: isLoadingCreateRecipe, isError: isErrorCreateRecipe }] = useCreateRecipeMutation();
     const [updateRecipe, { isLoading: isLoadingUpdateRecipe, isError: isErrorUpdateRecipe }] = useUpdateRecipeMutation();
+    const toast = useToast();
 
     useEffect(() => {
         if (!isCreateRecipe)
@@ -50,11 +52,11 @@ export const EditRecipeScreen = ({ route }: any) => {
                 instructions: recipeInstructions,
                 foods: recipeIngredients
             }).unwrap().then(() => {
-                Toast.show({ content: "Tạo công thức thành cong", icon: "success" });
+                toast.show("Tạo công thức thành công", { placement: "top", type: "success" });
                 navigation.goBack();
             });
         } catch (error) {
-            Toast.show({ content: "Tạo công thức không thành công", icon: "fail" });
+            toast.show("Tạo công thức không thành công", { placement: "top", type: "warning" });
         }
     }
 
@@ -67,11 +69,11 @@ export const EditRecipeScreen = ({ route }: any) => {
                 instructions: recipeInstructions,
                 foods: recipeIngredients
             }).unwrap().then(() => {
-                Toast.show({ content: "Cập nhật công thức thành công", icon: "success" });
+                toast.show("Cập nhật công thức thành công", { placement: "top", type: "success" });
                 navigation.goBack();
             });
         } catch (error) {
-            Toast.show({ content: "Cập nhật công thức không thành công", icon: "fail" });
+            toast.show("Cập nhật công thức không thành công thông", { placement: "top", type: "warning" });
         }
     }
 
@@ -278,7 +280,7 @@ export const EditRecipeScreen = ({ route }: any) => {
                                     fontWeight: "500",
                                     color: AppData.colors.text[900],
                                 }}>
-                                    {foods.find((food: any) => food.id === item?.food_id)?.name}
+                                    {foods && foods.find((food: any) => food.id === item?.food_id)?.name}
                                 </Text>
 
                                 <Text style={{
@@ -328,10 +330,7 @@ export const EditRecipeScreen = ({ route }: any) => {
                                 else
                                     handleUpdateRecipe();
                             } else {
-                                Toast.show({
-                                    content: 'Hãy nhập đầy đủ thông tin',
-                                    icon: 'fail',
-                                });
+                                toast.show('Hãy nhập đày đủ thông tin', { placement: "top", type: "warning" });
                             }
                         }}
                     >
@@ -351,7 +350,7 @@ export const EditRecipeScreen = ({ route }: any) => {
                 <Actionsheet isOpen={isOpenActionSheet}
                     onClose={() => setIsOpenActionSheet(false)}
                     hideDragIndicator
-
+                // key={Math.random()}
                 >
                     <Actionsheet.Content
                         borderTopRadius={24}                >
@@ -362,7 +361,9 @@ export const EditRecipeScreen = ({ route }: any) => {
                         }}>
                             <View style={{ width: "100%", zIndex: 4 }}>
                                 <SearchableDropdown
-                                    options={foodsOptions || []}
+                                    //foodOptions trừ đi các foods đã có trong RecipeIngredients
+                                    // options={foodsOptions || []}
+                                    options={foodsOptions.filter((food: any) => !recipeIngredients.find((ingredient: any) => ingredient?.food_id === food.value))}
                                     placeholder="Tên thực phẩm"
                                     onSelect={(value) => setFormFood(value)}
                                     isDisabled={true}
@@ -411,8 +412,15 @@ export const EditRecipeScreen = ({ route }: any) => {
                                     <SearchableDropdown
                                         options={unitOptions || []}
                                         placeholder="Đơn vị"
-                                        onSelect={(value) => setFormUnit(value)}
-
+                                        onSelect={(value) => {
+                                            const unitName = unitOptions.find((item: any) => item.value === value)?.label;
+                                            if (unitName) {
+                                                setFormUnit(unitName)
+                                            } else {
+                                                setFormUnit(value)
+                                            }
+                                        }
+                                        }
                                     />
                                 </View>
                             </View>
@@ -435,10 +443,7 @@ export const EditRecipeScreen = ({ route }: any) => {
                                         setIsOpenActionSheet(false);
 
                                     } else
-                                        Toast.show({
-                                            content: 'Hãy nhập đầy đủ thông tin',
-                                            icon: 'fail',
-                                        });
+                                        toast.show('Hãy nhập đầy đủ thông tin', { placement: "top", type: "warning" });
                                 }}
                             >
                                 <Text style={{

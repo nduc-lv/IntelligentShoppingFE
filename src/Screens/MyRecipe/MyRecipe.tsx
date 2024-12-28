@@ -8,11 +8,12 @@ import { ArrowRight, Heart, Plus } from "lucide-react-native";
 import AppData from "@/General/Constants/AppData";
 import { useLazyGetMyRecipeQuery, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
+import { useToast } from "react-native-toast-notifications";
 
 export const MyRecipeScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [fetchSavedRecipe, { data: recipes, isLoading, isError, error }] = useLazyGetMyRecipeQuery();
-
+    const toast = useToast();
 
     useEffect(() => {
         const unsubscribeFocus = navigation.addListener('focus', () => {
@@ -43,7 +44,7 @@ export const MyRecipeScreen = () => {
                 gap: 10,
                 marginBottom: 10,
             }]}
-            onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id })}
+            onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id, isMyRecipe: true })}
         >
             <View style={{ position: "relative" }}>
                 <Image
