@@ -35,6 +35,7 @@ import {
   useLazyGetAllFoodQuery,
 } from "@/Services/shoppingList";
 import { useToast } from 'react-native-toast-notifications'
+import { TextInput } from "react-native-paper";
 type ShoppingListRouteParams = {
   ShoppingListDetail: { groupId: string };
 };
@@ -42,7 +43,6 @@ type ShoppingListRouteParams = {
 export const ShoppingListDetail: React.FC = () => {
   const route = useRoute<RouteProp<ShoppingListRouteParams, "ShoppingListDetail">>();
   const userData = useSelector((state: any) => state?.userApi?.queries[`getMe`]?.data);
-  const mockUserId = userData?.id;
   const { groupId } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [fetchShoppingList, { data: rows = [], isLoading, isError }] = useLazyGetShoppingListQuery();
@@ -59,6 +59,7 @@ export const ShoppingListDetail: React.FC = () => {
   const [currentAction, setCurrentAction] = useState<"create" | "edit" | "delete" | null>(null);
   const [selectedItem, setSelectedItem] = useState<Shopping | null>(null);
   const [form] = Form.useForm();
+  form.setFieldValue("date", new Date());
 
   // Load shopping lists on initial render or pagination change
   useEffect(() => {
@@ -72,8 +73,8 @@ export const ShoppingListDetail: React.FC = () => {
 
   // Fetch food and unit data only when needed
   const loadPickerData = useCallback(() => {
-    fetchFoodList({ userId: mockUserId });
-    fetchUnitList({ userId: mockUserId });
+    fetchFoodList({ userId: "" });
+    fetchUnitList({ userId: "" });
     fetchUserList({ groupId: groupId });
   }, [fetchFoodList, fetchUnitList, fetchUserList]);
 
@@ -186,7 +187,7 @@ export const ShoppingListDetail: React.FC = () => {
               {/* Visible Row */}
               <TouchableHighlight underlayColor={'#AAA'} onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>
                 <View style={styles.groupItem}>
-                  <View>
+                  <View style={{gap: 5}}>
                     <Text>{moment(item.date).format("MM-DD-YY")}</Text>
                     <Text>{item.name}</Text>
                   </View>
@@ -227,30 +228,27 @@ export const ShoppingListDetail: React.FC = () => {
                 <Modal.Header>Create</Modal.Header>
                 <Modal.Body>
                   <Form form={form}>
-                    <Form.Item name="date" label="Date" rules={[{ required: true, message: "Please select a date" }]}
+                    <Form.Item name="date" rules={[{ required: true, message: "Please select a date" }]}
                     >
-                      <TouchableOpacity onPress={() => showDatepicker()} style={{display: "flex", flexDirection: "row", gap: 10, justifyContent: "center", alignItems:"center"}}>
+                      <TouchableOpacity onPress={() => showDatepicker()} style={{display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems:"center"}}>
                         <Text style={{fontSize: 20}}>
-                          {moment(date).format("YYYY-MM-DD")}
+                          {moment(form.getFieldValue("date")).format("YYYY-MM-DD")}
                         </Text>
                         <Calendar/>
                       </TouchableOpacity>
-                      {/* <Button onPress={() => showDatepicker()}>
-                        Choose Date
-                      </Button> */}
                     </Form.Item>
 
-                    <Form.Item name="name" label="name" rules={[{ required: true, message: "Please select a date" }]}>
-                      <Input mx="3" placeholder="Input" w="100%" onChangeText={(value) => form.setFieldValue('name', value)} />
+                    <Form.Item name="name" rules={[{ required: true, message: "Please provide a name" }]}>
+                      <TextInput style={styles.input} placeholder="Name" onChangeText={(value) => form.setFieldValue('name', value)} />
                     </Form.Item>
                     {/* Save Button */}
                   </Form>
                   <Modal.Footer>
-                    <Button.Group space={2}>
-                      <Button onPress={saveShoppingList}>
-                        Save Shopping List
+                    <Button.Group style={{flexDirection:"row", justifyContent:"space-between", width:"100%"}}>
+                      <Button style={styles.button} onPress={handleModalClose}>Cancel</Button>
+                      <Button style={styles.button} onPress={saveShoppingList}>
+                        Save
                       </Button>
-                      <Button onPress={handleModalClose}>Cancel</Button>
                     </Button.Group>
                   </Modal.Footer>
                 </Modal.Body>
@@ -302,4 +300,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
 },
+input:{
+  // borderWidth: 1,
+  // borderColor: "#ccc",
+  // borderRadius: 8,
+  padding: 1,
+  fontSize: 20,
+  paddingHorizontal: 1,
+  backgroundColor:"white"
+},
+button: {
+  backgroundColor: "#53B175"
+}
 });

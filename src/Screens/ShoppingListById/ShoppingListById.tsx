@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Trash2, Check } from "lucide-react-native";
+import { Trash2, Check, Calendar } from "lucide-react-native";
 import { Plus } from "lucide-react-native";
 import moment from "moment";
+import Autocomplete from 'react-native-autocomplete-input';
 import lodash from "lodash";
 import { Dropdown } from 'react-native-searchable-dropdown-kj'
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
@@ -29,8 +30,8 @@ import {
     useDeleteShoppingItemByIdMutation,
 } from "@/Services/shoppingList";
 
-import { useLazyGetMeQuery } from "@/Services";
 import { useFocus } from "native-base/lib/typescript/components/primitives";
+import { Unit } from "@/Services/unit";
 
 type ShoppingListRouteParams = {
     ShoppingListById: { shoppingId: string; groupId: string };
@@ -238,8 +239,6 @@ export const ShoppingListById: React.FC = () => {
     const showDatepicker = () => {
         showMode('date');
     };
-    const [getMe, { data: userInfo }] = useLazyGetMeQuery();
-    // const mockerUserId = userData?.id;
     const { groupId, shoppingId } = route.params;
     const [pagination, setPagination] = useState({ page: 1, per: 10 });
     const [selectedItem, setSelectedItem] = useState<Item>();
@@ -254,9 +253,14 @@ export const ShoppingListById: React.FC = () => {
     const [fetchFoodList, { data: foods = [] }] = useLazyGetAllFoodQuery();
     const [fetchUserList, { data: users = [] }] = useLazyGetAllUserQuery();
     const [formAddFridge] = Form.useForm();
+    formAddFridge.setFieldValue("date", new Date())
     const [items, setItems] = useState<Item[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [showCalendar, setShowCalendar] = useState(false);
+    const handleDisplayNameFromId = (data: Array<any>, obj: { id: string }) => {
+        const result = lodash.find(data, obj);
+        console.log(result);
+        return result?.name
+    }
     const deleteShoppingItemById = async (item: Item) => {
         try {
             await deleteShoppingItem(item.id)
@@ -276,17 +280,11 @@ export const ShoppingListById: React.FC = () => {
         }
     }
     useEffect(() => {
-        if (userInfo) {
-            fetchShoppingListById({ shoppingId, ...pagination });
-            fetchFoodList({ userId: userInfo.id });
-            fetchUnitList({ userId: userInfo.id });
-            fetchUserList({ groupId });
-        }
-    }, [userInfo, groupId, shoppingId, fetchShoppingListById, fetchFoodList, fetchUnitList, fetchUserList]);
-
-    useEffect(() => {
-        getMe()
-    }, [])
+        fetchShoppingListById({ shoppingId, ...pagination });
+        fetchFoodList({ userId: "" });
+        fetchUnitList({ userId: "" });
+        fetchUserList({ groupId });
+    }, [groupId, shoppingId, fetchShoppingListById, fetchFoodList, fetchUnitList, fetchUserList]);
     useEffect(() => {
         if (rows && rows.length >= 0) {
             const updatedItems = rows.map((row, index) => {
@@ -297,7 +295,7 @@ export const ShoppingListById: React.FC = () => {
                 return ({
                     id: row.id,
                     food: row.food_id || "",
-                    unit: row.unit_id || "",
+                    unit: row.unit_name || "",
                     assignee: row.task.user_id || "",
                     quantity: row.quantity || 0,
                 })
@@ -319,10 +317,11 @@ export const ShoppingListById: React.FC = () => {
                 groupId: groupId,
                 foods: [
                     {
-                        food_id: values.food_id,
+                        id: selectedItem?.id,
+                        food_id: values.food,
                         quantity: values.quantity,
                         user_id: values.assignee,
-                        unit_id: values.unit
+                        unit_name: values.unit
                     }
                 ]
             }
@@ -335,6 +334,7 @@ export const ShoppingListById: React.FC = () => {
                 console.log("successfully save shopping list")
             }
             setIsModalVisible(false);
+            editForm.resetFields();
             await fetchShoppingListById({ shoppingId, ...pagination });
         }
         catch (e) {
@@ -351,7 +351,7 @@ export const ShoppingListById: React.FC = () => {
                         food_id: values.food,
                         quantity: values.quantity,
                         user_id: values.assignee,
-                        unit_id: values.unit
+                        unit_name: values.unit
                     }
                 ]
             }
@@ -364,6 +364,7 @@ export const ShoppingListById: React.FC = () => {
                 console.log("successfully save shopping list")
             }
             setIsModalVisible(false)
+            createForm.resetFields();
             await fetchShoppingListById({ shoppingId, ...pagination });
         }
         catch (e) {
@@ -383,6 +384,7 @@ export const ShoppingListById: React.FC = () => {
             value: date,
             onChange,
             mode: currentMode,
+            minimumDate: new Date(),
             is24Hour: true,
         });
     };
@@ -413,16 +415,16 @@ export const ShoppingListById: React.FC = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Shopping List</Text>
-            {!userInfo || isLoading ? (
+            {isLoading ? (
                 <ActivityIndicator size="large" />
             ) : isError ? (
                 // <Text style={styles.errorText}>Failed to load data</Text>
-                <ScrollView style={styles.centered}>
+                <View style={styles.centered}>
                     <Text style={styles.errorText}>Failed to load groups. Please try again.</Text>
                     <Button onPress={() => fetchShoppingListById({ shoppingId, ...pagination })}>
                         Retry
                     </Button>
-                </ScrollView>
+                </View>
             ) :
                 (
                     <>
@@ -449,6 +451,14 @@ export const ShoppingListById: React.FC = () => {
                             ))}
                         </View>
                     </Form> */}
+                        {users && foods && units && items && !items.length
+                            &&
+                            <View>
+                                <Text>
+                                    Your list is empty
+                                </Text>
+                            </View>
+                        }
                         <FlatList
                             data={items}
                             keyExtractor={(item) => item.id}
@@ -488,19 +498,22 @@ export const ShoppingListById: React.FC = () => {
                                         </TouchableOpacity> */}
                                         <TouchableHighlight onPress={() => { showEditModal(item) }}>
                                             <View style={styles.itemContainer} >
+
                                                 <Image
                                                     source={{
-                                                        uri: "https://wallpaperaccess.com/full/317501.jpg"
+                                                        uri: item?.image_url || 'https://wallpaperaccess.com/full/4901583.jpg'
                                                     }}
                                                     alt="Image description"
                                                     size={"xl"}
                                                     borderRadius={10}
                                                 />
-                                                <View style={{ flexGrow: 1, justifyContent: "center", alignItems:"center" }}>
-                                                    <Text style={{fontWeight:"bold"}}>
-                                                        {item.food}
+                                                <View style={{ flexGrow: 1, justifyContent: "center", alignItems: "center" }}>
+                                                    <Text style={{ fontWeight: "bold" }}>
+                                                        {handleDisplayNameFromId(foods, {
+                                                            id: item.food
+                                                        })}
                                                     </Text>
-                                                    <View style={{flexDirection: "row", margin: 10, justifyContent:"space-between", gap:5}}>
+                                                    <View style={{ flexDirection: "row", margin: 10, justifyContent: "space-between", gap: 5 }}>
                                                         <Text>
                                                             {item.quantity}
                                                         </Text>
@@ -516,9 +529,9 @@ export const ShoppingListById: React.FC = () => {
                             }}
                         >
                         </FlatList>
-
                     </>
                 )}
+
             <TouchableOpacity style={styles.fab} onPress={showCreateModal}>
                 <Plus color="white" size={25} />
             </TouchableOpacity>
@@ -534,24 +547,30 @@ export const ShoppingListById: React.FC = () => {
                                 Add Item To The Fridge
                             </Modal.Header>
                             <Modal.Body>
-                                <Form form={formAddFridge}>
-                                    <FormControl isInvalid={!selectedItem.food}>
-
-                                        <Select
-                                            placeholder="Select Food"
-                                            selectedValue={selectedItem.food}
-                                            isDisabled={true}
-                                            _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
+                                <Form form={formAddFridge} style={{ gap: 5 }}>
+                                    <View style={{ flexGrow: 1, justifyContent: "center", alignItems: "center" }}>
+                                        <Text style={[{ width: "100%", textAlign: "center" }, styles.inputNumber]}>
+                                            {handleDisplayNameFromId(foods, {
+                                                id: selectedItem.food
+                                            })}
+                                        </Text>
+                                        <View style={[{ width: "100%", flexDirection: "row", margin: 10, justifyContent: "center", gap: 10, }, styles.inputNumber]}>
+                                            <Text style={{ fontSize: 18 }}>
+                                                {selectedItem.quantity}
+                                            </Text>
+                                            <Text ellipsizeMode="clip" numberOfLines={1} style={{ fontSize: 18 }}>
+                                                {selectedItem.unit}
+                                            </Text>
+                                        </View>
+                                        <Text
+                                            style={[styles.inputNumber, { width: "100%", textAlign: "center" }]}
                                         >
-                                            {foods.map((food) => (
-                                                <Select.Item key={food.id} label={food.name} value={food.id} />
-                                            ))}
-                                        </Select>
-                                        <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-                                            Please select a food item!
-                                        </FormControl.ErrorMessage>
-                                    </FormControl>
-                                    <FormControl isInvalid={!selectedItem.quantity}>
+                                            {handleDisplayNameFromId(users, {
+                                                id: selectedItem.assignee
+                                            })}
+                                        </Text>
+                                    </View>
+                                    {/* <FormControl isInvalid={!selectedItem.quantity}>
                                         <Input
                                             type="number"
                                             placeholder="Enter Quantity"
@@ -559,8 +578,8 @@ export const ShoppingListById: React.FC = () => {
                                             disabled={true}
                                             value={`${selectedItem.quantity}`}
                                         />
-                                    </FormControl>
-                                    <FormControl isInvalid={!selectedItem.unit}>
+                                    </FormControl> */}
+                                    {/* <FormControl isInvalid={!selectedItem.unit}>
                                         <Select
                                             placeholder="Select Unit"
                                             selectedValue={selectedItem.unit}
@@ -574,9 +593,9 @@ export const ShoppingListById: React.FC = () => {
                                         <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
                                             Please select a unit!
                                         </FormControl.ErrorMessage>
-                                    </FormControl>
+                                    </FormControl> */}
 
-                                    <FormControl isInvalid={!selectedItem.assignee}>
+                                    {/* <FormControl isInvalid={!selectedItem.assignee}>
                                         <Select
                                             placeholder="Select Assignee"
                                             selectedValue={selectedItem.assignee}
@@ -587,16 +606,27 @@ export const ShoppingListById: React.FC = () => {
                                                 <Select.Item key={user.id} label={user.name} value={user.id} />
                                             ))}
                                         </Select>
-                                    </FormControl>
-                                    <Form.Item name="date" label="Expired Date" rules={[{ required: true, message: "Please select a date" }]}
+                                    </FormControl> */}
+
+                                    <Form.Item name="date" style={[{ paddingLeft: 0 }]} rules={[{ required: true, message: "Please select a date" }]}
                                     >
-                                        <Text>
-                                            {moment(date).format("YYYY-DD-MM")}
+                                        {/* <Text>
+                                            {moment(form.getFieldValue("date")).format("YYYY-DD-MM")}
+                                        </Text> */}
+
+                                        <Text style={{ marginTop: 10, marginBottom: 10 }}>
+                                            Expired Date
                                         </Text>
+                                        <TouchableOpacity onPress={() => showDatepicker()} style={{ display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
+                                            <Text style={{ fontSize: 20 }}>
+                                                {moment(form.getFieldValue("date")).format("YYYY-MM-DD")}
+                                            </Text>
+                                            <Calendar />
+                                        </TouchableOpacity>
                                     </Form.Item>
-                                    <Button onPress={() => showDatepicker()}>
+                                    {/* <Button onPress={() => showDatepicker()}>
                                         Choose Date
-                                    </Button>
+                                    </Button> */}
                                 </Form>
                             </Modal.Body>
                             <Modal.Footer>
@@ -610,9 +640,9 @@ export const ShoppingListById: React.FC = () => {
                                         setIsModalVisible(false);
                                         const values = await formAddFridge.validateFields();
                                         await saveItemToFridge({
-                                            expired_at: values.date,
+                                            exprire_date: values.date,
                                             food_id: selectedItem.food,
-                                            unit_id: selectedItem.unit,
+                                            unit_name: selectedItem.unit,
                                             quantity: selectedItem.quantity,
                                             group_id: groupId,
                                             shopping_id: selectedItem.id
@@ -659,7 +689,7 @@ export const ShoppingListById: React.FC = () => {
                             <Modal.Body>
                                 <Form form={editForm}>
                                     <Form.Item name={'food'} rules={[{ required: true, message: "Must not Empty" }]}>
-                                        <Select
+                                        {/* <Select
                                             placeholder="Select Food"
                                             defaultValue={selectedItem.food}
                                             // selectedValue={editForm.getFieldValue('food') || selectedItem.food}
@@ -671,7 +701,26 @@ export const ShoppingListById: React.FC = () => {
                                             {foods.map((food) => (
                                                 <Select.Item key={food.id} label={food.name} value={food.id} />
                                             ))}
-                                        </Select>
+                                        </Select> */}
+                                        <Dropdown
+                                            placeholderStyle={styles.placeholderStyle}
+                                            selectedTextStyle={styles.selectedTextStyle}
+                                            inputSearchStyle={styles.inputSearchStyle}
+                                            iconStyle={styles.iconStyle}
+                                            data={foods.map(item => ({
+                                                label: item.name,
+                                                value: item.id
+                                            }))}
+                                            search
+                                            placeholder={handleDisplayNameFromId(foods, {id: selectedItem.food})}
+                                            maxHeight={300}
+                                            labelField="label"
+                                            valueField="value"
+                                            searchPlaceholder="Search..."
+                                            onChange={item => {
+                                                editForm.setFieldValue('food', item.value)
+                                            }}
+                                        />
                                     </Form.Item>
                                     <Form.Item name={'quantity'} rules={[{ required: true, message: 'Must not empty' }]}>
                                         {/* <Input
@@ -690,7 +739,7 @@ export const ShoppingListById: React.FC = () => {
                                             style={styles.inputNumber}
                                             onChangeText={(text) => {
                                                 if (text) {
-                                                    createForm.setFieldValue('quantity', Number(text))
+                                                    editForm.setFieldValue('quantity', Number(text))
                                                 }
                                             }}
                                             defaultValue={`${selectedItem.quantity}`}
@@ -700,7 +749,7 @@ export const ShoppingListById: React.FC = () => {
                                         />
                                     </Form.Item>
                                     <Form.Item name={'unit'} rules={[{ required: true, message: 'Must not empty' }]}>
-                                        <Select
+                                        {/* <Select
                                             placeholder="Select Unit"
                                             defaultValue={selectedItem.unit}
                                             onValueChange={(itemVlue) => editForm.setFieldValue("unit", itemVlue)}
@@ -709,11 +758,31 @@ export const ShoppingListById: React.FC = () => {
                                             {units.map((unit) => (
                                                 <Select.Item key={unit.id} label={unit.name} value={unit.id} />
                                             ))}
-                                        </Select>
+                                        </Select> */}
+                                        <TextInput
+                                            style={styles.inputNumber}
+                                            defaultValue={`${selectedItem.unit}`}
+                                            onChangeText={(value) => editForm.setFieldValue('unit', value)}
+                                            placeholder="Enter a unit"
+                                            placeholderTextColor="#999"
+                                        />
+                                        {/* <View style={styles.inputSearchStyle}>
+                                            {/* <Autocomplete
+                                                data={units.map(item => item.name)}
+                                                value={form.getFieldValue("unit")}
+                                                onChangeText={(value) => createForm.setFieldValue('unit', value)}
+                                                flatListProps={{
+                                                    keyExtractor: (_, idx) => `${idx}`,
+                                                    renderItem: ({ item }: { item: string }) => <Text>{item}</Text>,
+                                                }}
+                                            /> */}
+
+
+
                                     </Form.Item>
 
                                     <Form.Item name={'assignee'} rules={[{ required: true, message: "Must not empty" }]}>
-                                        <Select
+                                        {/* <Select
                                             placeholder="Select Assignee"
                                             defaultValue={selectedItem.assignee}
                                             onValueChange={(itemValue) => {
@@ -724,7 +793,26 @@ export const ShoppingListById: React.FC = () => {
                                             {users.map((user) => (
                                                 <Select.Item key={user.id} label={user.name} value={user.id} />
                                             ))}
-                                        </Select>
+                                        </Select> */}
+                                         <Dropdown
+                                            placeholderStyle={styles.placeholderStyle}
+                                            selectedTextStyle={styles.selectedTextStyle}
+                                            inputSearchStyle={styles.inputSearchStyle}
+                                            iconStyle={styles.iconStyle}
+                                            data={users.map(item => ({
+                                                label: item.name,
+                                                value: item.id
+                                            }))}
+                                            search
+                                            placeholder={handleDisplayNameFromId(users, {id: selectedItem.assignee})}
+                                            maxHeight={300}
+                                            labelField="label"
+                                            valueField="value"
+                                            searchPlaceholder="Search..."
+                                            onChange={item => {
+                                                editForm.setFieldValue('assignee', item.value)
+                                            }}
+                                        />
                                     </Form.Item>
                                 </Form>
                             </Modal.Body>
@@ -751,7 +839,7 @@ export const ShoppingListById: React.FC = () => {
                             <Modal.Body>
                                 <Form form={createForm}>
                                     <Form.Item name={'food'} rules={[{ required: true, message: "Must not Empty" }]}>
-                                        <Select
+                                        {/* <Select
                                             placeholder="Select Food"
                                             _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
                                             onValueChange={(itemValue) => createForm.setFieldValue('food', itemValue)}
@@ -759,10 +847,29 @@ export const ShoppingListById: React.FC = () => {
                                             {foods.map((food) => (
                                                 <Select.Item key={food.id} label={food.name} value={food.id} />
                                             ))}
-                                        </Select>
+                                        </Select> */}
+                                        <Dropdown
+                                            placeholderStyle={styles.placeholderStyle}
+                                            selectedTextStyle={styles.selectedTextStyle}
+                                            inputSearchStyle={styles.inputSearchStyle}
+                                            iconStyle={styles.iconStyle}
+                                            data={foods.map(item => ({
+                                                label: item.name,
+                                                value: item.id
+                                            }))}
+                                            search
+                                            placeholder="Choose Food"
+                                            maxHeight={300}
+                                            labelField="label"
+                                            valueField="value"
+                                            searchPlaceholder="Search..."
+                                            onChange={item => {
+                                                createForm.setFieldValue('food', item.value)
+                                            }}
+                                        />
                                     </Form.Item>
                                     <Form.Item name={'quantity'} rules={[{ required: true, message: 'Must not empty' }]}>
-                                        <Input
+                                        {/* <Input
                                             type="number"
                                             placeholder="Enter Quantity"
                                             onChangeText={(value) => {
@@ -770,11 +877,22 @@ export const ShoppingListById: React.FC = () => {
                                                     createForm.setFieldValue('quantity', Number(value))
                                                 }
                                             }}
-                                        // keyboardType="numeric"
+                                            keyboardType="numeric"
+                                        /> */}
+                                       <TextInput
+                                            style={styles.inputNumber}
+                                            onChangeText={(text) => {
+                                                if (text) {
+                                                    createForm.setFieldValue('quantity', Number(text))
+                                                }
+                                            }}
+                                            keyboardType="numeric"
+                                            placeholder="Enter number"
+                                            placeholderTextColor="#999"
                                         />
                                     </Form.Item>
                                     <Form.Item name={'unit'} rules={[{ required: true, message: 'Must not empty' }]}>
-                                        <Select
+                                        {/* <Select
                                             placeholder="Select Unit"
                                             _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
                                             onValueChange={(value) => createForm.setFieldValue('unit', value)}
@@ -782,11 +900,33 @@ export const ShoppingListById: React.FC = () => {
                                             {units.map((unit) => (
                                                 <Select.Item key={unit.id} label={unit.name} value={unit.id} />
                                             ))}
-                                        </Select>
+                                        </Select> */}
+                                        <TextInput
+                                            style={styles.inputNumber}
+                                            onChangeText={(value) => createForm.setFieldValue('unit', value)}
+                                            placeholder="Enter a unit"
+                                            placeholderTextColor="#999"
+                                        />
                                     </Form.Item>
+                                    {/* <View style={styles.autocompleteContainer}>
+                                        {/* <Autocomplete
+                                            // data={units.map(item => item.name)}
+                                            value={form.getFieldValue("unit")}
+                                            onChangeText={(value) => createForm.setFieldValue('unit', value)}
+                                            flatListProps={{
+                                                keyExtractor: (_, idx) => `${idx}`,
+                                                renderItem: ({ item }: { item: string }) => <Text>{item}</Text>,
+                                            }}
+                                        /> */}
+                                    {/* <TextInput
+                                            onChangeText={(value) => createForm.setFieldValue('unit', value)}
+                                        >
+                                        </TextInput>
+                                    </View> */}
+
 
                                     <Form.Item name={'assignee'} rules={[{ required: true, message: "Must not empty" }]}>
-                                        <Select
+                                        {/* <Select
                                             placeholder="Select Assignee"
                                             _selectedItem={{ bg: "teal.600", endIcon: <CheckIcon size={5} /> }}
                                             onValueChange={(value) => createForm.setFieldValue('assignee', value)}
@@ -794,7 +934,26 @@ export const ShoppingListById: React.FC = () => {
                                             {users.map((user) => (
                                                 <Select.Item key={user.id} label={user.name} value={user.id} />
                                             ))}
-                                        </Select>
+                                        </Select> */}
+                                        <Dropdown
+                                            placeholderStyle={styles.placeholderStyle}
+                                            selectedTextStyle={styles.selectedTextStyle}
+                                            inputSearchStyle={styles.inputSearchStyle}
+                                            iconStyle={styles.iconStyle}
+                                            data={users.map(item => ({
+                                                label: item.name,
+                                                value: item.id
+                                            }))}
+                                            search
+                                            placeholder="Choose Assignee"
+                                            maxHeight={300}
+                                            labelField="label"
+                                            valueField="value"
+                                            searchPlaceholder="Search..."
+                                            onChange={item => {
+                                                createForm.setFieldValue('assignee', item.value)
+                                            }}
+                                        />
                                     </Form.Item>
 
 
@@ -972,6 +1131,16 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     inputNumber: {
+        // borderWidth: 2,
+        // borderColor: "#3498db",
+        // borderRadius: 10,
+        paddingVertical: 10,
+        // paddingHorizontal: 20,
+        fontSize: 18,
+        color: "#333",
+        backgroundColor: "#fff",
+    },
+    expiredDate: {
         borderWidth: 2,
         borderColor: "#3498db",
         borderRadius: 10,
@@ -1009,4 +1178,13 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         right: 0,
     },
+    autocompleteContainer: {
+        // flex: 1,
+        // left: 0,
+        // position: 'absolute',
+        // right: 0,
+        // top: 0,
+        // zIndex: 1
+        // position: 'absolute'
+    }
 });
