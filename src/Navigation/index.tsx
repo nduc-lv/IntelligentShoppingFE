@@ -64,24 +64,15 @@ export const RootNavigationContainerRef = createNavigationContainerRef<RootStack
 
 // @refresh reset
 const ApplicationNavigator = () => {
-	const dispatch = useDispatch<AppDispatch>();
-	const authInitialized = useSelector(
-		(state: { auth: AuthState }) => state.auth.initialized
-	);
-	useEffect(() => {
-		if (!authInitialized) {
-			dispatch(fetchTokens());
-		}
-	}, [authInitialized]);
-	if (!authInitialized) {
-		return <Loading />;
-	}
 	return <_ApplicationNavigator />
 }
 const _ApplicationNavigator = () => {
 	const dispatch = useDispatch<AppDispatch>()
 	const accessToken = useSelector(
 		(state: { auth: AuthState }) => state.auth.accessToken
+	);
+	const initializedAuth = useSelector(
+		(state: { auth: AuthState }) => state.auth.initialized
 	);
 	const currentRoute = RootNavigationContainerRef.current?.getCurrentRoute()?.name
 
@@ -107,22 +98,25 @@ const _ApplicationNavigator = () => {
 	useEffect(()=>{
 		dispatch(setMe(getMeQuery.data??null))
 	},[getMeQuery.data])
+	const isGettingMe=!initializedAuth||getMeQuery.isLoading||getMeQuery.isFetching
 	useEffect(()=>{
-		if(!getMeQuery.isLoading&&!getMeQuery.isFetching){
-			const isLoggedin=accessToken&&getMeQuery.data&&!getMeQuery.error
-			if(!PublicScreens.has(currentRoute)){
-				if (!isLoggedin) {
+		const isLoggedin=getMeQuery.data&&!getMeQuery.error
+		if(PublicScreens.has(currentRoute)){
+			if(isLoggedin){
+				RootNavigationContainerRef.navigate(RootScreens.MAIN)
+			}
+		} else{
+			if((initializedAuth&&!accessToken)){
+				RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
+			} else if(!isGettingMe){
+				if(!isLoggedin){
 					RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
 				} 
-			} else{
-				if(isLoggedin){
-					RootNavigationContainerRef.navigate(RootScreens.MAIN)
-				}
 			}
 		}
 
-	},[!getMeQuery.isLoading&&!getMeQuery.isFetching,accessToken&&getMeQuery.data&&!getMeQuery.error])
-	if (getMeQuery.isLoading||getMeQuery.isFetching) {
+	},[accessToken,initializedAuth,getMeQuery.data&&!getMeQuery.error])
+	if (isGettingMe) {
 		return <Loading />;
 	}
 	return (
