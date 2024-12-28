@@ -6,7 +6,6 @@ import Constants from "expo-constants";
 
 import { Platform } from "react-native";
 import { Toast } from "native-base";
-
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
   notification?: Notifications.Notification;
@@ -54,7 +53,6 @@ export const usePushNotifications = (): PushNotificationState => {
       token = await Notifications.getExpoPushTokenAsync({
         projectId: Constants.expoConfig?.extra?.eas.projectId,
       });
-      console.log(token);
     } else {
       Toast.show({
 				placement: "top",
@@ -78,6 +76,7 @@ export const usePushNotifications = (): PushNotificationState => {
     registerForPushNotificationsAsync().then((token) => {
       console.log("Expo Token",token)
       setExpoPushToken(token);
+      // send to backend
     });
 
     notificationListener.current =

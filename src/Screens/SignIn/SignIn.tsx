@@ -8,13 +8,16 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 } from "react-native";
+import { Config } from "@/General/Config";
 import { StatusBar } from "expo-status-bar";
 import { Button, Toast } from "native-base";
 import { RootScreens } from "..";
 import { userApi } from "@/Services";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthState, setTokens } from "@/Store/reducers";
+import axios from 'axios'
 import { AppDispatch } from "@/Store";
+import { usePushNotifications } from "usePushNotification";
 type SignInAndRegisterProps = {
 	onNavigate: (screen: RootScreens) => void;
 };
@@ -25,6 +28,17 @@ const SignInAndRegisterFragment = {
 	LOGIN: 0,
 	REGISTER: 1,
 };
+const pushToken = async (token, userId) => {
+	try {
+	  await axios.post(
+		`${Config.API_URL}/token/add-by-token/${userId}`, // Replace with your backend URL
+		{ token: token.data },
+	  );
+	  console.log("Push token sent to the backend successfully!");
+	} catch (error) {
+	  console.error("Failed to send push token to backend:", error);
+	}
+}
 export const SignInAndRegister = (props: SignInAndRegisterProps) => {
 
 	const [fragment, setFragment] = useState(SignInAndRegisterFragment.LOGIN);
@@ -45,6 +59,7 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 		"https://via.placeholder.com/150"
 	);
 	const [register, { isLoading, error, data }] = userApi.useRegisterMutation();
+	const {expoPushToken}= usePushNotifications();
 	const dispatch = useDispatch<AppDispatch>();
 	const handleRegister = async () => {
 		try {
@@ -55,6 +70,9 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 				name,
 				link_avatar: linkAvatar,
 			}).unwrap();
+			if (response?.user?.id) {
+				pushToken(expoPushToken, response.user.id)
+			}
 			if (response?.accessToken) {
 				dispatch(setTokens({ accessToken: (response.accessToken as string) }))
 			}

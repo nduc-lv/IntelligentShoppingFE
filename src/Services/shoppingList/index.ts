@@ -27,6 +27,7 @@ export interface AddItemToFridgePayload {
   food_id: string,
   group_id: string,
   unit_id: string,
+  unit_name: string,
   shopping_id: string,
   id: string | undefined,
   quantity: number,
@@ -73,6 +74,7 @@ export interface User {
 export interface ItemByShoppingIdResponse {
   id: string,
   unit_id: string,
+  unit_name: string,
   food_id: string,
   quantity: number,
   shopping: {
@@ -83,6 +85,10 @@ export interface ItemByShoppingIdResponse {
   task: {
     user_id: string
   }
+}
+
+export interface Token {
+  token: string
 }
 const shoppingListAPI = API.injectEndpoints({
   endpoints: (build) => ({
@@ -103,16 +109,16 @@ const shoppingListAPI = API.injectEndpoints({
       transformResponse: (response: {rows: any}, meta, arg) => response.rows
     }),
 
-    getAllFood: build.query<Food[], {userId: string}>({
-      query: ({userId}) => ({
-        url: `shopping-list/all-food/${userId}`,
+    getAllFood: build.query<Food[], {}>({
+      query: ({}) => ({
+        url: `shopping-list/all-food/`,
         method: "GET",
       }),
       transformResponse: (response: { foods: Food[] }, meta, arg) => response.foods
     }),
-    getAllUnit: build.query<Unit[], { userId: string }>({
-      query: ({ userId }) => ({
-        url: `shopping-list/all-unit/${userId}`,
+    getAllUnit: build.query<Unit[], any>({
+      query: ({}) => ({
+        url: `shopping-list/all-unit/`,
         method: "GET"
       }),
       transformResponse: (response: { units: Unit[] }, meta, arg) => response.units
@@ -173,17 +179,24 @@ const shoppingListAPI = API.injectEndpoints({
       })
     }),
     getUserGroup: build.query({
-      query: (id) => `shopping-list/group/${id}`,
+      query: ({}) => `shopping-list/group/`,
       transformResponse: (response: {groups: any}) => {
         return response.groups
       }
-    })
-
+    }),
+    updateToken: build.mutation<any, Token>({
+      query:  (payload) => ({
+        url: 'token/add-token',
+        method: "POST",
+        body: payload
+      })
+    }),
   }),
   overrideExisting: true,
 });
 
 export const {
+  useUpdateTokenMutation,
   useGetShoppingListQuery,
   useLazyGetShoppingListQuery,
   useCreateShoppingListMutation,

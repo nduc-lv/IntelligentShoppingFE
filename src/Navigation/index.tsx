@@ -31,6 +31,10 @@ import WarningBanner from "@/General/Components/WarningBanner";
 import { i18n, LocalizationKey } from "@/Localization";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
+import { selectAccessToken, selectUser } from "@/Store/reducers";
+import { Config } from "@/General/Config";
+import axios from 'axios'
+import { usePushNotifications } from "usePushNotification";
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
@@ -62,8 +66,24 @@ const PublicScreens: Set<string | undefined> = new Set(
 export const RootStack = createNativeStackNavigator<RootStackParamList>();
 export const RootNavigationContainerRef = createNavigationContainerRef<RootStackParamList>()
 
+const pushToken = async (token, userId) => {
+	try {
+	  await axios.post(
+		`${Config.API_URL}/token/add/${userId}`,
+		{ token: token.data },
+	  );
+	  console.log("Push token sent to the backend successfully!");
+	} catch (error) {
+	  console.error("Failed to send push token to backend:", error);
+	}
+}
 // @refresh reset
 const ApplicationNavigator = () => {
+	const user = useSelector(selectUser)
+	const {expoPushToken, notification} = usePushNotifications();
+	if (user && user.id && expoPushToken) {
+		pushToken(expoPushToken, user.id)
+	}
 	return <_ApplicationNavigator />
 }
 const _ApplicationNavigator = () => {
@@ -144,13 +164,13 @@ const _ApplicationNavigator = () => {
 					name={RootScreens.ADMIN}
 					component={AdminNavigator}
 				/>
-				<RootStack.Screen
+				{/* <RootStack.Screen
 					name={'SHOPPING_LIST'}
 					component={ShoppingListContainer}
 				/>
 				<RootStack.Screen
 					name="SHOPPING_LIST_DETAIL"
-					component={ShoppingListDetailContainer} />
+					component={ShoppingListDetailContainer} /> */}
 				<RootStack.Screen
 					name="GROUP_DETAIL"
 					component={GroupDetailContainer} />

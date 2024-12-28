@@ -18,30 +18,19 @@ interface Group {
 export const ShoppingListScreen: React.FC = () => {
   // Lazy loading the groups with user ID
   const [fetchGroups, { data, isLoading, isError, currentData }] = useLazyGetUserGroupQuery();
-	const userInfo=useSelector((state:{auth:AuthState})=>(state.auth.user))
   const [userId, setUserId] = useState<string>("");
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     // Fetch groups when the component mounts
-    if (userInfo) {
-      fetchGroups(userInfo.id);
-    }
+    fetchGroups({});
     // fetchGroups(userInfo.id);
-  }, [fetchGroups, userInfo]);
+  }, [fetchGroups]);
+
 
   useEffect(() => {
     console.log("data",data)
   }, [data])
-
-  if (!userInfo) {
-    return (
-      <View style={styles.centered}>
-        <Spinner />
-        <Text>Loading groups...</Text>
-      </View>
-    )
-  }
   // Loading state
   if (isLoading) {
     return (
@@ -57,7 +46,7 @@ export const ShoppingListScreen: React.FC = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>Failed to load groups. Please try again.</Text>
-        <Button onPress={() => fetchGroups(userInfo.id)}>
+        <Button onPress={() => fetchGroups({})}>
           Retry
         </Button>
       </View>
