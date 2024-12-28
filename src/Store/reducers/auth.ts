@@ -50,6 +50,7 @@ const authSlice = createSlice({
   extraReducers:(builder)=>{
     builder.addCase(setTokens.fulfilled, (state, action) => {
       state.accessToken=action.payload.accessToken
+      state.initialized=true
     })
     builder.addCase(clearTokens.fulfilled, (state, action) => {
       state.accessToken=null
