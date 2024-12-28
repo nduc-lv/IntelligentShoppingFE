@@ -53,6 +53,8 @@ const authSlice = createSlice({
     })
     builder.addCase(clearTokens.fulfilled, (state, action) => {
       state.accessToken=null
+      state.user = null;
+      state.initialized=false
     })
     builder.addCase(fetchTokens.fulfilled, (state, action) => {
       state.accessToken=action.payload.accessToken
