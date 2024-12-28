@@ -10,6 +10,7 @@ import App from "App";
 import Globals from "@/General/Constants/Globals";
 import { useLazyGetRecipeListQuery, useSaveRecipeMutation, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
+import { useToast } from "react-native-toast-notifications";
 
 
 export const RecipeListScreen = () => {
@@ -20,8 +21,11 @@ export const RecipeListScreen = () => {
     const [food_recipes, setFoodRecipes] = useState<any>([]);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [search, setSearch] = useState("");
+    const toast = useToast();
 
     useEffect(() => {
+        if (search)
+            fetchRecipe(filters);
         const unsubscribeFocus = navigation.addListener('focus', () => {
             fetchRecipe(filters);;
         });
@@ -39,7 +43,7 @@ export const RecipeListScreen = () => {
             fetchRecipe(filters);
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to save recipe.", icon: "fail" });
+            toast.show("Không thể lưu công thức", { placement: "top", type: "warning" });
         }
     }
 
@@ -49,14 +53,14 @@ export const RecipeListScreen = () => {
             fetchRecipe(filters);
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to unsave recipe.", icon: "fail" });
+            toast.show("Không thể bỏ lưu công thức", { placement: "top", type: "warning" });
         }
     }
 
-    const renderRecipeItem = ({ item, index }: { item: any, index: number }) => (
+    const renderRecipeItem = ({ item }: { item: any }) => (
         // console.log('index1', item.id),
         <TouchableOpacity
-            key={item.id}
+            key={Math.random()}
             style={[styles.card, { width: 250, height: 270 }]}
             onPress={() => navigation.navigate("RECIPE_DETAIL", { recipeId: item.id, isMyRecipe: false })}
         >
@@ -161,7 +165,7 @@ export const RecipeListScreen = () => {
     const renderIngredientItem = ({ item, index }: { item: any, index: number }) => (
         // console.log('index2', index),
         <View
-            key={index}
+            key={Math.random()}
             style={{
                 width: 200,
                 marginRight: 16,

@@ -12,6 +12,7 @@ export interface CreateRecipePayload {
     description: string;
     instructions: string;
     foods: Array<any>;
+    image_url: string;
 }
 
 export interface UpdateRecipePayload {
@@ -20,6 +21,7 @@ export interface UpdateRecipePayload {
     description: string;
     instructions: string;
     foods: Array<any>;
+    image_url: string;
 }
 
 

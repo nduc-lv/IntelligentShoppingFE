@@ -1,3 +1,4 @@
+import { update } from "lodash";
 import { API } from "../base";
 
 export interface CreateFoodGroupPayload {
@@ -7,6 +8,12 @@ export interface CreateFoodGroupPayload {
     unit_name: string;
     quantity: number;
     exprire_date: string;
+}
+
+export interface UpdateFoodGroupPayload {
+    id: string;
+    unit_name: string;
+    quantity: number;
 }
 
 export interface CreateFoodPayload {
@@ -22,10 +29,11 @@ export interface Food {
 
 const foodGroupsApi = API.injectEndpoints({
     endpoints: (build) => ({
-        getAllFoodByCategory: build.query<Food[], { group_id: string; category_id: string }>({
-            query: ({ group_id, category_id }) => ({
+        getAllFoodByCategory: build.query<Food[], { group_id: string; category_id: string, search: string }>({
+            query: ({ group_id, category_id, search }) => ({
                 url: `foodgroup/food/${group_id}/${category_id}`,
                 method: "GET",
+                params: { search: search },
             }),
             transformResponse: (response: { rows: Food[] }, meta, arg) => response.rows,
         }),
@@ -50,6 +58,13 @@ const foodGroupsApi = API.injectEndpoints({
                 body: payload,
             }),
         }),
+        updateFoodGroup: build.mutation<any, UpdateFoodGroupPayload>({
+            query: ({ id, ...payload }) => ({
+                url: `foodgroup/${id}`,
+                method: "PATCH",
+                body: payload,
+            }),
+        })
     }),
     overrideExisting: true,
 });
@@ -58,5 +73,6 @@ export const {
     useLazyGetAllFoodByCategoryQuery,
     useCreateFoodGroupMutation,
     useCreateFoodMutation,
-    useDeleteFoodGroupMutation
+    useDeleteFoodGroupMutation,
+    useUpdateFoodGroupMutation
 } = foodGroupsApi;

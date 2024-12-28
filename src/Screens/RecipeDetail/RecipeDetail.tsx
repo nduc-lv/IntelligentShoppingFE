@@ -9,6 +9,7 @@ import UploadImage from "@/General/Components/UploadImage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useDeleteRecipeMutation, useLazyGetRecipeQuery, useSaveRecipeMutation, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
+import { useToast } from "react-native-toast-notifications";
 
 export const RecipeDetailScreen = ({ route }: any) => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -19,6 +20,8 @@ export const RecipeDetailScreen = ({ route }: any) => {
     const [saveRecipe, { data: savedRecipe }] = useSaveRecipeMutation();
     const [deleteRecipe, { data: deletedRecipe }] = useDeleteRecipeMutation();
     const [isOpenModalDelete, setIsOpenModalDelete] = useState(false);
+    const toast = useToast();
+
     useEffect(() => {
         const unsubscribeFocus = navigation.addListener('focus', () => {
             fetchRecipe({ recipeId });
@@ -33,7 +36,7 @@ export const RecipeDetailScreen = ({ route }: any) => {
             fetchRecipe({ recipeId });
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Không thể lưu công thức", icon: "fail" });
+            toast.show("Không thể lưu công thức", { placement: "top", type: "warning" });
         }
     }
 
@@ -43,18 +46,18 @@ export const RecipeDetailScreen = ({ route }: any) => {
             fetchRecipe({ recipeId });
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Không thể bỏ lưu công thức", icon: "fail" });
+            toast.show("Không thể bỏ lưu công thức", { placement: "top", type: "warning" });
         }
     }
 
     const handleDeleteRecipe = async (recipeId: string) => {
         try {
             await deleteRecipe({ recipe_id: recipeId }).unwrap();
-            Toast.show({ content: "Xóa công thức thành công", icon: "success" });
             navigation.goBack();
+            toast.show("Xóa công thức thành công", { placement: "top", type: "success" });
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Không thể xóa công thức", icon: "fail" });
+            toast.show("Không thể xóa công thức", { placement: "top", type: "warning" });
         }
     }
 
@@ -287,24 +290,6 @@ export const RecipeDetailScreen = ({ route }: any) => {
 
                     </View>
 
-                    {/* <UploadImage /> */}
-
-                    {/* <TouchableOpacity style={{
-                        padding: 16,
-                        height: 60,
-                        alignSelf: 'center',
-                        backgroundColor: AppData.colors.primary,
-                        borderRadius: 16,
-                        alignItems: 'center',
-                    }}>
-                        <Text style={{
-                            fontSize: AppData.fontSizes.medium,
-                            fontWeight: "500",
-                            color: AppData.colors.text[100],
-                        }}>
-                            {'Thêm vào danh sách mua'}
-                        </Text>
-                    </TouchableOpacity> */}
                 </ScrollView >
             </View>
             {

@@ -27,7 +27,7 @@ export interface CreateFoodPayload {
 
 const foodApi = API.injectEndpoints({
     endpoints: (build) => ({
-        getAllFood: build.query<Food[], void>({
+        getAllFood2: build.query<Food[], void>({
             query: () => ({
                 url: `food`,
                 method: "GET",
@@ -59,7 +59,7 @@ const foodApi = API.injectEndpoints({
 });
 
 export const {
-    useLazyGetAllFoodQuery,
+    useLazyGetAllFood2Query,
     useCreateFoodMutation,
     useUpdateFoodMutation,
     useDeleteFoodMutation

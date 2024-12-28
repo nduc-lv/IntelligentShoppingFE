@@ -12,6 +12,10 @@ const Globals = {
         search: '',
     },
 
+    gFilterFoodGroupList: {
+        search: '',
+    },
+
 };
 
 export default Globals;

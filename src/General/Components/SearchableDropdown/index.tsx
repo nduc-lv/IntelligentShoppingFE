@@ -71,8 +71,10 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                             setShowDropdown(true); // Mở dropdown khi tìm kiếm
 
                             if (!filteredOptions.find((option) => option.label === text)) {
+                                console.log('filteredOptions', text);
                                 onSelect(text);
-                                setShowDropdown(false);
+                            } else {
+                                console.log('filteredOptions', filteredOptions);
                             }
                         }}
                         onFocus={() => setShowDropdown(true)} // Mở dropdown khi focus
