@@ -26,7 +26,7 @@ import { ManageAccountContainer } from "@/Screens/ManageAccount";
 import { AdminNavigator } from "./Admin";
 import { ManageFoodContainer } from "@/Screens/ManageFood";
 import { ManageUnitContainer } from "@/Screens/ManageUnit";
-
+import * as Notifications from 'expo-notifications';
 import WarningBanner from "@/General/Components/WarningBanner";
 import { i18n, LocalizationKey } from "@/Localization";
 import { useNetInfo } from "@react-native-community/netinfo";
@@ -35,6 +35,8 @@ import { selectAccessToken, selectUser } from "@/Store/reducers";
 import { Config } from "@/General/Config";
 import axios from 'axios'
 import { usePushNotifications } from "usePushNotification";
+import { useNavigation } from "expo-router";
+import ExpoNoti from "@/General/Components/ExpoNoti";
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
@@ -142,6 +144,7 @@ const _ApplicationNavigator = () => {
 	return (
 		<NavigationContainer ref={RootNavigationContainerRef}>
 			<StatusBar />
+			<ExpoNoti/>
 			<WarningBanner hidden={!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)} />
 			<RootStack.Navigator
 				initialRouteName={RootScreens.WELCOME}
