@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ActivityIndicator, StatusBar, View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createNavigationContainerRef, NavigationContainer } from "@react-navigation/native";
@@ -118,11 +118,15 @@ const _ApplicationNavigator = () => {
 		console.log(`Fetching state : ${getMeQuery.isFetching}`)
 	},[getMeQuery.isFetching])
 	useEffect(()=>{
-		dispatch(setMe(getMeQuery.data??null))
-	},[getMeQuery.data])
-	const isGettingMe=!initializedAuth||getMeQuery.isLoading||getMeQuery.isFetching
+		if(getMeQuery.error){
+			dispatch(setMe(null))
+		} else{
+			dispatch(setMe(getMeQuery.data??null))
+		}
+	},[getMeQuery.data,getMeQuery.error])
+	const isGettingMe=useMemo(()=>!initializedAuth||getMeQuery.isLoading||getMeQuery.isFetching,[initializedAuth,getMeQuery.isLoading,getMeQuery.isFetching])
+	const isLoggedin=useMemo(()=>getMeQuery.data&&!getMeQuery.error,[getMeQuery.data,getMeQuery.error])
 	useEffect(()=>{
-		const isLoggedin=getMeQuery.data&&!getMeQuery.error
 		if(PublicScreens.has(currentRoute)){
 			if(isLoggedin){
 				RootNavigationContainerRef.navigate(RootScreens.MAIN)
@@ -137,7 +141,7 @@ const _ApplicationNavigator = () => {
 			}
 		}
 
-	},[accessToken,initializedAuth,getMeQuery.data&&!getMeQuery.error])
+	},[accessToken,initializedAuth,isLoggedin])
 	if (isGettingMe) {
 		return <Loading />;
 	}

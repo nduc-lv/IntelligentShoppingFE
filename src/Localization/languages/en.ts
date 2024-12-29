@@ -31,4 +31,6 @@ export const en = {
   // Titles
   [LocalizationKey.LOGIN_TITLE]: "Login to Your Account",
   [LocalizationKey.REGISTER_TITLE]: "Create a New Account",
+  [LocalizationKey.QUANTITY]: "Quantity",
+  
 };

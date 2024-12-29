@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, Image, ActivityIndicator, TextInput, ScrollView, ImageBackground } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { ArrowLeft, ArrowRight, Clock5, EllipsisVertical, Heart, Info, NotebookText, Plus, Search } from "lucide-react-native";
@@ -15,6 +15,8 @@ import { useSelector } from "react-redux";
 import { Utils } from "@/General/Utils/Utils";
 import { useToast } from "react-native-toast-notifications";
 import Globals from "@/General/Constants/Globals";
+import { i18n, LocalizationKey } from "@/Localization";
+import Loading from "@/General/Components/Loading";
 
 type GroupRouteParams = {
     GroupDetail: { groupId: string, isAdmin: boolean };
@@ -23,8 +25,8 @@ type GroupRouteParams = {
 export const GroupDetailScreen = () => {
     const route = useRoute<RouteProp<GroupRouteParams, "GroupDetail">>();
     const { groupId, isAdmin } = route.params;
-    const [fetchGroupInfo, { data, isLoading, isError }] = useLazyGetGroupInfoQuery();
-    const [fetchFoodByCategory, { data: myFoods, isLoading: isLoadingFoodByCategory, isError: isErrorFoodByCategory }] = useLazyGetAllFoodByCategoryQuery();
+    const [fetchGroupInfo, { data, isLoading: _isLoadingGroupInfo, isFetching:_isFetchingGroupInfo, isError }] = useLazyGetGroupInfoQuery();
+    const [fetchFoodByCategory, { data: myFoods, isLoading: _isLoadingFoodByCategory, isFetching:_isFetchingFoodByCategory, isError: isErrorFoodByCategory }] = useLazyGetAllFoodByCategoryQuery();
     const { categorys, units, foods } = useSelector((state: any) => state.data);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [isOpenActionSheet, setIsOpenActionSheet] = useState(false);
@@ -35,19 +37,19 @@ export const GroupDetailScreen = () => {
     const [formFood, setFormFood] = useState<string>('');
     const [formExpiredate, setFormExpiredate] = useState<any>('2025-01-10 17:22:58');
     const [formQuantity, setFormQuantity] = useState<number>(0);
-    const [createFoodGroup, { isLoading: isLoadingCreateFoodGroup, isError: isErrorCreateFoodGroup }] = useCreateFoodGroupMutation();
-    const [updateFoodGroup, { isLoading: isLoadingUpdateFoodGroup, isError: isErrorUpdateFoodGroup }] = useUpdateFoodGroupMutation();
-    const [deleteFoodGroup, { data: deletedFoodGroup }] = useDeleteFoodGroupMutation();
+    const [createFoodGroup, { isLoading: _isLoadingCreateFoodGroup, isError: isErrorCreateFoodGroup }] = useCreateFoodGroupMutation();
+    const [updateFoodGroup, { isLoading: _isLoadingUpdateFoodGroup, isError: isErrorUpdateFoodGroup }] = useUpdateFoodGroupMutation();
+    const [deleteFoodGroup, { data: deletedFoodGroup, isLoading: _isLoadingDeleteGroup }] = useDeleteFoodGroupMutation();
     const [isOpenModalDelete, setIsOpenModalDelete] = useState(false);
     const [selectedFoodGroupId, setSelectedFoodGroupId] = useState<string>('');
     const toast = useToast();
     const [search, setSearch] = useState('');
     const [filters, setFilters] = useState(Globals.gFilterFoodGroupList);
-
+    const isLoading=useMemo(()=>_isLoadingGroupInfo||_isLoadingCreateFoodGroup||_isLoadingUpdateFoodGroup||_isLoadingDeleteGroup||_isFetchingGroupInfo,[_isLoadingGroupInfo,_isLoadingCreateFoodGroup,_isLoadingUpdateFoodGroup,_isLoadingDeleteGroup,_isFetchingGroupInfo]);
+    const isLoadingFoodByCategory=useMemo(()=>_isLoadingFoodByCategory||_isFetchingFoodByCategory,[_isLoadingFoodByCategory,_isFetchingFoodByCategory])
     useEffect(() => {
         fetchGroupInfo({ groupId });
     }, [groupId, fetchGroupInfo]);
-
     useEffect(() => {
         fetchFoodByCategory({ group_id: groupId, category_id: selectedCategory, search: filters.search });
     }, [selectedCategory, fetchFoodByCategory, filters.search]);
@@ -215,12 +217,12 @@ export const GroupDetailScreen = () => {
         label: food.name,  // Dùng name làm label
         value: food.id,    // Dùng id làm value
     }))
-
+    if (isLoading){
+        return <Loading/>
+    }
     return (
         <View style={styles.container}>
-            {isLoading ? (
-                <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
-            ) : isError ? (
+            { isError ? (
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => navigation.navigate(RootScreens.MAIN)}>
                         <ArrowLeft size={24} color="#000" />
@@ -319,6 +321,7 @@ export const GroupDetailScreen = () => {
                                         categorys && categorys.map((item: any) => {
                                             return (
                                                 <TouchableOpacity key={item?.id}
+                                                    onPress={() => setSelectedCategory(item?.id)}
                                                     style={{
                                                         padding: 10,
                                                         alignSelf: 'center',
@@ -332,7 +335,6 @@ export const GroupDetailScreen = () => {
                                                         fontWeight: "500",
                                                         color: selectedCategory === item?.id ? AppData.colors.text[100] : AppData.colors.text[500],
                                                     }}
-                                                        onPress={() => setSelectedCategory(item?.id)}
                                                     >
                                                         {item?.name}
                                                     </Text>
@@ -350,7 +352,7 @@ export const GroupDetailScreen = () => {
                                     gap: 16,
                                 }}
                                 >
-                                    {myFoods && myFoods.map((item: any) => renderItem(item))}
+                                    {isLoadingFoodByCategory?<Loading/>:(myFoods && myFoods.map((item: any) => renderItem(item)))}
                                 </View>
                             </View>
                         </ScrollView>
