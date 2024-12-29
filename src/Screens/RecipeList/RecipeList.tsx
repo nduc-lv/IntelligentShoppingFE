@@ -11,6 +11,7 @@ import Globals from "@/General/Constants/Globals";
 import { useLazyGetRecipeListQuery, useSaveRecipeMutation, useUnsaveRecipeMutation } from "@/Services/recipe";
 import { Toast } from "antd-mobile";
 import { useToast } from "react-native-toast-notifications";
+import { useDebounce } from "use-debounce";
 
 
 export const RecipeListScreen = () => {
@@ -21,15 +22,22 @@ export const RecipeListScreen = () => {
     const [food_recipes, setFoodRecipes] = useState<any>([]);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [search, setSearch] = useState("");
-    const toast = useToast();
+    const [searchQuery]= useDebounce(search,500);
 
-    useEffect(() => {
-        if (search)
-            fetchRecipe(filters);
+    const toast = useToast();
+    useEffect(()=>{
         const unsubscribeFocus = navigation.addListener('focus', () => {
             fetchRecipe(filters);;
         });
         return unsubscribeFocus;
+    },[])
+    useEffect(()=>{
+        fetchRecipe({...filters,search: searchQuery });
+    },[searchQuery])
+    useEffect(() => {
+        if (search){
+            fetchRecipe({...filters,search: searchQuery});
+        }
     }, [filters]);
 
     useEffect(() => {
