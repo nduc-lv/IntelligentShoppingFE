@@ -19,7 +19,10 @@ export interface RegisterRequest {
   name: string,
   link_avatar: string,
 }
-
+export interface PasswordChangeRequest{
+  old_password:string;
+  new_password:string;
+}
 export const userApi = API
   .enhanceEndpoints({ addTagTypes: ['User'] })
   .injectEndpoints({
@@ -48,6 +51,13 @@ export const userApi = API
         }),
         invalidatesTags: (result, error) => [{ type: 'User', id: 'me' }],
       }),
+      loginWithoutCache: build.mutation<GenericResponse, LoginRequest>({
+        query: (credentials) => ({
+          url: `auth/login_without_cache`,
+          method: "POST",
+          body: credentials,
+        }),
+      }),
       register: build.mutation<GenericResponse, RegisterRequest>({
         query: (credentials) => ({
           url: `auth/register`,
@@ -71,8 +81,15 @@ export const userApi = API
           body: data,
         }),
         invalidatesTags: (result, error) => [{ type: 'User', id: 'me' }],
+      }),
+      updatePassword: build.mutation<GenericResponse, PasswordChangeRequest>({
+        query: (data) => ({
+          url: `user/me`,
+          method: "PATCH",
+          body: data,
+        }),
       })
     }),
     overrideExisting: true,
   });
-export const { useGetMeQuery, useLazyGetUserQuery, useLazyGetUserByEmailQuery, useLazyGetUserByUsernameQuery, useRegisterMutation, useLoginMutation, useUpdateUserMutation, useUpdateMeMutation,  } = userApi;
+export const { useGetMeQuery,useUpdatePasswordMutation, useLazyGetUserQuery, useLazyGetUserByEmailQuery, useLazyGetUserByUsernameQuery, useRegisterMutation, useLoginMutation,useLoginWithoutCacheMutation, useUpdateUserMutation, useUpdateMeMutation,  } = userApi;

@@ -7,4 +7,6 @@ export enum RootScreens {
 export enum UserTabScreens {
   USER_TAB_MAIN = "User Preference",
   ACCOUNT_SETTING = "Account Settings",
+  PROFILE_SETTINGS = "Profile Settings",
+  PASSWORD_SETTINGS = "Password Settings",
 }

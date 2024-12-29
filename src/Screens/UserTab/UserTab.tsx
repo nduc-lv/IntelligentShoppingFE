@@ -17,7 +17,10 @@ import { RootScreens,UserTabScreens } from "..";
 import Loading from "@/General/Components/Loading";
 import { AppDispatch, persistor } from "@/Store";
 import { RootNavigationContainerRef } from "@/Navigation";
-type UserTabListItem ={ title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void } 
+import { ScrollView, Toast } from "native-base";
+import AppConfig from "@/General/Constants/AppConfig";
+import { renderUserTabListItem, UserTabListItem } from "@/General/Components/UserTabItem";
+import { i18n } from "@/Localization";
 export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoading: boolean, onNavigate: (screen: UserTabScreens) => void }) => {
   const dispatch=useDispatch<AppDispatch>();
   if (isLoading) {
@@ -25,33 +28,31 @@ export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoad
       <Loading/>
     );
   }
-  const renderSetting = ({ item }: { item: UserTabListItem}) => (
-    <TouchableOpacity style={styles.settingItem} onPress={item.onClick}>
-      <item.icon size={24} color="#555" />
-      <Text style={styles.settingText}>{item.title}</Text>
-    </TouchableOpacity>
-  );
 
   const settings:Array<UserTabListItem> = [
     { title: "Account Settings", icon: Settings, onClick:(e)=>{
       onNavigate(UserTabScreens.ACCOUNT_SETTING)
     } },
-    { title: "Privacy Settings", icon: LockIcon },
-    { title: "Help & Support", icon: HelpCircleIcon },
+    { title: "Privacy Settings", icon: LockIcon,onClick:(e)=>{
+      Toast.show({description:"In progress",placement:"top"})
+    } },
+    { title: "Help & Support", icon: HelpCircleIcon, onClick:(e)=>{
+      Toast.show({description:"In progress",placement:"top"})
+    } },
     { title: "Logout", icon: LogOutIcon, onClick:(e)=>{
       dispatch(clearTokens())
     } },
   ];
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* User Profile Section */}
       <View style={styles.profileContainer}>
         <Image
           source={{
             uri: data.link_avatar,
           }}
-          defaultSource={{uri:"https://via.placeholder.com/150"}}
+          defaultSource={{uri:AppConfig.defaultAvatar}}
           style={styles.profileImage}
         />
         <Text style={styles.userName}>{data.name??"Unknown"}</Text>
@@ -59,14 +60,14 @@ export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoad
         <Text style={styles.userEmail}>{data.email??"Unknown"}</Text>
       </View>
 
-      {/* Settings Section */}
       <FlatList
         data={settings}
-        renderItem={renderSetting}
+        renderItem={renderUserTabListItem}
         keyExtractor={(item, index) => index.toString()}
         contentContainerStyle={styles.settingsList}
+        scrollEnabled={false}
       />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -115,19 +116,7 @@ const styles = StyleSheet.create({
   settingsList: {
     marginTop: 16,
   },
-  settingItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
+
   settingText: {
     marginLeft: 16,
     fontSize: 16,

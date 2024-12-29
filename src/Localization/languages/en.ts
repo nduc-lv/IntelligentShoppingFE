@@ -31,6 +31,21 @@ export const en = {
   // Titles
   [LocalizationKey.LOGIN_TITLE]: "Login to Your Account",
   [LocalizationKey.REGISTER_TITLE]: "Create a New Account",
-  [LocalizationKey.QUANTITY]: "Quantity",
   
+  // General
+  [LocalizationKey.QUANTITY]: "Quantity",
+
+  // Profile
+  [LocalizationKey.CHANGE_PASSWORD]: "Change Password",
+  [LocalizationKey.CHANGE_PROFILE_INFORMATION]: "Update Profile Information",
+
+  // Password Validation
+  [LocalizationKey.PASSWORD_NOT_MATCH]: "Passwords do not match",
+  [LocalizationKey.PASSWORD_NOT_CHANGED_COMPARED_TO_PREV]: "New password cannot be the same as the previous one",
+  [LocalizationKey.PASSWORD_NOT_VALID]: "Password is not valid",
+  [LocalizationKey.Password_must_be_at_least_8_characters_long]: "Password must be at least 8 characters long",
+  [LocalizationKey.Password_must_include_at_least_one_uppercase_letter]: "Password must include at least one uppercase letter",
+  [LocalizationKey.Password_must_include_at_least_one_lowercase_letter]: "Password must include at least one lowercase letter",
+  [LocalizationKey.Password_must_include_at_least_one_number]: "Password must include at least one number",
+  [LocalizationKey.Password_must_include_at_least_one_special_character]: "Password must include at least one special character",
 };

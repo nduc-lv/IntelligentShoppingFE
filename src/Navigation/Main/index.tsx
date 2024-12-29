@@ -34,6 +34,7 @@ const RecipeStack = () => (
 			component={RecipeContainer}
 			options={() => ({
 				headerTitle: `Danh sách món ăn`,
+				headerLeft: ()=> null,
 			})}
 		/>
 		<RootStack.Screen

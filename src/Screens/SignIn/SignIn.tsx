@@ -28,7 +28,7 @@ const SignInAndRegisterFragment = {
 	LOGIN: 0,
 	REGISTER: 1,
 };
-const pushToken = async (token, userId) => {
+const pushToken = async (token:{data:string}, userId:string) => {
 	try {
 	  await axios.post(
 		`${Config.API_URL}/token/add-by-token/${userId}`, // Replace with your backend URL
@@ -70,7 +70,7 @@ export const RegisterFragment = (props: SignInAndRegisterChildProps) => {
 				name,
 				link_avatar: linkAvatar,
 			}).unwrap();
-			if (response?.user?.id) {
+			if (response?.user?.id&&expoPushToken) {
 				pushToken(expoPushToken, response.user.id)
 			}
 			if (response?.accessToken) {

@@ -8,6 +8,8 @@ import {
 	Switch,
 	StyleSheet,
 	Alert,
+	ScrollView,
+	FlatList,
 } from "react-native";
 import { User } from "@/Store/types";
 import { userApi, useUpdateMeMutation } from "@/Services";
@@ -16,138 +18,46 @@ import { UserTabScreens } from "..";
 import { useSelector } from "react-redux";
 import { AuthState } from "@/Store/reducers";
 import Loading from "@/General/Components/Loading";
+import AppConfig from "@/General/Constants/AppConfig";
+import { renderUserTabListItem, UserTabListItem } from "@/General/Components/UserTabItem";
+import { i18n, LocalizationKey } from "@/Localization";
+import { FileUserIcon, KeySquareIcon } from "lucide-react-native";
 export interface AccountSettingsProps {
 	onNavigate: (screen: UserTabScreens) => void;
 	goBack: () => void;
 	canGoBack: () => boolean;
 }
-export const AccountSettings = ({
-	onNavigate,
-	goBack,
-	canGoBack,
-}: AccountSettingsProps) => {
-	const user=useSelector((state:{auth:AuthState})=>(state.auth.user))
 
-	
-	const [updateMe, { isLoading }] = useUpdateMeMutation();
-	const [formData, setFormData] = useState({
-		name: "",
-		email: "",
-		username: "",
-		link_avatar: "",
-    password:""
-	});
-
-	useEffect(() => {
-		if (user) {
-			setFormData({
-				name: user.name || "",
-				email: user.email || "",
-				username: user.username || "",
-				link_avatar: user.link_avatar || "",
-        password:""
-			});
-		}
-	}, [user]);
-
-	const handleInputChange = (field: string, value: string | boolean) => {
-		setFormData((prev) => ({
-			...prev,
-			[field]: value,
-		}));
-	};
-
-	const handleUpdate = async () => {
-    let payload:any={...formData}
-    if (!payload.password){
-      delete payload.password
-    }
-		try {
-			await updateMe(payload).unwrap();
-			Toast.show({
-				placement: "top",
-				description: "Your account has been updated.",
-			});
-			if (canGoBack()) {
-				goBack();
-			} else {
-				onNavigate(UserTabScreens.USER_TAB_MAIN);
-			}
-		} catch (error) {
-			Toast.show({
-				placement: "top",
-				description: "Failed to update account settings.",
-			});
-		}
-	};
-
-	if (!user) {
-		return (
-			<Loading/>
-		);
-	}
-
+export const AccountSettings = ({ onNavigate }: AccountSettingsProps) => {
+	const settings: Array<UserTabListItem> = [
+		{
+			title: i18n.t(LocalizationKey.CHANGE_PASSWORD),
+			icon: KeySquareIcon,
+			onClick: (e) => {
+				onNavigate(UserTabScreens.PASSWORD_SETTINGS);
+			},
+		},
+		{
+			title: i18n.t(LocalizationKey.CHANGE_PROFILE_INFORMATION),
+			icon: FileUserIcon,
+			onClick: (e) => {
+				onNavigate(UserTabScreens.PROFILE_SETTINGS);
+			},
+		},
+	];
 	return (
-		<View style={styles.container}>
-			<Image
-				source={{ uri: formData.link_avatar }}
-				style={styles.avatar}
-				defaultSource={{ uri: "https://via.placeholder.com/150" }}
+		<ScrollView>
+			<FlatList
+				data={settings}
+				renderItem={renderUserTabListItem}
+				keyExtractor={(item, index) => index.toString()}
+				contentContainerStyle={{marginTop: 16}}
+				scrollEnabled={false}
 			/>
-
-			<Text style={styles.label}>Name</Text>
-			<TextInput
-        placeholderTextColor={"#9AA6B2"}
-				style={styles.input}
-				placeholder="Name"
-				value={formData.name}
-				onChangeText={(text) => handleInputChange("name", text)}
-			/>
-
-			<Text style={styles.label}>Email</Text>
-			<TextInput
-        placeholderTextColor={"#9AA6B2"}
-				style={styles.input}
-				placeholder="Email"
-				value={formData.email}
-				onChangeText={(text) => handleInputChange("email", text)}
-				keyboardType="email-address"
-			/>
-
-			<Text style={styles.label}>Username</Text>
-			<TextInput
-        placeholderTextColor={"#9AA6B2"}
-				style={styles.input}
-				placeholder="Username"
-				value={formData.username}
-				onChangeText={(text) => handleInputChange("username", text)}
-			/>
-
-			<Text style={styles.label}>Avatar Link</Text>
-			<TextInput
-        placeholderTextColor={"#9AA6B2"}
-				style={styles.input}
-				placeholder="Avatar Link"
-				value={formData.link_avatar}
-				onChangeText={(text) => handleInputChange("link_avatar", text)}
-			/>
-			<Text style={styles.label}>Password</Text>
-			<TextInput
-        placeholderTextColor={"#9AA6B2"}
-				style={styles.input}
-				placeholder="Password"
-				value={formData.password}
-				onChangeText={(text) => handleInputChange("password", text)}
-				secureTextEntry={true}
-			/>
-			<Button
-				title={isLoading ? "Updating..." : "Update"}
-				onPress={handleUpdate}
-				disabled={isLoading}
-			/>
-		</View>
+		</ScrollView>
 	);
 };
+
 
 const styles = StyleSheet.create({
 	container: {
@@ -173,7 +83,7 @@ const styles = StyleSheet.create({
 		borderColor: "#ccc",
 		borderRadius: 8,
 		padding: 10,
-		marginVertical: 10
+		marginVertical: 10,
 	},
 	switchContainer: {
 		flexDirection: "row",
