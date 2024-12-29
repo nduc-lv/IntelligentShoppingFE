@@ -17,7 +17,7 @@ import { useToast } from "react-native-toast-notifications";
 import Globals from "@/General/Constants/Globals";
 import { i18n, LocalizationKey } from "@/Localization";
 import Loading from "@/General/Components/Loading";
-
+import { useDebounce } from 'use-debounce';
 type GroupRouteParams = {
     GroupDetail: { groupId: string, isAdmin: boolean };
 };
@@ -44,12 +44,16 @@ export const GroupDetailScreen = () => {
     const [selectedFoodGroupId, setSelectedFoodGroupId] = useState<string>('');
     const toast = useToast();
     const [search, setSearch] = useState('');
+    const [searchQuery]= useDebounce(search,500);
     const [filters, setFilters] = useState(Globals.gFilterFoodGroupList);
     const isLoading=useMemo(()=>_isLoadingGroupInfo||_isLoadingCreateFoodGroup||_isLoadingUpdateFoodGroup||_isLoadingDeleteGroup||_isFetchingGroupInfo,[_isLoadingGroupInfo,_isLoadingCreateFoodGroup,_isLoadingUpdateFoodGroup,_isLoadingDeleteGroup,_isFetchingGroupInfo]);
     const isLoadingFoodByCategory=useMemo(()=>_isLoadingFoodByCategory||_isFetchingFoodByCategory,[_isLoadingFoodByCategory,_isFetchingFoodByCategory])
     useEffect(() => {
         fetchGroupInfo({ groupId });
     }, [groupId, fetchGroupInfo]);
+    useEffect(()=>{
+        fetchFoodByCategory({ group_id: groupId, category_id: selectedCategory, search: searchQuery });
+    },[searchQuery])
     useEffect(() => {
         fetchFoodByCategory({ group_id: groupId, category_id: selectedCategory, search: filters.search });
     }, [selectedCategory, fetchFoodByCategory, filters.search]);
@@ -264,7 +268,9 @@ export const GroupDetailScreen = () => {
                                     borderRadius={16}
                                     borderColor={'#fff'}
                                     borderWidth={0.3}
-                                    onChangeText={setSearch}
+                                    onChangeText={(text)=>{
+                                        setSearch(text)
+                                    }}
                                     _focus={{
                                         borderColor: AppData.colors.primary,
                                         backgroundColor: "white",
