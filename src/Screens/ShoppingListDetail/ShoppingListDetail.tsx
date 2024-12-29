@@ -47,7 +47,7 @@ export const ShoppingListDetail: React.FC = () => {
   const userData = useSelector((state: any) => state?.userApi?.queries[`getMe`]?.data);
   const { groupId } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [fetchShoppingList, { data: rows = [], isLoading, isError }] = useLazyGetShoppingListQuery();
+  const [fetchShoppingList, { data: shoppingList = {rows: [], isAdmin: false}, isLoading, isError }] = useLazyGetShoppingListQuery();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [deleteShoppingList] = useDeleteShoppingListMutation();
   const [updateShoppingList] = useUpdateShoppingListMutation();
@@ -151,18 +151,20 @@ export const ShoppingListDetail: React.FC = () => {
         <View style={styles.centered}>
           <Text style={styles.errorText}>Failed to load shopping lists.</Text>
         </View>
-      ) : rows.length > 0 ? (
+      ) : shoppingList.rows && shoppingList?.rows.length > 0 ? (
         <FlatList
-          data={rows}
+          data={shoppingList?.rows}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <SwipeRow
               leftOpenValue={70}
             >
               {/* Hidden Row (Actions) */}
-              <TouchableOpacity style={styles.deleteButton}  onPress={() => { handleModalOpen("delete", item); }}>
-                 <Trash2></Trash2>
-              </TouchableOpacity>
+              {shoppingList?.isAdmin ? (
+                <TouchableOpacity style={styles.deleteButton}  onPress={() => { handleModalOpen("delete", item); }}>
+                  <Trash2></Trash2>
+                </TouchableOpacity>
+              ): <></>}
               {/* Visible Row */}
               <TouchableHighlight underlayColor={'#AAA'} onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>
                 <View style={styles.groupItem}>
@@ -236,9 +238,12 @@ export const ShoppingListDetail: React.FC = () => {
           }
         </Modal.Content>
       </Modal>
+
+      {shoppingList?.isAdmin && 
       <TouchableOpacity style={styles.fab} onPress={() => handleModalOpen("create")}>
                 <Plus color="white" size={25} />
       </TouchableOpacity>
+      }
     </View>
 
   );
