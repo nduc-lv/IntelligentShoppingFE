@@ -68,7 +68,7 @@ const PublicScreens: Set<string | undefined> = new Set(
 export const RootStack = createNativeStackNavigator<RootStackParamList>();
 export const RootNavigationContainerRef = createNavigationContainerRef<RootStackParamList>()
 
-const pushToken = async (token, userId) => {
+const pushToken = async (token: {data:string}, userId:string) => {
 	try {
 	  await axios.post(
 		`${Config.API_URL}/token/add/${userId}`,
