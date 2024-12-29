@@ -2,9 +2,10 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Trash2, Check, Calendar } from "lucide-react-native";
 import { Plus } from "lucide-react-native";
 import moment from "moment";
-import Autocomplete from 'react-native-autocomplete-input';
 import lodash from "lodash";
 import { Dropdown } from "react-native-searchable-dropdown-kj";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/Store/reducers";
 import {
 	DateTimePickerAndroid,
 	DateTimePickerEvent,
@@ -255,13 +256,14 @@ export const ShoppingListById: React.FC = () => {
     const { groupId, shoppingId } = route.params;
     const [pagination, setPagination] = useState({ page: 1, per: 10 });
     const [selectedItem, setSelectedItem] = useState<Item>();
-    const [fetchShoppingListById, { data: rows = [], isLoading, isError }] = useLazyGetItemByShoppingListIdQuery();
+    const [fetchShoppingListById, { data: shoppingList = {rows: [], isAdmin: false}, isLoading, isError }] = useLazyGetItemByShoppingListIdQuery();
     const [updateShoppingList, { isError: isUpdateError, isLoading: isUpdateLoading }] = useUpdateShoppingListMutation();
     const [addItemToFridge, { isError: isAddError }] = useAddShoppingItemToFridgeMutation();
     const [deleteShoppingItem, { isError: isDeleteError }] = useDeleteShoppingItemByIdMutation();
     const [form] = Form.useForm();
     const [editForm] = Form.useForm();
     const [createForm] = Form.useForm();
+    const user = useSelector(selectUser)
     const [fetchUnitList, { data: units = [] }] = useLazyGetAllUnitQuery();
     const [fetchFoodList, { data: foods = [] }] = useLazyGetAllFoodQuery();
     const [fetchUserList, { data: users = [] }] = useLazyGetAllUserQuery();
@@ -294,6 +296,7 @@ export const ShoppingListById: React.FC = () => {
     }
     const refresh = async () => {
         await fetchShoppingListById({shoppingId, ...pagination});
+        console.log(shoppingList.rows)
     }
     useEffect(() => {
         fetchShoppingListById({ shoppingId, ...pagination });
@@ -302,8 +305,8 @@ export const ShoppingListById: React.FC = () => {
         fetchUserList({ groupId });
     }, []);
     // useEffect(() => {
-    //     if (rows && rows.length >= 0) {
-    //         const updatedItems = rows.map((row, index) => {
+    //     if (shoppingList.rows && shoppingList.rows.length >= 0) {
+    //         const updatedItems = shoppingList.rows.map((row, index) => {
     //             if (index == 0) {
     //                 form.setFieldValue('date', row.shopping.date);
     //                 form.setFieldValue('name', row.shopping.name)
@@ -469,7 +472,7 @@ export const ShoppingListById: React.FC = () => {
                             ))}
                         </View>
                     </Form> */}
-                        {users && foods && units && rows && !rows.length
+                        {users && foods && units && shoppingList.rows && !shoppingList.rows.length
                             &&
                             <View>
                                 <Text>
@@ -478,7 +481,7 @@ export const ShoppingListById: React.FC = () => {
                             </View>
                         }
                         <FlatList
-                            data={rows.map(row => ({
+                            data={shoppingList?.rows?.map(row => ({
                                 id: row.id,
                                 food: row.food_id || "",
                                 unit: row.unit_name || "",
@@ -520,7 +523,7 @@ export const ShoppingListById: React.FC = () => {
                                         }}>
                                             <Trash2></Trash2>
                                         </TouchableOpacity> */}
-                                        <TouchableHighlight onPress={() => { showEditModal(item) }}>
+                                        <TouchableHighlight onPress={() => { shoppingList.isAdmin && showEditModal(item) }}>
                                             <View style={styles.itemContainer} >
 
                                                 <Image
@@ -556,9 +559,12 @@ export const ShoppingListById: React.FC = () => {
                     </>
                 )}
 
-            <TouchableOpacity style={styles.fab} onPress={showCreateModal}>
-                <Plus color="white" size={25} />
-            </TouchableOpacity>
+            {
+                shoppingList.isAdmin &&
+                <TouchableOpacity style={styles.fab} onPress={showCreateModal}>
+                    <Plus color="white" size={25} />
+                </TouchableOpacity>
+            }
             <Modal
                 isOpen={isModalVisible}
                 onClose={() => setIsModalVisible(false)}
