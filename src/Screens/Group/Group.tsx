@@ -9,7 +9,7 @@ import {
 } from "antd-mobile";
 import { useLazyGetAllCategoryQuery } from "@/Services/category";
 import { useLazyGetAllFood2Query } from "@/Services/food";
-import { useLazyGetUnitsQuery } from "@/Services/unit";
+import { useLazyGetUnitQuery } from "@/Services/unit";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/Store";
 import { setCategory, setUnit, setFood } from "@/Store/reducers/data";
@@ -24,7 +24,7 @@ export const GroupScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [fetchAllCategory, { data: categorys, isLoading: isLoadingAllCategory, isError: isErrorAllCategory }] = useLazyGetAllCategoryQuery();
   const [fetchAllFood, { data: foods, isLoading: isLoadingAllFood, isError: isErrorAllFood }] = useLazyGetAllFood2Query();
-  const [fetchAllUnit, { data: units, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetUnitsQuery();
+  const [fetchAllUnit, { data: units, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetUnitQuery();
 
   useEffect(() => {
     fetchAllFood();

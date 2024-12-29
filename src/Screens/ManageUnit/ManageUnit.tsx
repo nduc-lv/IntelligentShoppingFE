@@ -1,4 +1,4 @@
-import { Unit, useCreateUnitMutation, useDeleteUnitMutation, useLazyGetAllUnitQuery, useUpdateUnitMutation } from "@/Services/unit";
+import { Unit, useCreateUnitMutation, useDeleteUnitMutation, useLazyGetUnitQuery, useUpdateUnitMutation } from "@/Services/unit";
 import { ArrowLeft, Edit, Plus, Trash } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
@@ -12,7 +12,7 @@ import AppData from "@/General/Constants/AppData";
 import { Actionsheet, Input } from "native-base";
 
 export const ManageUnitScreen = () => {
-    const [fetchUnit, { data, isLoading, isError }] = useLazyGetAllUnitQuery();
+    const [fetchUnit, { data, isLoading, isError }] = useLazyGetUnitQuery();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [createUnit] = useCreateUnitMutation();
     const [updateUnit] = useUpdateUnitMutation();
