@@ -20,7 +20,7 @@ export const AdminNavigator = () => {
     (state: { auth: AuthState }) => state.auth.accessToken
   );
   useEffect(()=>{
-    if(user?.user_role?.role?.name!='admin'){
+    if(user?.user_role?.role_id !='admin'){
       navigation.navigate(RootScreens.MAIN);
     }
   },[user])
