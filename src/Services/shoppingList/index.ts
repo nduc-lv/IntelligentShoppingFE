@@ -15,6 +15,10 @@ export interface Shopping {
   foods: any[];
   tasks: any[];
 }
+export interface ResponseShopping {
+  rows: Shopping[],
+  isAdmin: boolean
+}
 
 export interface CreateShoppingPayload {
   name: string;
@@ -71,6 +75,11 @@ export interface User {
 //   shopping: any,
 // }
 
+export interface Response {
+  rows: ItemByShoppingIdResponse[] | undefined,
+  isAdmin: boolean
+}
+
 export interface ItemByShoppingIdResponse {
   id: string,
   unit_id: string,
@@ -92,21 +101,27 @@ export interface Token {
 }
 const shoppingListAPI = API.injectEndpoints({
   endpoints: (build) => ({
-    getShoppingList: build.query<Shopping[], { per: number; page: number; groupId: string }>({
+    getShoppingList: build.query<ResponseShopping, { per: number; page: number; groupId: string }>({
       query: ({ per, page, groupId }) => ({
         url: "shopping-list",
         method: "GET",
         params: { per, page, groupId },
       }),
-      transformResponse: (response: { rows: Shopping[] }, meta, arg) => response.rows,
+      transformResponse: (response: { rows: Shopping[], isAdmin: boolean  }, meta, arg) => ({
+        rows: response.rows,
+        isAdmin: response.isAdmin
+      }),
     }),
-    getItemByShoppingListId: build.query<ItemByShoppingIdResponse[], {page: number, per: number, shoppingId: string}>({
+    getItemByShoppingListId: build.query<Response, {page: number, per: number, shoppingId: string}>({
       query: ({per, page, shoppingId}) => ({
         url: "shopping-list/shopping",
         method: "GET",
         params: {per, page, shoppingId}
       }),
-      transformResponse: (response: {rows: any}, meta, arg) => response.rows
+      transformResponse: (response: {rows: any, isAdmin: boolean}, meta, arg) =>({
+        rows: response.rows,
+        isAdmin: response.isAdmin
+      }) 
     }),
 
     getAllFood: build.query<Food[], {}>({
