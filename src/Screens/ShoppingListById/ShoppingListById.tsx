@@ -261,7 +261,6 @@ export const ShoppingListById: React.FC = () => {
     const [updateShoppingList, { isError: isUpdateError, isLoading: isUpdateLoading }] = useUpdateShoppingListMutation();
     const [addItemToFridge, { isError: isAddError }] = useAddShoppingItemToFridgeMutation();
     const [deleteShoppingItem, { isError: isDeleteError }] = useDeleteShoppingItemByIdMutation();
-    const [form] = Form.useForm();
     const [editForm] = Form.useForm();
     const [createForm] = Form.useForm();
     const user = useSelector(selectUser)
@@ -269,7 +268,6 @@ export const ShoppingListById: React.FC = () => {
     const [fetchFoodList, { data: foods = [] }] = useLazyGetAllFoodQuery();
     const [fetchUserList, { data: users = [] }] = useLazyGetAllUserQuery();
     const [formAddFridge] = Form.useForm();
-    formAddFridge.setFieldValue("date", new Date())
     const [items, setItems] = useState<Item[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const handleDisplayNameFromId = (data: Array<any>, obj: { id: string }) => {
@@ -502,6 +500,7 @@ export const ShoppingListById: React.FC = () => {
                                                     setIsModalVisible(true);
                                                     setSelectedItem(curr => item);
                                                     setAction(curr => 'addToFridge')
+                                                    formAddFridge.setFieldValue("date", new Date())
                                                 }}
                                             >
                                                 <Check color={"white"}></Check>

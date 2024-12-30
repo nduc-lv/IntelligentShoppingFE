@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { useLazyGetUserGroupQuery } from "@/Services/shoppingList";
 import { Button, Spinner } from "native-base";
@@ -7,6 +7,7 @@ import { RootStackParamList } from "@/Navigation";
 import { ChevronRight } from "lucide-react-native";
 import { useSelector } from "react-redux";
 import { AuthState } from "@/Store/reducers";
+import { useFocusEffect } from "expo-router";
 // Type definition for Group
 interface Group {
   id: string;
@@ -22,15 +23,9 @@ export const ShoppingListScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   useEffect(() => {
-    // Fetch groups when the component mounts
-    fetchGroups({});
-    // fetchGroups(userInfo.id);
-  }, [fetchGroups]);
+    fetchGroups({})
+  }, [])
 
-
-  useEffect(() => {
-    console.log("data",data)
-  }, [data])
   // Loading state
   if (isLoading) {
     return (
@@ -61,6 +56,8 @@ export const ShoppingListScreen: React.FC = () => {
         <FlatList
           data={data}
           keyExtractor={(item) => item.id}
+          onEndReached={() => fetchGroups({})}
+          onEndReachedThreshold={0.1} // Trigger when 10% away from the bottom
           renderItem={({ item }: { item: Group }) => (
             <TouchableOpacity style={styles.groupItem} onPress={() => navigation.navigate("SHOPPING_LIST_DETAIL", { groupId: item.id })}>
               <Text style={styles.groupName}>{item.name}</Text>

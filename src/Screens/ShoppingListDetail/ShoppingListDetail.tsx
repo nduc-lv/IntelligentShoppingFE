@@ -62,8 +62,7 @@ export const ShoppingListDetail: React.FC = () => {
   const [currentAction, setCurrentAction] = useState<"create" | "edit" | "delete" | null>(null);
   const [selectedItem, setSelectedItem] = useState<Shopping | null>(null);
   const [form] = Form.useForm();
-  form.setFieldValue("date", new Date());
-
+ 
   // Load shopping lists on initial render or pagination change
   useEffect(() => {
     fetchShoppingList({ groupId, ...pagination });
@@ -79,6 +78,7 @@ export const ShoppingListDetail: React.FC = () => {
     setCurrentAction(action);
     setSelectedItem(item);
     setIsModalVisible(true);
+    form.setFieldValue("date", new Date())
   };
   const [showCalendar, setShowCalendar] = useState(false);
 
@@ -106,6 +106,9 @@ export const ShoppingListDetail: React.FC = () => {
   const showDatepicker = () => {
     showMode('date');
   };
+  const handleNameChange = (value: string) => {
+    form.setFieldValue('name', value); // Ensure `form` is not part of itself
+};
   // Save shopping list (create or update)
   const saveShoppingList = async () => {
     try {
@@ -219,9 +222,8 @@ export const ShoppingListDetail: React.FC = () => {
                         <Calendar />
                       </TouchableOpacity>
                     </Form.Item>
-
                     <Form.Item name="name" rules={[{ required: true, message: "Please provide a name" }]}>
-                      <TextInput style={styles.input} placeholder="Name" onChangeText={(value) => form.setFieldValue('name', value)} />
+                      <TextInput style={styles.input} placeholder="Name" onChangeText={handleNameChange} />
                     </Form.Item>
                     {/* Save Button */}
                   </Form>
