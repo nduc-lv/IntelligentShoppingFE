@@ -5,12 +5,12 @@ import { NavigationProp, RouteProp, useNavigation, useRoute } from "@react-navig
 import { RootStackParamList } from "@/Navigation";
 import { useCreateUserGroupMutation, useDeleteUserGroupMutation, useLazyGetAllUserGroupQuery, useUpdateUserGroupMutation } from "@/Services/usergroup";
 import { Menu, Provider } from "react-native-paper";
-import {
-    Toast,
-} from "antd-mobile";
 import { useLazyGetUserByEmailQuery, useLazyGetUserByUsernameQuery } from "@/Services";
 import { useSelector } from "react-redux";
 import { AuthState } from "@/Store/reducers";
+import { useToast } from "react-native-toast-notifications";
+import { Actionsheet, Input } from "native-base";
+import AppData from "@/General/Constants/AppData";
 
 type GroupRouteParams = {
     Usergroup: { groupId: string, isAdmin: boolean, groupName: string };
@@ -27,7 +27,7 @@ export const UsergroupScreen = () => {
     const { groupId, isAdmin, groupName } = route.params;
 
     const [fetchUserGroupList, { data: users = [], isLoading: isListLoading, isError: isListError }] = useLazyGetAllUserGroupQuery();
-    const myInfo=useSelector((state:{auth:AuthState})=>(state.auth.user))
+    const myInfo = useSelector((state: { auth: AuthState }) => (state.auth.user))
 
     const [triggerEmailSearch] = useLazyGetUserByEmailQuery();
     const [triggerUsernameSearch] = useLazyGetUserByUsernameQuery();
@@ -40,6 +40,7 @@ export const UsergroupScreen = () => {
     const [createModalVisible, setCreateModalVisible] = useState(false);
     const [memberUsername, setMemberUsername] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const toast = useToast();
 
     const openMenu = (user_id: string) => {
         setSelectedUser(user_id);
@@ -63,15 +64,15 @@ export const UsergroupScreen = () => {
         try {
             if (isAdmin) {
                 await deleteUsergroup({ group_id: groupId, user_id: selectedUser });
-                Toast.show({ content: "Member removed successfully!", icon: "success" });
+                toast.show("Xóa thành viên thành công", { placement: "top", type: "success" });
                 fetchUserGroupList({ groupId, ...pagination });
             }
             else {
-                Toast.show({ content: "You are not group admin!", icon: "fail" });
+                toast.show("Bạn không phải trưởng nhóm", { placement: "top", type: "warning" });
             }
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to delete member.", icon: "fail" });
+            toast.show("Xóa thất bại", { placement: "top", type: "warning" });
         }
     }
 
@@ -82,21 +83,21 @@ export const UsergroupScreen = () => {
                     is_admin: option === 'promote' ? 1 : 0
                 };
                 await updateUsergroup({ group_id: groupId, user_id: selectedUser, ...payload });
-                Toast.show({ content: "Member updated successfully!", icon: "success" });
+                toast.show("Cập nhật thành công", { placement: "top", type: "success" });
                 fetchUserGroupList({ groupId, ...pagination });
             }
             else {
-                Toast.show({ content: "You are not group admin!", icon: "fail" });
+                toast.show("Bạn không phải trưởng nhóm", { placement: "top", type: "warning" });
             }
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to update member.", icon: "fail" });
+            toast.show("Cập nhật thất bại", { placement: "top", type: "warning" });
         }
     }
 
     const handleCreateMember = async () => {
         if (!memberUsername.trim()) {
-            Toast.show({ content: "Please enter member's username or email!", icon: "fail" });
+            toast.show("Chưa điền tên thành viên", { placement: "top", type: "warning" });
             return;
         }
         try {
@@ -118,7 +119,7 @@ export const UsergroupScreen = () => {
             const foundUser = (emailResult ? emailResult : (usernameResult ? usernameResult : undefined));
 
             if (!foundUser) {
-                Toast.show({ content: "No matching user found.", icon: "fail" });
+                toast.show("Không tìm được người dùng", { placement: "top", type: "warning" });
                 return;
             }
             setErrorMessage('');
@@ -129,13 +130,13 @@ export const UsergroupScreen = () => {
             }
 
             const response = await createUsergroup(payload).unwrap();
-            Toast.show({ content: "Member found and created successfully!", icon: "success" });
+            toast.show("Thêm thành viên thành công", { placement: "top", type: "success" });
             handleCloseCreateDialog();
             fetchUserGroupList({ groupId, ...pagination });
         } catch (error) {
             console.error("Unexpected error:", error);
             setErrorMessage((error as ApiError).data.message);
-            Toast.show({ content: "Failed to create member.", icon: "fail" });
+            toast.show("Thêm thành viên thất bại", { placement: "top", type: "warning" });
         }
     }
 
@@ -227,7 +228,65 @@ export const UsergroupScreen = () => {
                 ) : (
                     <Text>No groups found.</Text>
                 )}
-                <Modal
+                {createModalVisible && (
+                    <Actionsheet isOpen={createModalVisible}
+                        onClose={() => handleCloseCreateDialog()}
+                        hideDragIndicator
+                    >
+                        <Actionsheet.Content borderTopRadius={24}>
+                            <View
+                                style={{
+                                    height: "auto",
+                                    padding: 24,
+                                    gap: 16,
+                                    width: "100%",
+                                }}>
+                                <View style={{ width: "100%", zIndex: 3, flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                                    <Input
+                                        width={"100%"}
+                                        placeholder="Username/Email"
+                                        size={"xl"}
+                                        height={12}
+                                        bgColor="white"
+                                        borderRadius={10}
+                                        borderColor={AppData.colors.text[400]}
+                                        borderWidth={0.3}
+                                        _focus={{
+                                            borderColor: AppData.colors.primary,
+                                            backgroundColor: "white",
+                                        }}
+                                        value={memberUsername}
+                                        onChangeText={setMemberUsername}
+                                    />
+                                    {errorMessage ? (
+                                        <Text style={styles.errorText}>{errorMessage}</Text>
+                                    ) : null}
+                                </View>
+                                <TouchableOpacity style={{
+                                    padding: 16,
+                                    height: 60,
+                                    alignSelf: 'center',
+                                    backgroundColor: AppData.colors.primary,
+                                    borderRadius: 16,
+                                    alignItems: 'center',
+                                    zIndex: 1,
+                                    minWidth: 200
+                                }}
+                                    onPress={() => handleCreateMember()}
+                                >
+                                    <Text style={{
+                                        fontSize: AppData.fontSizes.medium,
+                                        fontWeight: "500",
+                                        color: AppData.colors.text[100],
+                                    }}>
+                                        {'Thêm thành viên'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Actionsheet.Content>
+                    </Actionsheet>
+                )}
+                {/* <Modal
                     animationType="fade"
                     transparent={true}
                     visible={createModalVisible}
@@ -251,7 +310,7 @@ export const UsergroupScreen = () => {
                             </View>
                         </View>
                     </View>
-                </Modal>
+                </Modal> */}
             </View>
         </Provider>
     );

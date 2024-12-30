@@ -5,12 +5,11 @@ import { ArrowLeft, LogOut, LucideIcon, Pencil, Trash, UsersRound } from "lucide
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import { useDeleteGroupMutation, useLazyGetGroupInfoQuery, useUpdateGroupMutation } from "@/Services/group";
-import {
-    Toast,
-} from "antd-mobile";
-import { useSafeArea } from "native-base";
+import { Actionsheet, Input, useSafeArea} from "native-base";
 import { RootScreens } from "..";
 import { useLeaveGroupMutation } from "@/Services/usergroup";
+import AppData from "@/General/Constants/AppData";
+import { useToast } from "react-native-toast-notifications";
 type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void, disable: boolean, color?: string }
 type GroupRouteParams = {
     GroupInfo: { groupId: string, isAdmin: boolean };
@@ -29,7 +28,7 @@ export const GroupInfoScreen = () => {
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const { groupId, isAdmin } = route.params;
-
+    const toast = useToast();
 
     const [fetchGroupInfo, { data: info, isLoading: isLoadingInfo, isError: isErrorInfo }] = useLazyGetGroupInfoQuery();
     const [updateGroup] = useUpdateGroupMutation();
@@ -57,19 +56,19 @@ export const GroupInfoScreen = () => {
     const handleSave = async () => {
         try {
             if (!newGroupName) {
-                Toast.show({ content: "Please fill in new group name.", icon: "fail" });
+                toast.show("Chưa điền tên nhóm", { placement: "top", type: "warning" });
                 return;
             }
             const payload = {
                 name: newGroupName
             };
             await updateGroup({ id: groupId, ...payload }).unwrap();
-            Toast.show({ content: "Group updated successfully!", icon: "success" });
+            toast.show("Cập nhật thành công", { placement: "top", type: "success" });
             fetchGroupInfo({ groupId });
             handleCloseEditDialog();
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to save group infomation.", icon: "fail" });
+            toast.show("Cập nhật thất bại", { placement: "top", type: "warning" });
         }
     }
 
@@ -77,48 +76,48 @@ export const GroupInfoScreen = () => {
         try {
             if (isAdmin) {
                 await deleteGroup(groupId);
-                Toast.show({ content: "Group deleted successfully!", icon: "success" });
+                toast.show("Xóa thành công", { placement: "top", type: "success" });
                 handleCloseDeleteDialog();
                 navigation.navigate(RootScreens.MAIN);
             }
             else {
-                Toast.show({ content: "You are not group admin!", icon: "fail" });
+                toast.show("Bạn không phải trưởng nhóm", { placement: "top", type: "warning" });
             }
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to delete group.", icon: "fail" });
+            toast.show("Xóa thất bại", { placement: "top", type: "warning" });
         }
     }
 
     const handleLeaveGroup = async () => {
         try {
             await leaveGroup({ group_id: groupId });
-            Toast.show({ content: "Leave group successfully!", icon: "success" });
+            toast.show("Rời nhóm thành công", { placement: "top", type: "success" });
             navigation.navigate(RootScreens.MAIN);
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to leave group.", icon: "fail" });
+            toast.show("Rời nhóm thất bại", { placement: "top", type: "warning" });
         }
     }
 
     const settings: Array<GroupInfoListItem> = [
         {
-            title: "Change Group Name", icon: Pencil, onClick: (e) => {
+            title: "Đổi tên nhóm", icon: Pencil, onClick: (e) => {
                 handleOpenEditDialog();
             }, disable: !isAdmin
         },
         {
-            title: "Members", icon: UsersRound, onClick: (e) => {
+            title: "Thành viên", icon: UsersRound, onClick: (e) => {
                 navigation.navigate("USERGROUP", { groupId: groupId, isAdmin: isAdmin, groupName: info.rows[0].group.name ?? "Unknown" })
             }, disable: false
         },
         {
-            title: "Leave Group", icon: LogOut, onClick: (e) => {
+            title: "Rời nhóm", icon: LogOut, onClick: (e) => {
                 handleLeaveGroup();
             }, disable: isAdmin, color: "red"
         },
         {
-            title: "Delete Group", icon: Trash, onClick: (e) => {
+            title: "Xóa nhóm", icon: Trash, onClick: (e) => {
                 handleOpenDeleteDialog();
             }, disable: !isAdmin, color: "red"
         },
@@ -159,28 +158,61 @@ export const GroupInfoScreen = () => {
                         keyExtractor={(item, index) => index.toString()}
                         contentContainerStyle={styles.settingsList}
                     />
-                    <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={editModalVisible}
-                        onRequestClose={() => handleCloseEditDialog()}
-                    >
-                        <View style={styles.modalOverlay}>
-                            <View style={styles.modalContent}>
-                                <Text style={styles.modalTitle}>Enter New Group Name</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Group Name"
-                                    value={newGroupName}
-                                    onChangeText={setNewGroupName}
-                                />
-                                <View style={styles.buttonContainer}>
-                                    <Button title="Cancel" onPress={() => handleCloseEditDialog()} />
-                                    <Button title="Save" onPress={() => handleSave()} />
+                    {editModalVisible && (
+                        <Actionsheet isOpen={editModalVisible}
+                            onClose={() => handleCloseEditDialog()}
+                            hideDragIndicator
+                        >
+                            <Actionsheet.Content borderTopRadius={24}>
+                                <View
+                                    style={{
+                                        height: "auto",
+                                        padding: 24,
+                                        gap: 16,
+                                        width: "100%",
+                                    }}>
+                                    <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                                        <Input
+                                            width={"100%"}
+                                            placeholder="Tên nhóm"
+                                            size={"xl"}
+                                            height={12}
+                                            bgColor="white"
+                                            borderRadius={10}
+                                            borderColor={AppData.colors.text[400]}
+                                            borderWidth={0.3}
+                                            _focus={{
+                                                borderColor: AppData.colors.primary,
+                                                backgroundColor: "white",
+                                            }}
+                                            value={newGroupName}
+                                            onChangeText={setNewGroupName}
+                                        />
+                                    </View>
+                                    <TouchableOpacity style={{
+                                        padding: 16,
+                                        height: 60,
+                                        alignSelf: 'center',
+                                        backgroundColor: AppData.colors.primary,
+                                        borderRadius: 16,
+                                        alignItems: 'center',
+                                        zIndex: 1,
+                                        minWidth: 200
+                                    }}
+                                        onPress={() => handleSave()}
+                                    >
+                                        <Text style={{
+                                            fontSize: AppData.fontSizes.medium,
+                                            fontWeight: "500",
+                                            color: AppData.colors.text[100],
+                                        }}>
+                                            {'Lưu'}
+                                        </Text>
+                                    </TouchableOpacity>
                                 </View>
-                            </View>
-                        </View>
-                    </Modal>
+                            </Actionsheet.Content>
+                        </Actionsheet>
+                    )}
                     <Modal
                         animationType="fade"
                         transparent={true}
@@ -203,8 +235,9 @@ export const GroupInfoScreen = () => {
                 </View>
             ) : (
                 <Text>No info found.</Text>
-            )}
-        </View>
+            )
+            }
+        </View >
     );
 }
 

@@ -5,11 +5,9 @@ import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, 
 import { RootScreens } from "..";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
-import {
-    Toast,
-} from "antd-mobile";
 import AppData from "@/General/Constants/AppData";
 import { Actionsheet, Input } from "native-base";
+import { useToast } from "react-native-toast-notifications";
 
 export const ManageUnitScreen = () => {
     const [fetchUnit, { data, isLoading, isError }] = useLazyGetUnitQuery();
@@ -20,6 +18,7 @@ export const ManageUnitScreen = () => {
     const [modalOption, setModalOption] = useState('');
     const [newUnitName, setNewUnitName] = useState('');
     const [selectedUnit, setSelectedUnit] = useState<Unit | null>();
+    const Toast = useToast();
 
     const handleOpenDialog = (option: string, item: Unit | null = null) => {
         setModalOption(option);
@@ -36,7 +35,7 @@ export const ManageUnitScreen = () => {
     const handleSubmit = async () => {
         try {
             if (!newUnitName) {
-                Toast.show({ content: "Hãy điền tên mới cho đơn vị.", icon: "fail" });
+                Toast.show("Chưa điền tên mới", { placement: "top", type: "warning" });
                 return;
             }
             const payload = {
@@ -47,28 +46,28 @@ export const ManageUnitScreen = () => {
             }
             if (modalOption === 'edit') {
                 if (!selectedUnit) {
-                    Toast.show({ content: "Please select an unit.", icon: "fail" });
+                    Toast.show("Chưa chọn đơn vị", { placement: "top", type: "warning" });
                     return;
                 }
                 await updateUnit({ id: selectedUnit.id, ...payload }).unwrap();
             }
-            Toast.show({ content: "Unit saved successfully!", icon: "success" });
+            Toast.show("Cập nhật thành công", { placement: "top", type: "success" });
             fetchUnit();
             handleCloseDialog();
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to save unit infomation.", icon: "fail" });
+            Toast.show("Cập nhật thất bại", { placement: "top", type: "warning" });
         }
     }
 
     const handleDelete = async (id: string) => {
         try {
             await deleteUnit(id);
-            Toast.show({ content: "Unit deleted successfully!", icon: "success" });
+            Toast.show("Xóa thành công", { placement: "top", type: "success" });
             fetchUnit();         
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to delete group.", icon: "fail" });
+            Toast.show("Xóa thất bại", { placement: "top", type: "warning" });
         }
     }
 

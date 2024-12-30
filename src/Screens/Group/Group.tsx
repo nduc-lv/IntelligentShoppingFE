@@ -4,9 +4,6 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
-import {
-  Toast,
-} from "antd-mobile";
 import { useLazyGetAllCategoryQuery } from "@/Services/category";
 import { useLazyGetAllFood2Query } from "@/Services/food";
 import { useLazyGetUnitQuery } from "@/Services/unit";
@@ -14,6 +11,8 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/Store";
 import { setCategory, setUnit, setFood } from "@/Store/reducers/data";
 import AppData from "@/General/Constants/AppData";
+import { useToast } from "react-native-toast-notifications";
+import { Actionsheet, Input } from "native-base";
 
 export const GroupScreen = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -25,6 +24,7 @@ export const GroupScreen = () => {
   const [fetchAllCategory, { data: categorys, isLoading: isLoadingAllCategory, isError: isErrorAllCategory }] = useLazyGetAllCategoryQuery();
   const [fetchAllFood, { data: foods, isLoading: isLoadingAllFood, isError: isErrorAllFood }] = useLazyGetAllFood2Query();
   const [fetchAllUnit, { data: units, isLoading: isLoadingAllUnit, isError: isErrorAllUnit }] = useLazyGetUnitQuery();
+  const toast = useToast();
 
   useEffect(() => {
     fetchAllFood();
@@ -51,19 +51,19 @@ export const GroupScreen = () => {
   const handleCreate = async () => {
     try {
       if (!newGroupName) {
-        Toast.show({ content: "Please fill in new group name.", icon: "fail" });
+        toast.show("Chưa điền tên nhóm", { placement: "top", type: "warning" });
         return;
       }
       const payload = {
         name: newGroupName
       };
       await createGroup(payload).unwrap();
-      Toast.show({ content: "Group updated successfully!", icon: "success" });
+      toast.show("Tạo nhóm thành công", { placement: "top", type: "success" });
       fetchGroup();
       handleCloseDialog();
     } catch (e) {
       console.log(e)
-      Toast.show({ content: "Failed to save group infomation.", icon: "fail" });
+      toast.show("Tạo nhóm thất bại", { placement: "top", type: "warning" });
     }
   }
 
@@ -109,7 +109,62 @@ export const GroupScreen = () => {
       <TouchableOpacity style={styles.fab} onPress={() => handleOpenDialog()}>
         <Plus color="white" size={25} />
       </TouchableOpacity>
-      <Modal
+      {modalVisible && (
+        <Actionsheet isOpen={modalVisible}
+          onClose={() => handleCloseDialog()}
+          hideDragIndicator
+        >
+          <Actionsheet.Content borderTopRadius={24}>
+            <View
+              style={{
+                height: "auto",
+                padding: 24,
+                gap: 16,
+                width: "100%",
+              }}>
+              <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                <Input
+                  width={"100%"}
+                  placeholder="Tên nhóm"
+                  size={"xl"}
+                  height={12}
+                  bgColor="white"
+                  borderRadius={10}
+                  borderColor={AppData.colors.text[400]}
+                  borderWidth={0.3}
+                  _focus={{
+                    borderColor: AppData.colors.primary,
+                    backgroundColor: "white",
+                  }}
+                  value={newGroupName}
+                  onChangeText={setNewGroupName}
+                />
+              </View>
+              <TouchableOpacity style={{
+                padding: 16,
+                height: 60,
+                alignSelf: 'center',
+                backgroundColor: AppData.colors.primary,
+                borderRadius: 16,
+                alignItems: 'center',
+                zIndex: 1,
+                minWidth: 200
+              }}
+                onPress={() => handleCreate()}
+              >
+                <Text style={{
+                  fontSize: AppData.fontSizes.medium,
+                  fontWeight: "500",
+                  color: AppData.colors.text[100],
+                }}>
+                  {'Tạo mới'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Actionsheet.Content>
+        </Actionsheet>
+      )}
+      {/* <Modal
         animationType="fade"
         transparent={true}
         visible={modalVisible}
@@ -130,7 +185,7 @@ export const GroupScreen = () => {
             </View>
           </View>
         </View>
-      </Modal>
+      </Modal> */}
     </View>
   );
 }

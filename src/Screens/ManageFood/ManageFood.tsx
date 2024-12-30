@@ -2,9 +2,6 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
-import {
-    Toast,
-} from "antd-mobile";
 import { Food, useCreateFoodMutation, useDeleteFoodMutation, useLazyGetAllFood2Query, useUpdateFoodMutation } from "@/Services/food";
 import { ArrowLeft, Edit, Plus, Trash } from "lucide-react-native";
 import { RootScreens } from "..";
@@ -13,6 +10,7 @@ import { useLazyGetAllCategoryQuery } from "@/Services/category";
 import SearchableDropdown from "@/General/Components/SearchableDropdown";
 import { Actionsheet, Avatar, Input } from "native-base";
 import AppData from "@/General/Constants/AppData";
+import { useToast } from "react-native-toast-notifications";
 
 export const ManageFoodScreen = () => {
     const [fetchFood, { data: foodData, isLoading: isFoodLoading, isError: isFoodError }] = useLazyGetAllFood2Query();
@@ -27,6 +25,7 @@ export const ManageFoodScreen = () => {
     const [updateFood] = useUpdateFoodMutation();
     const [deleteFood] = useDeleteFoodMutation();
     var filteredFood: Food[] = [];
+    const Toast = useToast();
 
     const handleSearch = (text: any) => {
         setSearchQuery(text);
@@ -51,7 +50,7 @@ export const ManageFoodScreen = () => {
     const handleSubmit = async () => {
         try {
             if (!newFoodName) {
-                Toast.show({ content: "Hãy điền tên mới cho thực phẩm", icon: "fail" });
+                Toast.show("Chưa điền tên mới", { placement: "top", type: "warning" });
                 return;
             }
             const payload = {
@@ -63,28 +62,28 @@ export const ManageFoodScreen = () => {
             }
             if (modalOption === 'edit') {
                 if (!selectedFood) {
-                    Toast.show({ content: "Hãy chọn thực phẩm", icon: "fail" });
+                    Toast.show("Chưa chọn thực phẩm", { placement: "top", type: "warning" });
                     return;
                 }
                 await updateFood({ id: selectedFood.id, ...payload }).unwrap();
             }
-            Toast.show({ content: "Unit saved successfully!", icon: "success" });
+            Toast.show("Cập nhật thành công", { placement: "top", type: "success" });
             fetchFood();
             handleCloseDialog();
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to save unit infomation.", icon: "fail" });
+            Toast.show("Cập nhật thất bại", { placement: "top", type: "warning" });
         }
     }
 
     const handleDelete = async (id: string) => {
         try {
             await deleteFood(id);
-            Toast.show({ content: "Unit deleted successfully!", icon: "success" });
+            Toast.show("Xóa thành công", { placement: "top", type: "success" });
             fetchFood();
         } catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to delete group.", icon: "fail" });
+            Toast.show("Xóa thất bại", { placement: "top", type: "warning" });
         }
     }
 
@@ -209,7 +208,6 @@ export const ManageFoodScreen = () => {
                                 options={categoryOptions || []}
                                 placeholder="Phân loại"
                                 onSelect={(value) => setNewCategory(value)}
-                                dropdownWidth="250px"
                             />
                         </View>
                         <TouchableOpacity style={{

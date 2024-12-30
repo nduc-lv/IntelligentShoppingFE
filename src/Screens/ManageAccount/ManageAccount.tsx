@@ -6,11 +6,9 @@ import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, 
 import { RootScreens } from "..";
 import { ArrowLeft } from "lucide-react-native";
 import { Actionsheet, Avatar, Input } from "native-base";
-import {
-    Toast,
-} from "antd-mobile";
 import AppData from "@/General/Constants/AppData";
 import { useUpdateUserMutation } from "@/Services";
+import { useToast } from "react-native-toast-notifications";
 
 export const ManageAccountScreen = () => {
     const [fetchUserrole, { data, isLoading, isError }] = useLazyGetAllUserroleQuery();
@@ -24,6 +22,7 @@ export const ManageAccountScreen = () => {
     const [banUser] = useBanUserMutation();
     const [unbanUser] = useUnbanUserMutation();
     const [deleteUser] = useDeleteUserMutation();
+    const Toast = useToast();
     var filteredUsers: UserRoleResponse[] = [];
 
     const handleSearch = (text: any) => {
@@ -55,17 +54,17 @@ export const ManageAccountScreen = () => {
             if (selectedUser) {
                 if (selectedUser.is_active) await banUser({ id: selectedUser.id }).unwrap();
                 else await unbanUser({ id: selectedUser.id }).unwrap();
-                Toast.show({ content: "Cấm người dùng thành công!", icon: "success" });
+                Toast.show("Cấm người dùng thành công", { placement: "top", type: "success" });
                 fetchUserrole();
             }
             else {
-                Toast.show({ content: "Người dùng không tồn tại!", icon: "fail" });
+                Toast.show("Chưa chọn người dùng", { placement: "top", type: "warning" });
             }
             handleCloseDialog();
         }
         catch (e) {
             console.log(e)
-            Toast.show({ content: "Cấm thất bại.", icon: "fail" });
+            Toast.show("Cấm thất bại", { placement: "top", type: "warning" });
         }
     };
 
@@ -73,20 +72,20 @@ export const ManageAccountScreen = () => {
         try{
             if (selectedUser){
                 if(!newPassword){
-                    Toast.show({ content: "Hãy nhập mật khẩu mới!", icon: "fail" });
+                    Toast.show("Chưa điền mật khẩu mới", { placement: "top", type: "warning" });
                     return;
                 }
                 const payload = {
                     password: newPassword
                 }
                 await updateUser({id: selectedUser.id, ...payload}).unwrap();
-                Toast.show({ content: "Đổi mật khẩu thành công!", icon: "success" });
+                Toast.show("Đổi mật khẩu thành công", { placement: "top", type: "success" });
             }
             handleCloseUpdateDialog();
         }
         catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to update password.", icon: "fail" });
+            Toast.show("Đổi mật khẩu thất bại", { placement: "top", type: "warning" });
         }
     };
 
@@ -94,17 +93,17 @@ export const ManageAccountScreen = () => {
         try {
             if (selectedUser) {
                 await deleteUser({ id: selectedUser.id }).unwrap();
-                Toast.show({ content: "User deleted successfully!", icon: "success" });
+                Toast.show("Xóa người dùng thành công", { placement: "top", type: "success" });
                 fetchUserrole();
                 handleCloseDialog();
             }
             else {
-                Toast.show({ content: "User not found!", icon: "fail" });
+                Toast.show("Người dùng không hơp lệ", { placement: "top", type: "warning" });
             }
         }
         catch (e) {
             console.log(e)
-            Toast.show({ content: "Failed to delete user.", icon: "fail" });
+            Toast.show("Xóa người dùng thất bại", { placement: "top", type: "warning" });
         }
     };
 
