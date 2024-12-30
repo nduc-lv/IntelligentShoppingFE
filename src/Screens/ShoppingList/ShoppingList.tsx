@@ -120,4 +120,7 @@ const styles = StyleSheet.create({
     color: "red",
     marginBottom: 16,
   },
+  buttonGroup: {
+    flexDirection:"row", justifyContent:"space-between", width:"100%"
+  }
 });
