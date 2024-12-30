@@ -25,7 +25,7 @@ export const ShoppingListTabNavigation = () => {
 				name="SHOPPING_LIST_DETAIL"
 				component={ShoppingListDetailContainer}
 				options={() => ({
-					headerTitle: `Shopiing List By Group`,
+					headerTitle: `Shopping List By Group`,
 				})}
 			/>
 			<ShoppingListTab.Screen

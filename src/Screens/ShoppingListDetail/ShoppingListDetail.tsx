@@ -38,6 +38,7 @@ import {
 } from "@/Services/shoppingList";
 import { useToast } from 'react-native-toast-notifications'
 import { TextInput } from "react-native-paper";
+import AppData from "@/General/Constants/AppData";
 type ShoppingListRouteParams = {
   ShoppingListDetail: { groupId: string };
 };
@@ -47,7 +48,7 @@ export const ShoppingListDetail: React.FC = () => {
   const userData = useSelector((state: any) => state?.userApi?.queries[`getMe`]?.data);
   const { groupId } = route.params;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [fetchShoppingList, { data: shoppingList = {rows: [], isAdmin: false}, isLoading, isError }] = useLazyGetShoppingListQuery();
+  const [fetchShoppingList, { data: shoppingList = { rows: [], isAdmin: false }, isLoading, isError }] = useLazyGetShoppingListQuery();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [deleteShoppingList] = useDeleteShoppingListMutation();
   const [updateShoppingList] = useUpdateShoppingListMutation();
@@ -161,14 +162,14 @@ export const ShoppingListDetail: React.FC = () => {
             >
               {/* Hidden Row (Actions) */}
               {shoppingList?.isAdmin ? (
-                <TouchableOpacity style={styles.deleteButton}  onPress={() => { handleModalOpen("delete", item); }}>
+                <TouchableOpacity style={styles.deleteButton} onPress={() => { handleModalOpen("delete", item); }}>
                   <Trash2></Trash2>
                 </TouchableOpacity>
-              ): <></>}
+              ) : <></>}
               {/* Visible Row */}
               <TouchableHighlight underlayColor={'#AAA'} onPress={() => { navigation.navigate("SHOPPING_LIST_BY_ID", { groupId, shoppingId: item.id }) }}>
                 <View style={styles.groupItem}>
-                  <View style={{gap: 5}}>
+                  <View style={{ gap: 5 }}>
                     <Text>{moment(item.date).format("MM-DD-YY")}</Text>
                     <Text>{item.name}</Text>
                   </View>
@@ -211,11 +212,11 @@ export const ShoppingListDetail: React.FC = () => {
                   <Form form={form}>
                     <Form.Item name="date" rules={[{ required: true, message: "Please select a date" }]}
                     >
-                      <TouchableOpacity onPress={() => showDatepicker()} style={{display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems:"center"}}>
-                        <Text style={{fontSize: 20}}>
+                      <TouchableOpacity onPress={() => showDatepicker()} style={{ display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
+                        <Text style={{ fontSize: 20 }}>
                           {moment(date).format("YYYY-MM-DD")}
                         </Text>
-                        <Calendar/>
+                        <Calendar />
                       </TouchableOpacity>
                     </Form.Item>
 
@@ -225,7 +226,7 @@ export const ShoppingListDetail: React.FC = () => {
                     {/* Save Button */}
                   </Form>
                   <Modal.Footer>
-                    <Button.Group style={{flexDirection:"row", justifyContent:"space-between", width:"100%"}}>
+                    <Button.Group style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
                       <Button style={styles.button} onPress={handleModalClose}>Cancel</Button>
                       <Button style={styles.button} onPress={saveShoppingList}>
                         Save
@@ -239,10 +240,10 @@ export const ShoppingListDetail: React.FC = () => {
         </Modal.Content>
       </Modal>
 
-      {shoppingList?.isAdmin && 
-      <TouchableOpacity style={styles.fab} onPress={() => handleModalOpen("create")}>
-                <Plus color="white" size={25} />
-      </TouchableOpacity>
+      {shoppingList?.isAdmin &&
+        <TouchableOpacity style={styles.fab} onPress={() => handleModalOpen("create")}>
+          <Plus color="white" size={25} />
+        </TouchableOpacity>
       }
     </View>
 
@@ -252,7 +253,7 @@ export const ShoppingListDetail: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#f9f9f9" },
   title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
-  groupItem: { padding: 12, backgroundColor: "#fff", marginBottom: 8, borderRadius: 8, flexDirection:"row" , justifyContent:"space-between"},
+  groupItem: { padding: 12, backgroundColor: "#fff", marginBottom: 8, borderRadius: 8, flexDirection: "row", justifyContent: "space-between" },
   buttonContainer: { flexDirection: "row", justifyContent: "space-between" },
   deleteButton: {
     padding: 12,
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     backgroundColor: 'red',
-    marginBottom: 8, borderRadius: 8 
+    marginBottom: 8, borderRadius: 8
   },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   errorText: { color: "red" },
@@ -270,12 +271,10 @@ const styles = StyleSheet.create({
   itemRow: { marginBottom: 12 },
   fab: {
     position: 'absolute',
-    bottom: 25,
+    bottom: 35,
     right: 25,
-    backgroundColor: '#007AFF',
     width: 60,
     height: 60,
-    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
@@ -283,17 +282,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
-},
-input:{
-  // borderWidth: 1,
-  // borderColor: "#ccc",
-  // borderRadius: 8,
-  padding: 1,
-  fontSize: 20,
-  paddingHorizontal: 1,
-  backgroundColor:"white"
-},
-button: {
-  backgroundColor: "#53B175"
-}
+    backgroundColor: AppData.colors.primary,
+    display: "flex",
+    borderRadius: 16,
+  },
+  input: {
+    // borderWidth: 1,
+    // borderColor: "#ccc",
+    // borderRadius: 8,
+    padding: 1,
+    fontSize: 20,
+    paddingHorizontal: 1,
+    backgroundColor: "white"
+  },
+  button: {
+    backgroundColor: "#53B175"
+  }
 });
