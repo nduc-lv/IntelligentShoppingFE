@@ -326,7 +326,6 @@ export const GroupDetailScreen = () => {
 						}}
 						placeholder="Tìm kiếm"
 						placeholderTextColor="#aaa"
-						value={search}
 						onChangeText={setSearch}
 					/>
 				</View>

@@ -158,7 +158,6 @@ export const ManageAccountScreen = () => {
                     <TextInput
                         style={styles.searchBar}
                         placeholder="Tìm kiếm tài khoản..."
-                        value={searchQuery}
                         onChangeText={handleSearch}
                     />
                         <FlatList

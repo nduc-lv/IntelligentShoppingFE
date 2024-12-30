@@ -111,7 +111,6 @@ export const PasswordSettings = ({
         placeholderTextColor={"#9AA6B2"}
         style={styles.input}
         placeholder="Password"
-        value={formData.old_password}
         onChangeText={(text) => handleInputChange("old_password", text)}
         secureTextEntry={true} />
 
@@ -120,7 +119,6 @@ export const PasswordSettings = ({
         placeholderTextColor={"#9AA6B2"}
         style={styles.input}
         placeholder="Password"
-        value={formData.new_password}
         onChangeText={(text) => handleInputChange("new_password", text)}
         secureTextEntry={true} />
 

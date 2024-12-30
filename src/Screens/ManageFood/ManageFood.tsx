@@ -161,9 +161,8 @@ export const ManageFoodScreen = () => {
                     </View>
                     <TextInput
                         style={styles.searchBar}
-                        placeholderTextColor={'black'}
+                        placeholderTextColor={AppData.colors.text[400]}
                         placeholder="Tìm kiếm thực phẩm..."
-                        value={searchQuery}
                         onChangeText={handleSearch}
                     />
                     <FlatList
@@ -184,46 +183,51 @@ export const ManageFoodScreen = () => {
                 hideDragIndicator
 
             >
-                <Actionsheet.Content borderTopRadius={24}      bottom={bottomInset}           >
+                <Actionsheet.Content borderTopRadius={24}      bottom={bottomInset}>
                     <View style={{
-                        height: 500,
                         padding: 24,
-                        gap: 16
+                        gap: 16,
                     }}>
-                        <View style={{ width: "100%", zIndex: 4 }}>
+                        {selectedFood?.image_url&&<View style={{ width: "100%", zIndex: 4 }}>
                             <Image
-                                source={{ uri: selectedFood?.image_url || 'https://via.placeholder.com/150' }}
+                                source={{ uri: selectedFood?.image_url ?? 'https://via.placeholder.com/150' }}
                                 style={styles.foodImage}
                             />
                         </View>
+                        }       
                         <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-                            <Input
-                                width={"100%"}
-                                placeholder="Tên thực phẩm"
-                                size={"xl"}
-                                height={12}
-                                bgColor="white"
-                                borderRadius={10}
-                                borderColor={AppData.colors.text[400]}
-                                borderWidth={0.3}
-                                _focus={{
-                                    borderColor: AppData.colors.primary,
-                                    backgroundColor: "white",
+                            <TextInput
+                                style={{
+                                    flex:1,
+                                    fontSize: AppData.fontSizes.medium, // Approximate equivalent of size="xl"
+                                    height: 48, // 12 multiplied by 4
+                                    backgroundColor: 'white',
+                                    borderRadius: 10,
+                                    borderColor: AppData.colors.text[400],
+                                    borderWidth: 0.3,
+                                    paddingHorizontal: 10, // Padding for better input experience
                                 }}
-                                value={newFoodName}
+                                placeholder="Tên thực phẩm"
+                                placeholderTextColor={AppData.colors.text[400]}
+                                onFocus={(e) => {
+                                    e.target.setNativeProps({
+                                    style: { borderColor: AppData.colors.primary, backgroundColor: 'white' },
+                                    });
+                                }}
                                 onChangeText={setNewFoodName}
-                            />
+                                />
                         </View>
-                        <View style={{ width: "100%", zIndex: 5 }}>
+                        <View style={{ width: "100%", zIndex: 3,flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                            <View style={{flex:1, height:48}}>
                             <SearchableDropdown
                                 options={categoryOptions || []}
                                 placeholder="Phân loại"
                                 onSelect={(value) => setNewCategory(value)}
                             />
+                            </View>
                         </View>
                         <TouchableOpacity style={{
                             padding: 16,
-                            height: 60,
                             alignSelf: 'center',
                             backgroundColor: AppData.colors.primary,
                             borderRadius: 16,

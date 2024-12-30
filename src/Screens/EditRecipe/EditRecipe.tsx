@@ -249,7 +249,6 @@ export const EditRecipeScreen = ({ route }: any) => {
 										},
 									});
 								}}
-								value={recipeName}
 								onChangeText={setRecipeName}
 							/>
 						</View>
@@ -320,7 +319,6 @@ export const EditRecipeScreen = ({ route }: any) => {
 								placeholder="Nhập hướng dẫn"
 								placeholderTextColor={AppData.colors.text[400]}
 								multiline={true}
-								value={recipeInstructions}
 								onChangeText={setRecipeInstructions}
 								onFocus={(e) => {
 									e.target.setNativeProps({

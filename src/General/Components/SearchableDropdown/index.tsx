@@ -5,10 +5,11 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
-  TextInput } from
+  TextInput, 
+  TouchableOpacity} from
 "react-native";
 import AppData from "@/General/Constants/AppData";
-import { Check, ChevronDown, CircleX } from "lucide-react-native";
+import { Check, ChevronDown, ChevronLeft, CircleX } from "lucide-react-native";
 
 interface Option {
   label: string,
@@ -56,24 +57,24 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   };
 
   return (
-    <TouchableWithoutFeedback onPress={closeDropdown}>
 			<View
         style={
         {
-
-
-          // width: "100%",
-          // position: "relative"
+          width: "100%",
+          position: "relative",
         }}>
 				{/* Input Field */}
-				<Pressable
+				<TouchableOpacity
           onPress={() => {
             if (isDisabled) {
               setShowDropdown((val) => !val); // Mở dropdown khi `isDisabled` bật
             }
-          }}>
+          }}
+          
+          >
 
 					<View
+          {...isDisabled ? { pointerEvents: "none" } : {}}
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -81,11 +82,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
               borderRadius: 10,
               borderWidth: 0.3,
               borderColor: AppData.colors.text[400],
+              width:"100%",
               height: 48 // Approximate height=12 with 'xl' size
             }}>
 
 						<TextInput
-              {...isDisabled ? { pointerEvents: "none" } : {}}
               style={{
                 flex: 1,
                 fontSize: AppData.fontSizes.medium,
@@ -94,6 +95,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                 borderRadius: 10
               }}
               placeholder={placeholder}
+              placeholderTextColor={AppData.colors.text[400]}
               value={searchTerm}
               onChangeText={(text) => {
                 setSearchTerm(text);
@@ -114,19 +116,22 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
 									<CircleX size={20} color={AppData.colors.text[500]} />
 								</Pressable> :
 
-              <Pressable onPress={() => setShowDropdown(!showDropdown)}>
-									<ChevronDown size={20} color={AppData.colors.text[500]} />
+              <Pressable onPress={() => setShowDropdown((val) => !val)}>
+									{showDropdown?
+                  <ChevronDown size={20} color={AppData.colors.text[500]} />
+                  :<ChevronLeft size={20} color={AppData.colors.text[500]} />}
 								</Pressable>
               }
 						</View>
 					</View>
-				</Pressable>
+				</TouchableOpacity>
 
 				{/* Dropdown List */}
 				{showDropdown &&
         <FlatList
           data={filteredOptions}
           keyExtractor={(item) => item.value}
+          keyboardShouldPersistTaps={'always'}
           // showsVerticalScrollIndicator={false}
           renderItem={({ item }) =>
           <Pressable
@@ -148,14 +153,14 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             backgroundColor: "white",
             borderColor: "#ccc",
             borderWidth: 1,
-            zIndex: 1, // Ensure dropdown stays above other elements
+            zIndex: 10000, // Ensure dropdown stays above other elements
             maxHeight: 150,
             marginTop: 5 // Small gap between input and dropdown
           }} />
 
         }
 			</View>
-		</TouchableWithoutFeedback>);
+		);
 
 };
 
