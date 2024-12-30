@@ -6,6 +6,7 @@ import lodash from "lodash";
 import { Dropdown } from "react-native-searchable-dropdown-kj";
 import { useSelector } from "react-redux";
 import { selectUser } from "@/Store/reducers";
+import AppData from "@/General/Constants/AppData";
 import {
 	DateTimePickerAndroid,
 	DateTimePickerEvent,
@@ -660,13 +661,13 @@ export const ShoppingListById: React.FC = () => {
                                 </Form>
                             </Modal.Body>
                             <Modal.Footer>
-                                <Button.Group space={2}>
-                                    <Button variant="ghost" colorScheme="blueGray" onPress={() => {
+                                <Button.Group style={styles.buttonGroup}>
+                                    <Button style={styles.buton} onPress={() => {
                                         setIsModalVisible(false);
                                     }}>
                                         Cancel
                                     </Button>
-                                    <Button onPress={async () => {
+                                    <Button style={styles.buton} onPress={async () => {
                                         setIsModalVisible(false);
                                         const values = await formAddFridge.validateFields();
                                         await saveItemToFridge({
@@ -696,13 +697,13 @@ export const ShoppingListById: React.FC = () => {
                                 </Text>
                             </Modal.Body>
                             <Modal.Footer>
-                                <Button.Group space={2}>
-                                    <Button variant="ghost" colorScheme="blueGray" onPress={() => {
+                                <Button.Group style={styles.buttonGroup}>
+                                    <Button style={styles.buton} onPress={() => {
                                         setIsModalVisible(false);
                                     }}>
                                         Cancel
                                     </Button>
-                                    <Button onPress={async () => {
+                                    <Button style={styles.buton} onPress={async () => {
                                         await deleteShoppingItemById(selectedItem)
                                     }}>
                                         Delete
@@ -847,13 +848,13 @@ export const ShoppingListById: React.FC = () => {
                                 </Form>
                             </Modal.Body>
                             <Modal.Footer>
-                                <Button.Group space={2}>
-                                    <Button variant="ghost" colorScheme="blueGray" onPress={() => {
+                                <Button.Group style={styles.buttonGroup}>
+                                    <Button style={styles.buton} onPress={() => {
                                         setIsModalVisible(false);
                                     }}>
                                         Cancel
                                     </Button>
-                                    <Button onPress={handleEditItem}>
+                                    <Button style={styles.buton} onPress={handleEditItem}>
                                         Save Item
                                     </Button>
                                 </Button.Group>
@@ -876,7 +877,7 @@ export const ShoppingListById: React.FC = () => {
                                         >
                                             {foods.map((food) => (
                                                 <Select.Item key={food.id} label={food.name} value={food.id} />
-                                            ))}
+                                            ))}"create"
                                         </Select> */}
                                         <Dropdown
                                             placeholderStyle={styles.placeholderStyle}
@@ -990,13 +991,13 @@ export const ShoppingListById: React.FC = () => {
                                 </Form>
                             </Modal.Body>
                             <Modal.Footer>
-                                <Button.Group space={2}>
-                                    <Button variant="ghost" colorScheme="blueGray" onPress={() => {
+                                <Button.Group style={styles.buttonGroup}>
+                                    <Button style={styles.buton} onPress={() => {
                                         setIsModalVisible(false);
                                     }}>
                                         Cancel
                                     </Button>
-                                    <Button isLoading={isUpdateLoading} onPress={handleCreateItem}>
+                                    <Button style={styles.buton} isLoading={isUpdateLoading} onPress={handleCreateItem}>
                                         Save Item
                                     </Button>
                                 </Button.Group>
@@ -1012,6 +1013,9 @@ export const ShoppingListById: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+    buton:{ 
+     backgroundColor: "#53B175"
+    },
     container: {
         flex: 1,
         backgroundColor: '#f9f9f9',
@@ -1114,12 +1118,10 @@ const styles = StyleSheet.create({
     },
     fab: {
         position: 'absolute',
-        bottom: 25,
+        bottom: 35,
         right: 25,
-        backgroundColor: '#007AFF',
         width: 60,
         height: 60,
-        borderRadius: 30,
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,
@@ -1127,6 +1129,9 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
+        backgroundColor: AppData.colors.primary,
+        display: "flex",
+        borderRadius: 16,
     },
     icon: {
         marginRight: 5,
@@ -1200,7 +1205,7 @@ const styles = StyleSheet.create({
         width: 75,
     },
     backRightBtnLeft: {
-        backgroundColor: 'blue',
+        backgroundColor: AppData.colors.primary,
         right: 75,
     },
     backRightBtnRight: {
@@ -1216,5 +1221,8 @@ const styles = StyleSheet.create({
         // top: 0,
         // zIndex: 1
         // position: 'absolute'
-    }
+    },
+    buttonGroup: {
+        flexDirection:"row", justifyContent:"space-between", width:"100%"
+      }
 });
