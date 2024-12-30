@@ -17,15 +17,6 @@ export const WelcomeContainer = ({
   const onNavigate = (screen: RootScreens) => {
     navigation.navigate(screen);
   };
-	const accessToken = useSelector(
-		(state: { auth: AuthState }) => state.auth.accessToken
-	);
-  useEffect(()=>{
-    if(accessToken){
-      onNavigate(RootScreens.MAIN)
-    }
-  },[accessToken])
-
 
   return <Welcome onNavigate={onNavigate} />;
 };

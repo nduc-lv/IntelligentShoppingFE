@@ -11,8 +11,10 @@ import SearchableDropdown from "@/General/Components/SearchableDropdown";
 import { Actionsheet, Avatar, Input } from "native-base";
 import AppData from "@/General/Constants/AppData";
 import { useToast } from "react-native-toast-notifications";
+import useKeyboardBottomInset from "@/General/Hooks/bottominset";
 
 export const ManageFoodScreen = () => {
+    const bottomInset=useKeyboardBottomInset()
     const [fetchFood, { data: foodData, isLoading: isFoodLoading, isError: isFoodError }] = useLazyGetAllFood2Query();
     const [fetchCategory, { data: categoryData, isLoading: isCategoryLoading, isError: isCategoryError }] = useLazyGetAllCategoryQuery();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -142,7 +144,7 @@ export const ManageFoodScreen = () => {
                     </View>
                 </View>
             ) : foodData ? (
-                <View>
+                <>
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => navigation.navigate(RootScreens.ADMIN)}>
                             <ArrowLeft size={24} color="#000" />
@@ -161,7 +163,7 @@ export const ManageFoodScreen = () => {
                         renderItem={({ item }) => renderFoodItem(item)}
                         contentContainerStyle={styles.listContainer}
                     />
-                </View>
+                </>
             ) : (
                 <Text>No info found.</Text>
             )}
@@ -173,7 +175,7 @@ export const ManageFoodScreen = () => {
                 hideDragIndicator
 
             >
-                <Actionsheet.Content borderTopRadius={24}                >
+                <Actionsheet.Content borderTopRadius={24}      bottom={bottomInset}           >
                     <View style={{
                         height: 500,
                         padding: 24,

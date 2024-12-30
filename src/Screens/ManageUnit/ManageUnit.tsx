@@ -8,8 +8,10 @@ import { RootStackParamList } from "@/Navigation";
 import AppData from "@/General/Constants/AppData";
 import { Actionsheet, Input } from "native-base";
 import { useToast } from "react-native-toast-notifications";
+import useKeyboardBottomInset from "@/General/Hooks/bottominset";
 
 export const ManageUnitScreen = () => {
+    const bottomInset=useKeyboardBottomInset()
     const [fetchUnit, { data, isLoading, isError }] = useLazyGetUnitQuery();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [createUnit] = useCreateUnitMutation();
@@ -89,13 +91,7 @@ export const ManageUnitScreen = () => {
                     </View>
                 </View>
             ) : data ? (
-                <View>
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => navigation.navigate(RootScreens.ADMIN)}>
-                            <ArrowLeft size={24} color="#000" />
-                        </TouchableOpacity>
-                        <Text style={styles.title}>{"Quản lý đơn vị"}</Text>
-                    </View>
+                <>
                     <FlatList
                         data={data}
                         keyExtractor={(item) => item.id.toString()}
@@ -114,7 +110,7 @@ export const ManageUnitScreen = () => {
                         )}
                     />
 
-                </View>
+                </>
             ) : (
                 <Text>No info found.</Text>
             )}
@@ -125,7 +121,7 @@ export const ManageUnitScreen = () => {
                 onClose={() => handleCloseDialog()}
                 hideDragIndicator
             >
-                <Actionsheet.Content borderTopRadius={24}                >
+                <Actionsheet.Content borderTopRadius={24}    bottom={bottomInset}            >
                     <View style={{
                         height: 150,
                         padding: 24,

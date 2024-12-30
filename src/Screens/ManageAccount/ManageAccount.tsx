@@ -5,12 +5,14 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
 import { RootScreens } from "..";
 import { ArrowLeft } from "lucide-react-native";
-import { Actionsheet, Avatar, Input } from "native-base";
+import { Actionsheet, Avatar, Input, ScrollView } from "native-base";
 import AppData from "@/General/Constants/AppData";
 import { useUpdateUserMutation } from "@/Services";
 import { useToast } from "react-native-toast-notifications";
+import useKeyboardBottomInset from "@/General/Hooks/bottominset";
 
 export const ManageAccountScreen = () => {
+    const bottomInset=useKeyboardBottomInset()
     const [fetchUserrole, { data, isLoading, isError }] = useLazyGetAllUserroleQuery();
     const [updateUser] = useUpdateUserMutation();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -23,8 +25,7 @@ export const ManageAccountScreen = () => {
     const [unbanUser] = useUnbanUserMutation();
     const [deleteUser] = useDeleteUserMutation();
     const Toast = useToast();
-    var filteredUsers: UserRoleResponse[] = [];
-
+    const [filteredUsers,setFilteredUsers]=useState<UserRoleResponse[]>([]);
     const handleSearch = (text: any) => {
         setSearchQuery(text);
     };
@@ -110,15 +111,21 @@ export const ManageAccountScreen = () => {
     useEffect(() => {
         fetchUserrole();
     }, [fetchUserrole]);
-
-    if (data) {
-        filteredUsers = data.filter(
-            (data) =>
-                data.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                data.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                data.username.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }
+    useEffect(()=>{
+        if(data){
+            setFilteredUsers(
+                data.filter(
+                    (data) =>
+                        data.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        data.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        data.username.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+            )
+        } else{
+            setFilteredUsers([]);
+        }
+        console.log(filteredUsers)
+    },[data])
 
     const renderUserItem = (item: UserRoleResponse) => (
         <TouchableOpacity style={styles.userItem} onPress={() => handleUserPress(item)}>
@@ -146,31 +153,26 @@ export const ManageAccountScreen = () => {
                     </View>
                 </View>
             ) : data ? (
-                <View>
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => navigation.navigate(RootScreens.ADMIN)}>
-                            <ArrowLeft size={24} color="#000" />
-                        </TouchableOpacity>
-                        <Text style={styles.title}>{"Quản lý tài khoản"}</Text>
-                    </View>
+                <>
                     <TextInput
                         style={styles.searchBar}
                         placeholder="Tìm kiếm tài khoản..."
                         value={searchQuery}
                         onChangeText={handleSearch}
                     />
-                    <FlatList
-                        data={filteredUsers}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => renderUserItem(item)}
-                        contentContainerStyle={styles.listContainer}
-                    />
+                        <FlatList
+                            data={filteredUsers}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({ item }) => renderUserItem(item)}
+                            scrollEnabled={true}
+                            contentContainerStyle={styles.listContainer}
+                        />
                     <Actionsheet isOpen={dialogVisible}
                         onClose={() => handleCloseDialog()}
                         hideDragIndicator
 
                     >
-                        <Actionsheet.Content borderTopRadius={24}                >
+                        <Actionsheet.Content borderTopRadius={24}  bottom={bottomInset}               >
                             {selectedUser && (
                                 <View style={{
                                     height: 500,
@@ -253,7 +255,7 @@ export const ManageAccountScreen = () => {
                         onClose={() => handleCloseUpdateDialog()}
                         hideDragIndicator
                     >
-                        <Actionsheet.Content borderTopRadius={24}                >
+                        <Actionsheet.Content borderTopRadius={24}   bottom={bottomInset}             >
                             <View style={{
                                 height: 200,
                                 padding: 24,
@@ -301,7 +303,7 @@ export const ManageAccountScreen = () => {
                             </View>
                         </Actionsheet.Content>
                     </Actionsheet>
-                </View>
+                </>
             ) : (
                 <Text>No info found.</Text>
             )}

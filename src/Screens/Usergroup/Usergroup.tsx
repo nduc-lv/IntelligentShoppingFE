@@ -11,6 +11,7 @@ import { AuthState } from "@/Store/reducers";
 import { useToast } from "react-native-toast-notifications";
 import { Actionsheet, Input } from "native-base";
 import AppData from "@/General/Constants/AppData";
+import useKeyboardBottomInset from "@/General/Hooks/bottominset";
 
 type GroupRouteParams = {
     Usergroup: { groupId: string, isAdmin: boolean, groupName: string };
@@ -22,6 +23,7 @@ interface ApiError {
 }
 
 export const UsergroupScreen = () => {
+    const bottomInset=useKeyboardBottomInset()
     const route = useRoute<RouteProp<GroupRouteParams, "Usergroup">>();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const { groupId, isAdmin, groupName } = route.params;
@@ -233,7 +235,7 @@ export const UsergroupScreen = () => {
                         onClose={() => handleCloseCreateDialog()}
                         hideDragIndicator
                     >
-                        <Actionsheet.Content borderTopRadius={24}>
+                        <Actionsheet.Content borderTopRadius={24} bottom={bottomInset}>
                             <View
                                 style={{
                                     height: "auto",

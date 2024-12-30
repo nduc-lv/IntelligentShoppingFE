@@ -3,6 +3,7 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { Beef, ChevronRight, Users, Weight } from "lucide-react-native";
 import React from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
+import { AdminScreens } from "..";
 
 export const ManageScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -10,7 +11,7 @@ export const ManageScreen = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Admin screen</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("MANAGE_ACCOUNT")}>
+            <TouchableOpacity onPress={() => navigation.navigate(AdminScreens.MANAGE_ACCOUNT)}>
                 <View style={styles.groupItem}>
                     <View style={styles.leftContent}>
                         <Users size={24} color="#888"></Users>
@@ -19,7 +20,7 @@ export const ManageScreen = () => {
                     <ChevronRight size={24} color="#888" />
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("MANAGE_UNIT")}>
+            <TouchableOpacity onPress={() => navigation.navigate(AdminScreens.MANAGE_UNIT)}>
                 <View style={styles.groupItem}>
                     <View style={styles.leftContent}>
                         <Weight size={24} color="#888"></Weight>

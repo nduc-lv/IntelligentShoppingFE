@@ -10,6 +10,7 @@ import { RootScreens } from "..";
 import { useLeaveGroupMutation } from "@/Services/usergroup";
 import AppData from "@/General/Constants/AppData";
 import { useToast } from "react-native-toast-notifications";
+import useKeyboardBottomInset from "@/General/Hooks/bottominset";
 type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void, disable: boolean, color?: string }
 type GroupRouteParams = {
     GroupInfo: { groupId: string, isAdmin: boolean };
@@ -23,6 +24,7 @@ const renderSetting = ({ item }: { item: GroupInfoListItem }) => (
 );
 
 export const GroupInfoScreen = () => {
+    const bottomInset = useKeyboardBottomInset();
     const route = useRoute<RouteProp<GroupRouteParams, "GroupInfo">>();
     const [newGroupName, setNewGroupName] = useState('');
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -163,7 +165,7 @@ export const GroupInfoScreen = () => {
                             onClose={() => handleCloseEditDialog()}
                             hideDragIndicator
                         >
-                            <Actionsheet.Content borderTopRadius={24}>
+                            <Actionsheet.Content borderTopRadius={24} bottom={bottomInset}>
                                 <View
                                     style={{
                                         height: "auto",

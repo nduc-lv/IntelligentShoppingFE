@@ -14,7 +14,13 @@ const ExpoNoti: React.FC<any> = () => {
             console.log("this is my response", response)
             if (screen) {
                 // Navigate to the specified screen with parameter
-                navigation.navigate(screen, params);
+                if(typeof screen ==='string'&&screen){
+                    console.log(screen)
+                    console.log(params)
+                    // @ts-ignore
+                    navigation.navigate(screen, ...params);
+                }
+                
             }
         });
 

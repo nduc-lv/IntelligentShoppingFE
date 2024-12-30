@@ -13,10 +13,12 @@ import { setCategory, setUnit, setFood } from "@/Store/reducers/data";
 import AppData from "@/General/Constants/AppData";
 import { useToast } from "react-native-toast-notifications";
 import { Actionsheet, Input } from "native-base";
+import useKeyboardBottomInset from "@/General/Hooks/bottominset";
 
 export const GroupScreen = () => {
+  const bottomInset = useKeyboardBottomInset();
   const dispatch = useDispatch<AppDispatch>()
-  const [fetchGroup, { data = [], isLoading, isError, error }] = useLazyGetAllGroupQuery();
+  const [fetchGroup, { data: groupData = [], isLoading, isError, error }] = useLazyGetAllGroupQuery();
   const [modalVisible, setModalVisible] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [createGroup] = useCreateGroupMutation();
@@ -30,7 +32,6 @@ export const GroupScreen = () => {
     fetchAllFood();
     fetchAllCategory();
     fetchAllUnit();
-
   }, []);
 
   useEffect(() => {
@@ -79,9 +80,9 @@ export const GroupScreen = () => {
         <View style={styles.centered}>
           <Text style={styles.errorText}>Failed to load groups.</Text>
         </View>
-      ) : data.length > 0 ? (
+      ) : groupData.length > 0 ? (
         <FlatList
-          data={data}
+          data={groupData}
           keyExtractor={(item) => item.group_id}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
@@ -114,7 +115,7 @@ export const GroupScreen = () => {
           onClose={() => handleCloseDialog()}
           hideDragIndicator
         >
-          <Actionsheet.Content borderTopRadius={24}>
+          <Actionsheet.Content borderTopRadius={24} bottom={bottomInset}>
             <View
               style={{
                 height: "auto",
@@ -123,26 +124,30 @@ export const GroupScreen = () => {
                 width: "100%",
               }}>
               <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-                <Input
-                  width={"100%"}
-                  placeholder="Tên nhóm"
-                  size={"xl"}
-                  height={12}
-                  bgColor="white"
-                  borderRadius={10}
-                  borderColor={AppData.colors.text[400]}
-                  borderWidth={0.3}
-                  _focus={{
-                    borderColor: AppData.colors.primary,
-                    backgroundColor: "white",
-                  }}
-                  value={newGroupName}
-                  onChangeText={setNewGroupName}
-                />
+              <TextInput
+      style={{
+        width: '100%',
+        fontSize: AppData.fontSizes.medium, // Approximate equivalent of size="xl"
+        height: 48, // 12 multiplied by 4
+        backgroundColor: 'white',
+        borderRadius: 10,
+        borderColor: AppData.colors.text[400],
+        borderWidth: 0.3,
+        paddingHorizontal: 10, // Adding padding for better user experience
+      }}
+      placeholder="Tên nhóm"
+      placeholderTextColor={AppData.colors.text[400]}
+      onFocus={(e) => {
+        e.target.setNativeProps({
+          style: { borderColor: AppData.colors.primary, backgroundColor: 'white' },
+        });
+      }}
+      value={newGroupName}
+      onChangeText={setNewGroupName}
+    />
               </View>
               <TouchableOpacity style={{
                 padding: 16,
-                height: 60,
                 alignSelf: 'center',
                 backgroundColor: AppData.colors.primary,
                 borderRadius: 16,

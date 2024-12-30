@@ -30,4 +30,6 @@ export enum LocalizationKey {
   Password_must_include_at_least_one_lowercase_letter = "Password_must_include_at_least_one_lowercase_letter",
   Password_must_include_at_least_one_number = "Password_must_include_at_least_one_number",
   Password_must_include_at_least_one_special_character = "Password_must_include_at_least_one_special_character",
+  MANAGE_UNIT = "MANAGE_UNIT",
+  MANAGE_ACCOUNT = "MANAGE_ACCOUNT",
 }

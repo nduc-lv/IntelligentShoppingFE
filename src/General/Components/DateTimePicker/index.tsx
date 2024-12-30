@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Platform } from "react-native";
+import { View, Platform, TouchableOpacity } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Input, Pressable, Icon } from "native-base";
 import { MaterialIcons } from "@expo/vector-icons"; // Hoặc bất kỳ bộ icon nào bạn sử dụng
@@ -27,13 +27,14 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = ({
     };
 
     return (
-        <View style={{ width: "100%" }}>
-            <Pressable
+        <View style={{ width: "100%",  }}>
+            <TouchableOpacity
                 onPress={() => {
-                    setShowPicker(true);
+                    setShowPicker((val)=>(!val));
                 }}
             >
                 <Input
+                pointerEvents="none"
                     value={text}
                     placeholder={placeholder}
                     onChangeText={(val) => setText(val)} // Cho phép người dùng nhập
@@ -45,6 +46,7 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = ({
                     isDisabled
                     borderRadius={10}
                     borderColor={AppData.colors.text[900]}
+                    fontSize={AppData.fontSizes.medium}
                     borderWidth={0.3}
                     _focus={{
                         borderColor: AppData.colors.primary,
@@ -56,7 +58,7 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = ({
                         borderColor: AppData.colors.text[400], // Giữ màu viền
                     }}
                     InputRightElement={
-                        <Pressable onPress={() => setShowPicker(true)}>
+                        <TouchableOpacity onPress={() => setShowPicker((val)=>(!val))}>
                             <Icon
                                 as={MaterialIcons}
                                 name="date-range"
@@ -64,10 +66,10 @@ const DateTimePickerInput: React.FC<DateTimePickerInputProps> = ({
                                 mr={2}
                                 color={AppData.colors.text[400]}
                             />
-                        </Pressable>
+                        </TouchableOpacity>
                     }
                 />
-            </Pressable>
+            </TouchableOpacity>
 
 
 

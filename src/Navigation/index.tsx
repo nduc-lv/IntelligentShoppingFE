@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StatusBar, View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createNavigationContainerRef, NavigationContainer } from "@react-navigation/native";
 import { MainNavigator } from "./Main";
 import { WelcomeContainer } from "@/Screens/Welcome";
-import { RootScreens } from "@/Screens";
+import { AdminScreens, RootScreens } from "@/Screens";
 import { SignInContainer } from "@/Screens/SignIn";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/Store";
-import { AuthState, fetchTokens, setMe } from "@/Store/reducers";
+import { AuthState, clearTokens, fetchTokens, setMe } from "@/Store/reducers";
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { GroupDetailContainer } from "@/Screens/GroupDetail/GroupDetailContainer";
@@ -51,9 +51,9 @@ export type RootStackParamList = {
 	GROUP_INFO: { groupId: string, isAdmin: boolean };
 	USERGROUP: { groupId: string, isAdmin: boolean, groupName: string };
 	MANAGE: undefined;
-	MANAGE_ACCOUNT: undefined;
+	[AdminScreens.MANAGE_ACCOUNT]: undefined;
 	MANAGE_FOOD: undefined;
-	MANAGE_UNIT: undefined;
+	[AdminScreens.MANAGE_UNIT]: undefined;
 	RECIPE: undefined;
 	RECIPE_DETAIL: { recipeId: string, isMyRecipe: boolean };
 	RECIPE_LIST: undefined;
@@ -112,12 +112,13 @@ const _ApplicationNavigator = () => {
 		console.log(!getMeQuery.isFetching)
 
 		if (accessToken && isConnected && !getMeQuery.isFetching) {
-			console.log("Refetch issued")
+			console.log("Refetch issued "+accessToken)
 			getMeQuery.refetch()
 		}
 	}, [accessToken, isConnected])
 	useEffect(() => {
 		console.log(`Fetching state : ${getMeQuery.isFetching}`)
+		console.log(`Fetching : ${getMeQuery.data}`)
 	},[getMeQuery.isFetching])
 	useEffect(()=>{
 		if(getMeQuery.error){
@@ -127,28 +128,39 @@ const _ApplicationNavigator = () => {
 		}
 	},[getMeQuery.data,getMeQuery.error])
 	const isGettingMe=useMemo(()=>!initializedAuth||getMeQuery.isLoading||getMeQuery.isFetching,[initializedAuth,getMeQuery.isLoading,getMeQuery.isFetching])
-	const isLoggedin=useMemo(()=>getMeQuery.data&&!getMeQuery.error,[getMeQuery.data,getMeQuery.error])
+	const isLoggedin=useMemo(()=>!!accessToken&&!!getMeQuery.data&&!!!getMeQuery.error,[getMeQuery.data,getMeQuery.error,accessToken])
+	const [navOnReadyIncrement,setNavOnReadyIncrement]=useState(0);
 	useEffect(()=>{
+		if(!RootNavigationContainerRef.isReady()){
+			return 
+		}
 		if(PublicScreens.has(currentRoute)){
 			if(isLoggedin){
+				console.log("NAV MAIN")
 				RootNavigationContainerRef.navigate(RootScreens.MAIN)
 			}
 		} else {
 			if ((initializedAuth && !accessToken)) {
+				console.log("NAV")
 				RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
 			} else if (!isGettingMe) {
 				if (!isLoggedin) {
+				console.log("NAV!!")
+					dispatch(clearTokens())
 					RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
 				}
 			}
 		}
 
-	},[accessToken,initializedAuth,isLoggedin])
+	},[accessToken,initializedAuth,isLoggedin,navOnReadyIncrement])
 	if (isGettingMe) {
 		return <Loading />;
 	}
 	return (
-		<NavigationContainer ref={RootNavigationContainerRef}>
+		<NavigationContainer ref={RootNavigationContainerRef} onReady={()=>{
+			setNavOnReadyIncrement((val)=>(val+1))
+		}}
+		>
 			<StatusBar />
 			<ExpoNoti />
 			<WarningBanner hidden={!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)} />
@@ -197,16 +209,18 @@ const _ApplicationNavigator = () => {
 					component={ManageContainer}
 				/>
 				<RootStack.Screen
-					name={"MANAGE_ACCOUNT"}
+					name={AdminScreens.MANAGE_ACCOUNT}
 					component={ManageAccountContainer}
+					options={{headerShown:true}}
 				/>
 				<RootStack.Screen
 					name={"MANAGE_FOOD"}
 					component={ManageFoodContainer}
 				/>
 				<RootStack.Screen
-					name={"MANAGE_UNIT"}
+					name={AdminScreens.MANAGE_UNIT}
 					component={ManageUnitContainer}
+					options={{headerShown:true}}
 				/>
 
 				<RootStack.Screen

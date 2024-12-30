@@ -10,3 +10,7 @@ export enum UserTabScreens {
   PROFILE_SETTINGS = "Profile Settings",
   PASSWORD_SETTINGS = "Password Settings",
 }
+export enum AdminScreens {
+	MANAGE_ACCOUNT="Quản lý tài khoản",
+	MANAGE_UNIT = "Quản lý đơn vị"
+}

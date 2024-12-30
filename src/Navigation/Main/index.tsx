@@ -72,14 +72,6 @@ export const MainNavigator = () => {
 	},[user])
 	return (
 		<Tab.Navigator screenOptions={{ popToTopOnBlur: true, headerShown: false }}>
-			{/* <Tab.Screen
-				name="Home"
-				component={HomeContainer}
-				options={{
-					tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
-					tabBarLabelPosition: "below-icon",
-				}}
-			/> */}
 			<Tab.Screen
 				name="Group"
 				component={GroupContainer}

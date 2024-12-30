@@ -3,9 +3,14 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "..";
 import { EditRecipeScreen } from "./EditRecipe";
-import { Text } from "react-native";
+import { KeyboardAvoidingView, Platform, Text } from "react-native";
 
 
 export const EditRecipeContainer = ({ route }: NativeStackScreenProps<RootStackParamList, "EDIT_RECIPE">) => {
-    return <EditRecipeScreen route={route} />
+    return <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+    >
+        <EditRecipeScreen route={route} />
+    </KeyboardAvoidingView>
 };

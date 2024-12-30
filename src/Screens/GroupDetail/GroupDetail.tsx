@@ -18,11 +18,15 @@ import Globals from "@/General/Constants/Globals";
 import { i18n, LocalizationKey } from "@/Localization";
 import Loading from "@/General/Components/Loading";
 import { useDebounce } from 'use-debounce';
+import useKeyboardBottomInset from "@/General/Hooks/bottominset";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 type GroupRouteParams = {
     GroupDetail: { groupId: string, isAdmin: boolean };
 };
 
 export const GroupDetailScreen = () => {
+    const safeAreaInsets=useSafeAreaInsets()
+    const bottomInset = useKeyboardBottomInset();
     const route = useRoute<RouteProp<GroupRouteParams, "GroupDetail">>();
     const { groupId, isAdmin } = route.params;
     const [fetchGroupInfo, { data, isLoading: _isLoadingGroupInfo, isFetching:_isFetchingGroupInfo, isError }] = useLazyGetGroupInfoQuery();
@@ -225,7 +229,13 @@ export const GroupDetailScreen = () => {
         return <Loading/>
     }
     return (
-        <View style={styles.container}>
+        <View style={{
+            ...styles.container,
+                paddingTop: safeAreaInsets.top,
+                paddingBottom: safeAreaInsets.bottom,
+                paddingLeft: safeAreaInsets.left,
+                paddingRight: safeAreaInsets.right,
+        }}>
             { isError ? (
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => navigation.navigate(RootScreens.MAIN)}>
@@ -282,41 +292,43 @@ export const GroupDetailScreen = () => {
                                     <CalendarDays color="white" />
                                 </View>
                             </TouchableOpacity>
-                            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                <Input
-                                    flex={1}
-                                    InputLeftElement={<Search style={{ marginLeft: 15 }} size={28} color={AppData.colors.primary} />}
-                                    placeholder="Tìm kiếm"
-                                    size={"xl"}
-                                    height={16}
-                                    bgColor="white"
-                                    borderRadius={16}
-                                    borderColor={'#fff'}
-                                    borderWidth={0.3}
-                                    onChangeText={(text)=>{
-                                        setSearch(text)
-                                    }}
-                                    _focus={{
-                                        borderColor: AppData.colors.primary,
-                                        backgroundColor: "white",
-                                    }}
-                                    shadow={1}
-                                />
-                                <TouchableOpacity style={{
-                                    height: 64,
-                                    width: 64,
-                                    backgroundColor: AppData.colors.primary,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    borderRadius: 16,
-                                    marginLeft: 16,
-                                }}
-                                    onPress={() => { setFilters({ ...filters, search: search }) }}
-                                >
-                                    <ArrowRight color="white" />
-                                </TouchableOpacity>
-                            </View>
+                            <View
+					style={{
+						flexDirection: "row",
+						alignItems: "center",
+						backgroundColor: "white",
+						borderRadius: 16,
+						borderWidth: 0.3,
+						borderColor: "#fff",
+						shadowColor: "#000",
+						shadowOffset: { width: 0, height: 1 },
+						shadowOpacity: 0.2,
+						shadowRadius: 1,
+						elevation: 1,
+						flex: 1,
+						height: 64, // Approximate height={16} with XL sizing
+					}}
+				>
+					<Search
+						style={{ marginLeft: 15 }}
+						size={28}
+						color={AppData.colors.primary}
+					/>
+					<TextInput
+						style={{
+							flex: 1,
+							fontSize: 18, // Approximate size={"xl"}
+							color: "#000",
+							padding: 10,
+							backgroundColor: "white",
+							borderRadius: 16,
+						}}
+						placeholder="Tìm kiếm"
+						placeholderTextColor="#aaa"
+						value={search}
+						onChangeText={setSearch}
+					/>
+				</View>
 
                             <View style={{ gap: 10 }}>
                                 <Text style={{
@@ -329,6 +341,7 @@ export const GroupDetailScreen = () => {
                                 <ScrollView horizontal={true}
                                     showsHorizontalScrollIndicator={false}
                                     contentContainerStyle={{ gap: 10 }}
+                                    style={{paddingVertical:5}}
                                 >
                                     <TouchableOpacity style={{
                                         padding: 10,
@@ -401,7 +414,7 @@ export const GroupDetailScreen = () => {
                     onClose={() => setIsOpenActionSheet(false)}
                     hideDragIndicator
                 >
-                    <Actionsheet.Content borderTopRadius={24}                >
+                    <Actionsheet.Content borderTopRadius={24}    bottom={bottomInset}            >
                         <View style={{
                             height: "auto",
                             padding: 24,
@@ -436,29 +449,33 @@ export const GroupDetailScreen = () => {
                                 />
                             </View>
                             <View style={{ width: "100%", zIndex: 3, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-                                <Input
-                                    width={"40%"}
+                            <View
+                                style={{
+                                    width: "40%",
+                                    backgroundColor: 'white',
+                                    borderRadius: 10,
+                                    borderWidth: 0.3,
+                                    borderColor: AppData.colors.text[400],
+                                    height: 48, // Adjust height={12} with 'xl' size
+                                    justifyContent: 'center',
+                                }}
+                                >
+                                <TextInput
+                                    style={{
+                                    flex: 1,
+                                    fontSize: AppData.fontSizes.medium, // Assuming AppData.fontSizes.medium exists
+                                    paddingHorizontal: 10,
+                                    backgroundColor: 'white',
+                                    borderColor: AppData.colors.text[400],
+                                    borderRadius: 10,
+                                    borderWidth: 0.3,
+                                    }}
                                     placeholder="Số lượng"
-                                    size={"xl"}
-                                    height={12}
-                                    bgColor="white"
-                                    borderRadius={10}
-                                    borderColor={AppData.colors.text[400]}
-                                    borderWidth={0.3}
-                                    _focus={{
-                                        borderColor: AppData.colors.primary,
-                                        backgroundColor: "white",
-                                    }}
-                                    keyboardType="numeric" // Hiển thị bàn phím số và dấu chấm (trên một số thiết bị)
-                                    onChangeText={(text) => {
-                                        const numericValue = parseFloat(text.replace(/[^0-9.]/g, "")); // Loại bỏ ký tự không phải số, chuyển thành số
-                                        if (!isNaN(numericValue)) {
-                                            setFormQuantity(numericValue); // Cập nhật giá trị
-                                        } else {
-                                            setFormQuantity(0); // Trường hợp nhập không hợp lệ, đặt giá trị mặc định là 0
-                                        }
-                                    }}
+                                    // value={text}
+                                    onChangeText={(text)=>{setFormQuantity(Number.parseInt(text))}} // Handles numeric input
+                                    keyboardType="numeric" // Shows numeric keyboard with period (for decimal entry)
                                 />
+                                </View>
 
 
                                 <View style={{ flex: 1 }}>
@@ -700,7 +717,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 16,
+        paddingHorizontal: 16,
         borderBottomColor: "#ccc",
         borderBottomWidth: 0.1,
         fontSize: AppData.fontSizes.large,

@@ -182,6 +182,7 @@ export const SignInFragment = (props: SignInAndRegisterChildProps) => {
 				email,
 				password,
 			}).unwrap();
+			console.log(response)
 			if (response?.accessToken) {
 				dispatch(setTokens({ accessToken: (response.accessToken as string) }))
 			}
