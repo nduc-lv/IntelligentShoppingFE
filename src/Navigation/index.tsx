@@ -161,9 +161,8 @@ const _ApplicationNavigator = () => {
 			setNavOnReadyIncrement((val)=>(val+1))
 		}}
 		>
-			<StatusBar />
 			<ExpoNoti />
-			<WarningBanner hidden={!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)} />
+			<WarningBanner hidden={!!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)} />
 			<RootStack.Navigator
 				initialRouteName={RootScreens.WELCOME}
 				screenOptions={{ headerShown: false }}

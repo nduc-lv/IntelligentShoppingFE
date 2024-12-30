@@ -10,7 +10,8 @@ export enum Language {
 export const i18n = new I18n({
   [Language.VIETNAMESE]: vi,
   [Language.ENGLISH]: en,
+},{
+  enableFallback:true,
+  defaultLocale:Language.ENGLISH,
 });
-
-i18n.defaultLocale=Language.ENGLISH
 export * from "./keys";

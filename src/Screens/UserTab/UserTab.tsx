@@ -50,7 +50,7 @@ export const UserTab = ({ data, isLoading,onNavigate }: { data: any|User; isLoad
       <View style={styles.profileContainer}>
         <Image
           source={{
-            uri: data.link_avatar,
+            uri: data.link_avatar??AppConfig.defaultAvatar,
           }}
           defaultSource={{uri:AppConfig.defaultAvatar}}
           style={styles.profileImage}

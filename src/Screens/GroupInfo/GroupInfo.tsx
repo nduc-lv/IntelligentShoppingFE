@@ -11,6 +11,7 @@ import { useLeaveGroupMutation } from "@/Services/usergroup";
 import AppData from "@/General/Constants/AppData";
 import { useToast } from "react-native-toast-notifications";
 import useKeyboardBottomInset from "@/General/Hooks/bottominset";
+import AppConfig from "@/General/Constants/AppConfig";
 type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void, disable: boolean, color?: string }
 type GroupRouteParams = {
     GroupInfo: { groupId: string, isAdmin: boolean };
@@ -149,7 +150,7 @@ export const GroupInfoScreen = () => {
                             // source={{
                             //     uri: data.link_avatar,
                             // }}
-                            defaultSource={{ uri: "https://via.placeholder.com/150" }}
+                            defaultSource={{ uri: AppConfig.defaultAvatar}}
                             style={styles.image}
                         />
                         <Text style={styles.groupName}>{info.rows[0].group.name ?? "Unknown"}</Text>

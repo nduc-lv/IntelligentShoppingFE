@@ -4,13 +4,22 @@ import { Beef, ChevronRight, Users, Weight } from "lucide-react-native";
 import React from "react";
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, Image, Modal, TextInput, Button } from "react-native";
 import { AdminScreens } from "..";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const ManageScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const safeAreaInsets=useSafeAreaInsets()
     
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Admin screen</Text>
+        <View style={{...styles.container,
+            paddingTop: safeAreaInsets.top,
+            paddingBottom: safeAreaInsets.bottom,
+            paddingLeft: safeAreaInsets.left,
+            paddingRight: safeAreaInsets.right,
+        }}>
+            <View style={{paddingHorizontal:16}}>
+            <Text style={styles.title}>Admin</Text>
+            </View>
             <TouchableOpacity onPress={() => navigation.navigate(AdminScreens.MANAGE_ACCOUNT)}>
                 <View style={styles.groupItem}>
                     <View style={styles.leftContent}>

@@ -7,13 +7,13 @@ import { RootScreens } from "..";
 import AppResource from "@/General/Constants/AppResource";
 
 export const Welcome = (props: {
-  onNavigate: (screen: RootScreens) => void;
-}) => {
+  onNavigate: (screen: RootScreens) => void }) =>
+{
   return (
     <ImageBackground
       source={AppResource.login.bgWelcome}
-      style={styles.container}
-    >
+      style={styles.container}>
+
       <StatusBar style="auto" />
       <View style={styles.content}>
         <Text style={styles.txtWelcome}>
@@ -21,25 +21,25 @@ export const Welcome = (props: {
         </Text>
         <Button
           style={styles.btnGetStarted}
-          onPress={() => props.onNavigate(RootScreens.SIGN_IN)}
-        >
+          onPress={() => props.onNavigate(RootScreens.SIGN_IN)}>
+
           {i18n.t(LocalizationKey.GET_STARTED)}
         </Button>
       </View>
-    </ImageBackground>
-  );
+    </ImageBackground>);
+
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#fff"
   },
   content: {
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
-    paddingBottom: 50, // Khoảng cách từ nội dung đến đáy màn hình
+    paddingBottom: 50 // Khoảng cách từ nội dung đến đáy màn hình
   },
   btnGetStarted: {
     width: "80%",
@@ -47,13 +47,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#53B175",
     borderRadius: 10,
     height: 55,
-    marginBottom: 20, // Khoảng cách giữa nút và văn bản
+    marginBottom: 20 // Khoảng cách giữa nút và văn bản
   },
   txtWelcome: {
     color: "white",
     fontSize: 40,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20, // Khoảng cách giữa văn bản và nút
-  },
+    marginBottom: 20 // Khoảng cách giữa văn bản và nút
+  }
 });

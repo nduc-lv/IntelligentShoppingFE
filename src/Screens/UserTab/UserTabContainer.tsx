@@ -8,20 +8,20 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthState } from "@/Store/reducers";
 import { useSelector } from "react-redux";
 type AccountSettingsNavigatorProps = NativeStackScreenProps<
-    UserTabStackParamList,
-    UserTabScreens.USER_TAB_MAIN
->;
-export const UserTabContainer = ({navigation}:AccountSettingsNavigatorProps) => {
-	const data=useSelector((state:{auth:AuthState})=>(state.auth.user))
+  UserTabStackParamList,
+  UserTabScreens.USER_TAB_MAIN>;
 
-	const onNavigate = (screen: UserTabScreens) => {
-		navigation.navigate(screen);
-	};
-	return (
-		<UserTab
-			data={data}
-			isLoading={!data}
-			onNavigate={onNavigate}
-		/>
-	);
+export const UserTabContainer = ({ navigation }: AccountSettingsNavigatorProps) => {
+  const data = useSelector((state: { auth: AuthState }) => state.auth.user);
+
+  const onNavigate = (screen: UserTabScreens) => {
+    navigation.navigate(screen);
+  };
+  return (
+    <UserTab
+      data={data}
+      isLoading={!data}
+      onNavigate={onNavigate} />);
+
+
 };

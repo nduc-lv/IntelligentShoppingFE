@@ -5,6 +5,6 @@ import { RootScreens } from "..";
 import { ShoppingListDetail } from "./ShoppingListDetail";
 
 
-export const ShoppingListDetailContainer  = () => {
-  return <ShoppingListDetail/>
+export const ShoppingListDetailContainer = () => {
+  return <ShoppingListDetail />;
 };

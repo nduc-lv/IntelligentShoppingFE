@@ -10,8 +10,8 @@ import {
   PAUSE,
   PERSIST,
   PURGE,
-  REGISTER,
-} from "redux-persist";
+  REGISTER } from
+"redux-persist";
 import { homeReducers, themeReducers, authReducer } from "./reducers";
 import { dataReducer } from "./reducers/data";
 import { useSelector } from "react-redux";
@@ -28,17 +28,17 @@ const persistedReducer = persistReducer(
   {
     key: "root",
     storage: AsyncStorage,
-    blacklist:[`user/me`]
-  }
-  , reducers);
+    blacklist: [`user/me`]
+  },
+  reducers);
 
 const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) => {
     const middlewares = getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-      },
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
+      }
     }).concat(API.middleware);
 
     // if (__DEV__ && !process.env.JEST_WORKER_ID) {
@@ -47,7 +47,7 @@ const store = configureStore({
     // }
 
     return middlewares;
-  },
+  }
 });
 
 const persistor = persistStore(store);

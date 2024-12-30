@@ -31,7 +31,7 @@ export const en = {
   // Titles
   [LocalizationKey.LOGIN_TITLE]: "Login to Your Account",
   [LocalizationKey.REGISTER_TITLE]: "Create a New Account",
-  
+
   // General
   [LocalizationKey.QUANTITY]: "Quantity",
 
@@ -48,4 +48,32 @@ export const en = {
   [LocalizationKey.Password_must_include_at_least_one_lowercase_letter]: "Password must include at least one lowercase letter",
   [LocalizationKey.Password_must_include_at_least_one_number]: "Password must include at least one number",
   [LocalizationKey.Password_must_include_at_least_one_special_character]: "Password must include at least one special character",
+
+  // Manage
+  [LocalizationKey.MANAGE_UNIT]: "Manage Unit",
+  [LocalizationKey.MANAGE_ACCOUNT]: "Manage Account",
+  [LocalizationKey.IMAGE_UPLOADED]: "Image Uploaded",
+
+  // Password
+  [LocalizationKey.NEW_PASSWORD]: "New Password",
+  [LocalizationKey.OLD_PASSWORD]: "Old Password",
+
+  // Updating
+  [LocalizationKey.UPDATING]: "Updating",
+  [LocalizationKey.UPDATE]: "Update",
+
+  // User Info
+  [LocalizationKey.NAME]: "Name",
+  [LocalizationKey.EMAIL]: "Email",
+  [LocalizationKey.USERNAME]: "Username",
+  [LocalizationKey.AVATAR_LINK]: "Avatar Link",
+
+  // Other
+  [LocalizationKey.NO_GROUP_AVAILABLE]: "No Group Available",
+  [LocalizationKey.SELECT]: "Select",
+  [LocalizationKey.PLEASE_SELECT_A_FOOD_ITEM]: "Please select a food item",
+  [LocalizationKey.PLEASE_SELECT_A_UNIT]: "Please select a unit",
+  [LocalizationKey.PLEASE_SELECT_AN_ASSIGNEE]: "Please select an assignee",
+  [LocalizationKey.REMOVE]: "Remove",
+  [LocalizationKey.DELETE]: "Delete",
 };

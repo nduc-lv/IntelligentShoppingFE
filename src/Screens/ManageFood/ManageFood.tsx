@@ -12,8 +12,11 @@ import { Actionsheet, Avatar, Input } from "native-base";
 import AppData from "@/General/Constants/AppData";
 import { useToast } from "react-native-toast-notifications";
 import useKeyboardBottomInset from "@/General/Hooks/bottominset";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AppConfig from "@/General/Constants/AppConfig";
 
 export const ManageFoodScreen = () => {
+    const safeAreaInsets=useSafeAreaInsets()
     const bottomInset=useKeyboardBottomInset()
     const [fetchFood, { data: foodData, isLoading: isFoodLoading, isError: isFoodError }] = useLazyGetAllFood2Query();
     const [fetchCategory, { data: categoryData, isLoading: isCategoryLoading, isError: isCategoryError }] = useLazyGetAllCategoryQuery();
@@ -111,9 +114,9 @@ export const ManageFoodScreen = () => {
     const renderFoodItem = (item: Food) => (
         <View style={styles.foodItem}>
             <Image
-                source={{ uri: item.image_url ?? "https://via.placeholder.com/150" }}
+                source={{ uri: item.image_url ?? AppConfig.defaultAvatar}}
                 style={styles.avatar}
-                defaultSource={{ uri: "https://via.placeholder.com/150" }}
+                defaultSource={{ uri: AppConfig.defaultAvatar}}
             />
             <View style={styles.foodInfo}>
                 <Text style={styles.foodName}>{item.name}</Text>
@@ -131,7 +134,12 @@ export const ManageFoodScreen = () => {
     );
 
     return (
-        <View style={styles.container}>
+        <View style={{...styles.container,
+            paddingTop: safeAreaInsets.top,
+            paddingBottom: safeAreaInsets.bottom,
+            paddingLeft: safeAreaInsets.left,
+            paddingRight: safeAreaInsets.right,
+        }}>
             {isFoodLoading ? (
                 <ActivityIndicator style={styles.centered} size="large" color="#0000ff" />
             ) : isFoodError ? (
@@ -153,6 +161,7 @@ export const ManageFoodScreen = () => {
                     </View>
                     <TextInput
                         style={styles.searchBar}
+                        placeholderTextColor={'black'}
                         placeholder="Tìm kiếm thực phẩm..."
                         value={searchQuery}
                         onChangeText={handleSearch}

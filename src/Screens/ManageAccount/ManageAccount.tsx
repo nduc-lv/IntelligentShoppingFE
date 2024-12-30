@@ -10,6 +10,7 @@ import AppData from "@/General/Constants/AppData";
 import { useUpdateUserMutation } from "@/Services";
 import { useToast } from "react-native-toast-notifications";
 import useKeyboardBottomInset from "@/General/Hooks/bottominset";
+import AppConfig from "@/General/Constants/AppConfig";
 
 export const ManageAccountScreen = () => {
     const bottomInset=useKeyboardBottomInset()
@@ -180,7 +181,7 @@ export const ManageAccountScreen = () => {
                                     gap: 16
                                 }}>
                                     <View style={{ width: "100%", zIndex: 3, flexDirection: "column", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-                                        <Image source={{ uri: selectedUser.link_avatar }} style={styles.dialogAvatar} />
+                                        <Image source={{ uri: selectedUser.link_avatar??AppConfig.defaultAvatar }} style={styles.dialogAvatar} defaultSource={{uri:AppConfig.defaultAvatar}}/>
                                         <Text style={styles.dialogText}>Email: {selectedUser.email}</Text>
                                         <Text style={styles.dialogText}>Username: {selectedUser.username}</Text>
                                         <Text style={styles.dialogText}>

@@ -6,5 +6,5 @@ import { MenuCalendarScreen } from "./MenuCalendar";
 
 export const MenuCalendarContainer = () => {
 
-  return <MenuCalendarScreen/>;
+  return <MenuCalendarScreen />;
 };

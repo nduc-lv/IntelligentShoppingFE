@@ -46,7 +46,11 @@ export const API = createApi({
   // to prevent circular type issues, the return type needs to be annotated as any
   extractRehydrationInfo(action, { reducerPath }): any {
     if (isHydrateAction(action)) {
-      return action.payload[reducerPath]
+      try{
+        return action.payload[reducerPath]
+      } catch(e){
+
+      }
     }
   },
   endpoints: () => ({}),

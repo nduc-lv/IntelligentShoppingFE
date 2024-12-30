@@ -17,8 +17,8 @@ const slice = createSlice({
         state.theme = theme;
         state.darkMode = darkMode;
       }
-    },
-  },
+    }
+  }
 });
 
 export const { actionA, actionB } = slice.actions;

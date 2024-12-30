@@ -6,5 +6,5 @@ import { RecipeScreen } from "./Recipe";
 
 
 export const RecipeContainer = () => {
-  return <RecipeScreen />
+  return <RecipeScreen />;
 };

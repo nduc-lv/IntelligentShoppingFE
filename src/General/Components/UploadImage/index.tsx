@@ -1,4 +1,4 @@
-import { uploadImageToCloudinary } from '@/Services/uploadImage';
+import { i18n, Language, LocalizationKey } from "@/Localization";import { uploadImageToCloudinary } from '@/Services/uploadImage';
 import React, { useState } from 'react';
 import { View, Text, Button, Image, ActivityIndicator, Alert } from 'react-native';
 import { launchImageLibrary, ImagePickerResponse } from 'react-native-image-picker';
@@ -29,7 +29,7 @@ const UploadImage: React.FC = () => {
 
   // Xử lý upload ảnh (nếu có chọn ảnh)
   const handleUploadImage = async () => {
-    if (imageUri) { // Kiểm tra nếu có ảnh
+    if (imageUri) {// Kiểm tra nếu có ảnh
       try {
         setLoading(true);
         const uploadedUrl = await uploadImageToCloudinary(imageUri, 'image.jpg');
@@ -54,9 +54,9 @@ const UploadImage: React.FC = () => {
       <View style={{ marginTop: 20 }}>
         <Button title="Upload ảnh lên Cloudinary" onPress={handleUploadImage} />
       </View>
-      {imageUrl ? <Text>Ảnh đã được upload: {imageUrl}</Text> : null}
-    </View>
-  );
+      {imageUrl ? <Text>{i18n.t(LocalizationKey.IMAGE_UPLOADED)} {imageUrl}</Text> : null}
+    </View>);
+
 };
 
 export default UploadImage;

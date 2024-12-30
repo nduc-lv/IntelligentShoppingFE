@@ -8,11 +8,11 @@ import { AuthState } from "@/Store/reducers";
 
 type WelcomeScreenNavigatorProps = NativeStackScreenProps<
   RootStackParamList,
-  RootScreens.WELCOME
->;
+  RootScreens.WELCOME>;
+
 
 export const WelcomeContainer = ({
-  navigation,
+  navigation
 }: WelcomeScreenNavigatorProps) => {
   const onNavigate = (screen: RootScreens) => {
     navigation.navigate(screen);

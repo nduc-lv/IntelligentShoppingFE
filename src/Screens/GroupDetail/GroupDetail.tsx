@@ -20,6 +20,7 @@ import Loading from "@/General/Components/Loading";
 import { useDebounce } from 'use-debounce';
 import useKeyboardBottomInset from "@/General/Hooks/bottominset";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AppConfig from "@/General/Constants/AppConfig";
 type GroupRouteParams = {
     GroupDetail: { groupId: string, isAdmin: boolean };
 };
@@ -255,7 +256,7 @@ export const GroupDetailScreen = () => {
                             // source={{
                             //     uri: data.link_avatar,
                             // }}
-                            defaultSource={{ uri: "https://via.placeholder.com/150" }}
+                            defaultSource={{ uri: AppConfig.defaultAvatar}}
                             style={styles.groupImage}
                         />
                         <Text style={styles.title}>{data.rows[0].group.name ?? "Unknown"}</Text>

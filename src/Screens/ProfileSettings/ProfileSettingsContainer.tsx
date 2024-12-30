@@ -4,13 +4,13 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { UserTabScreens } from "..";
 import { UserTabStackParamList } from "@/Navigation/Main/UserTab";
 type ProfileSettingsNavigatorProps = NativeStackScreenProps<
-    UserTabStackParamList,
-    UserTabScreens.PROFILE_SETTINGS
->;
-export const ProfileSettingsContainer = ({navigation}:ProfileSettingsNavigatorProps) => {
+  UserTabStackParamList,
+  UserTabScreens.PROFILE_SETTINGS>;
+
+export const ProfileSettingsContainer = ({ navigation }: ProfileSettingsNavigatorProps) => {
   const onNavigate = (screen: UserTabScreens) => {
     navigation.navigate(screen);
-};
+  };
 
-  return <ProfileSettings onNavigate={onNavigate} goBack={navigation.goBack} canGoBack={navigation.canGoBack}/>;
+  return <ProfileSettings onNavigate={onNavigate} goBack={navigation.goBack} canGoBack={navigation.canGoBack} />;
 };

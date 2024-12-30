@@ -7,5 +7,5 @@ import { Text } from "react-native";
 
 
 export const RecipeDetailContainer = ({ route }: NativeStackScreenProps<RootStackParamList, "RECIPE_DETAIL">) => {
-    return <RecipeDetailScreen route={route} />
+  return <RecipeDetailScreen route={route} />;
 };

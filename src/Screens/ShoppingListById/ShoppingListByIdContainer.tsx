@@ -5,6 +5,6 @@ import { RootScreens } from "..";
 import { ShoppingListById } from "./ShoppingListById";
 
 
-export const ShoppingListByIdContainer  = () => {
-  return <ShoppingListById/>
-}
+export const ShoppingListByIdContainer = () => {
+  return <ShoppingListById />;
+};

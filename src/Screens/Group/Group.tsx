@@ -14,6 +14,7 @@ import AppData from "@/General/Constants/AppData";
 import { useToast } from "react-native-toast-notifications";
 import { Actionsheet, Input } from "native-base";
 import useKeyboardBottomInset from "@/General/Hooks/bottominset";
+import AppConfig from "@/General/Constants/AppConfig";
 
 export const GroupScreen = () => {
   const bottomInset = useKeyboardBottomInset();
@@ -90,7 +91,8 @@ export const GroupScreen = () => {
               <View style={styles.groupItem}>
                 <View style={styles.leftContent}>
                   <Image
-                    defaultSource={{ uri: "https://via.placeholder.com/150" }}
+                  source={{uri:AppConfig.defaultAvatar}}
+                    defaultSource={{ uri: AppConfig.defaultAvatar}}
                     style={styles.groupImage}
                   />
                   <Text style={styles.itemText}>{item.name}</Text>

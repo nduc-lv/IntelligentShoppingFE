@@ -1,10 +1,10 @@
 import * as ImagePicker from "expo-image-picker";
 
 export const uploadImageToCloudinary = async (
-  uri: string,
-  cloudName: string = "dyqpebht7",
-  uploadPreset: string = "intelligent_shopping"
-) => {
+uri: string,
+cloudName: string = "dyqpebht7",
+uploadPreset: string = "intelligent_shopping") =>
+{
   try {
     const formData = new FormData();
     // Đọc ảnh từ URI và tạo đối tượng FormData
@@ -14,7 +14,7 @@ export const uploadImageToCloudinary = async (
     const file = {
       uri,
       name: `image.${fileType}`,
-      type: `image/${fileType}`,
+      type: `image/${fileType}`
     };
 
     formData.append("file", file);
@@ -26,7 +26,7 @@ export const uploadImageToCloudinary = async (
       `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       {
         method: "POST",
-        body: formData,
+        body: formData
       }
     );
 

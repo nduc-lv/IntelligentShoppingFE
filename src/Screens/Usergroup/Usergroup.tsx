@@ -12,6 +12,7 @@ import { useToast } from "react-native-toast-notifications";
 import { Actionsheet, Input } from "native-base";
 import AppData from "@/General/Constants/AppData";
 import useKeyboardBottomInset from "@/General/Hooks/bottominset";
+import AppConfig from "@/General/Constants/AppConfig";
 
 type GroupRouteParams = {
     Usergroup: { groupId: string, isAdmin: boolean, groupName: string };
@@ -174,7 +175,7 @@ export const UsergroupScreen = () => {
                             <View style={styles.groupItem}>
                                 <View style={styles.leftContent}>
                                     <Image
-                                        defaultSource={{ uri: "https://via.placeholder.com/150" }}
+                                        defaultSource={{ uri: AppConfig.defaultAvatar}}
                                         style={styles.groupImage}
                                     />
                                     <View style={styles.textContainer}>

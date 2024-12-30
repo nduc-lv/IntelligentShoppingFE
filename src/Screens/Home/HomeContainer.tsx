@@ -6,7 +6,7 @@ import { AuthState } from "@/Store/reducers";
 
 export const HomeContainer = () => {
 
-  const user=useSelector((state:{auth:AuthState})=>(state.auth.user))
+  const user = useSelector((state: { auth: AuthState }) => state.auth.user);
 
 
   return <Home data={user} isLoading={!user} />;
