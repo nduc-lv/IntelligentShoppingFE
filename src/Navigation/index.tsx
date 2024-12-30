@@ -37,6 +37,7 @@ import axios from 'axios'
 import { usePushNotifications } from "usePushNotification";
 import { useNavigation } from "expo-router";
 import ExpoNoti from "@/General/Components/ExpoNoti";
+import { MenuCalendarContainer } from "@/Screens/MenuCalendar/MenuCalendarContainer";
 export type RootStackParamList = {
 	[RootScreens.MAIN]: undefined;
 	[RootScreens.WELCOME]: undefined;
@@ -57,6 +58,7 @@ export type RootStackParamList = {
 	RECIPE_DETAIL: { recipeId: string, isMyRecipe: boolean };
 	RECIPE_LIST: undefined;
 	EDIT_RECIPE: { recipeId: string };
+	MENU_CALENDAR: { groupId: string, isAdmin: boolean };
 };
 const PublicScreens: Set<string | undefined> = new Set(
 	[
@@ -70,19 +72,19 @@ export const RootNavigationContainerRef = createNavigationContainerRef<RootStack
 
 const pushToken = async (token, userId) => {
 	try {
-	  await axios.post(
-		`${Config.API_URL}/token/add/${userId}`,
-		{ token: token.data },
-	  );
-	  console.log("Push token sent to the backend successfully!");
+		await axios.post(
+			`${Config.API_URL}/token/add/${userId}`,
+			{ token: token.data },
+		);
+		console.log("Push token sent to the backend successfully!");
 	} catch (error) {
-	  console.error("Failed to send push token to backend:", error);
+		console.error("Failed to send push token to backend:", error);
 	}
 }
 // @refresh reset
 const ApplicationNavigator = () => {
 	const user = useSelector(selectUser)
-	const {expoPushToken, notification} = usePushNotifications();
+	const { expoPushToken, notification } = usePushNotifications();
 	if (user && user.id && expoPushToken) {
 		pushToken(expoPushToken, user.id)
 	}
@@ -99,52 +101,52 @@ const _ApplicationNavigator = () => {
 	const currentRoute = RootNavigationContainerRef.current?.getCurrentRoute()?.name
 
 	const { type, isConnected } = useNetInfo();
-	const getMeQuery = userApi.useGetMeQuery(accessToken?{} as unknown as void:skipToken);
-	useEffect(()=>{
-		console.log("AccessToken changed " +accessToken)
+	const getMeQuery = userApi.useGetMeQuery(accessToken ? {} as unknown as void : skipToken);
+	useEffect(() => {
+		console.log("AccessToken changed " + accessToken)
 		// use cleartokens for logout
-		if(!accessToken){
+		if (!accessToken) {
 			dispatch(fetchTokens())
 		}
 		console.log(isConnected)
 		console.log(!getMeQuery.isFetching)
 
-		if(accessToken&&isConnected&&!getMeQuery.isFetching){
+		if (accessToken && isConnected && !getMeQuery.isFetching) {
 			console.log("Refetch issued")
 			getMeQuery.refetch()
 		}
-	},[accessToken,isConnected])
-	useEffect(()=>{
+	}, [accessToken, isConnected])
+	useEffect(() => {
 		console.log(`Fetching state : ${getMeQuery.isFetching}`)
-	},[getMeQuery.isFetching])
-	useEffect(()=>{
-		dispatch(setMe(getMeQuery.data??null))
-	},[getMeQuery.data])
-	const isGettingMe=!initializedAuth||getMeQuery.isLoading||getMeQuery.isFetching
-	useEffect(()=>{
-		const isLoggedin=getMeQuery.data&&!getMeQuery.error
-		if(PublicScreens.has(currentRoute)){
-			if(isLoggedin){
+	}, [getMeQuery.isFetching])
+	useEffect(() => {
+		dispatch(setMe(getMeQuery.data ?? null))
+	}, [getMeQuery.data])
+	const isGettingMe = !initializedAuth || getMeQuery.isLoading || getMeQuery.isFetching
+	useEffect(() => {
+		const isLoggedin = getMeQuery.data && !getMeQuery.error
+		if (PublicScreens.has(currentRoute)) {
+			if (isLoggedin) {
 				RootNavigationContainerRef.navigate(RootScreens.MAIN)
 			}
-		} else{
-			if((initializedAuth&&!accessToken)){
+		} else {
+			if ((initializedAuth && !accessToken)) {
 				RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
-			} else if(!isGettingMe){
-				if(!isLoggedin){
+			} else if (!isGettingMe) {
+				if (!isLoggedin) {
 					RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
-				} 
+				}
 			}
 		}
 
-	},[accessToken,initializedAuth,getMeQuery.data&&!getMeQuery.error])
+	}, [accessToken, initializedAuth, getMeQuery.data && !getMeQuery.error])
 	if (isGettingMe) {
 		return <Loading />;
 	}
 	return (
 		<NavigationContainer ref={RootNavigationContainerRef}>
 			<StatusBar />
-			<ExpoNoti/>
+			<ExpoNoti />
 			<WarningBanner hidden={!isConnected} description={i18n.t(LocalizationKey.NETWORK_NOT_CONNECTED)} />
 			<RootStack.Navigator
 				initialRouteName={RootScreens.WELCOME}
@@ -206,6 +208,9 @@ const _ApplicationNavigator = () => {
 				<RootStack.Screen
 					name="SHOPPING_LIST_BY_ID"
 					component={ShoppingListByIdContainer} />
+				<RootStack.Screen
+					name="MENU_CALENDAR"
+					component={MenuCalendarContainer} />
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);

@@ -53,6 +53,12 @@ const usergroupApi = API.injectEndpoints({
                 method: "DELETE",
             })
         }),
+        leaveGroup: build.mutation<any, {group_id: string}>({
+            query: ({group_id}) => ({
+                url: `usergroup/${group_id}`,
+                method: "DELETE",
+            })
+        }),
     }),
     overrideExisting: true,
 });
@@ -61,5 +67,6 @@ export const {
     useLazyGetAllUserGroupQuery,
     useCreateUserGroupMutation,
     useUpdateUserGroupMutation,
-    useDeleteUserGroupMutation
+    useDeleteUserGroupMutation,
+    useLeaveGroupMutation
 } = usergroupApi;

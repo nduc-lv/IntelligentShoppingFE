@@ -10,6 +10,7 @@ import {
 } from "antd-mobile";
 import { useSafeArea } from "native-base";
 import { RootScreens } from "..";
+import { useLeaveGroupMutation } from "@/Services/usergroup";
 type GroupInfoListItem = { title: string; icon: LucideIcon, onClick?: (event: GestureResponderEvent) => void, disable: boolean, color?: string }
 type GroupRouteParams = {
     GroupInfo: { groupId: string, isAdmin: boolean };
@@ -33,6 +34,7 @@ export const GroupInfoScreen = () => {
     const [fetchGroupInfo, { data: info, isLoading: isLoadingInfo, isError: isErrorInfo }] = useLazyGetGroupInfoQuery();
     const [updateGroup] = useUpdateGroupMutation();
     const [deleteGroup] = useDeleteGroupMutation();
+    const [leaveGroup] = useLeaveGroupMutation();
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const handleOpenEditDialog = () => {
@@ -73,18 +75,29 @@ export const GroupInfoScreen = () => {
 
     const handleDelete = async () => {
         try {
-            if(isAdmin){
+            if (isAdmin) {
                 await deleteGroup(groupId);
                 Toast.show({ content: "Group deleted successfully!", icon: "success" });
                 handleCloseDeleteDialog();
                 navigation.navigate(RootScreens.MAIN);
             }
-            else{
+            else {
                 Toast.show({ content: "You are not group admin!", icon: "fail" });
             }
         } catch (e) {
             console.log(e)
             Toast.show({ content: "Failed to delete group.", icon: "fail" });
+        }
+    }
+
+    const handleLeaveGroup = async () => {
+        try {
+            await leaveGroup({ group_id: groupId });
+            Toast.show({ content: "Leave group successfully!", icon: "success" });
+            navigation.navigate(RootScreens.MAIN);
+        } catch (e) {
+            console.log(e)
+            Toast.show({ content: "Failed to leave group.", icon: "fail" });
         }
     }
 
@@ -101,7 +114,7 @@ export const GroupInfoScreen = () => {
         },
         {
             title: "Leave Group", icon: LogOut, onClick: (e) => {
-                console.log("leave");
+                handleLeaveGroup();
             }, disable: isAdmin, color: "red"
         },
         {

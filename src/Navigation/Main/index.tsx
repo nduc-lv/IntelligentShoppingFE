@@ -65,7 +65,6 @@ export const MainNavigator = () => {
 	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 	const user=useSelector((state:{auth:AuthState})=>(state.auth.user))
 	useEffect(()=>{
-		console.log("Mian");
 		if(user?.user_role?.role_id === "admin"){
 			navigation.navigate(RootScreens.ADMIN);
 		}
