@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, Text, TouchableOpacity, Image, ActivityIndicator, TextInput, ScrollView, ImageBackground } from "react-native";
 import { useRoute, RouteProp } from "@react-navigation/native";
-import { ArrowLeft, ArrowRight, Clock5, EllipsisVertical, Heart, Info, NotebookText, Plus, Search } from "lucide-react-native";
+import { ArrowLeft, ArrowRight, CalendarDays, Clock5, EllipsisVertical, Heart, Info, NotebookText, Plus, Search } from "lucide-react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "..";
@@ -257,6 +257,31 @@ export const GroupDetailScreen = () => {
                         <ScrollView
                             contentContainerStyle={{ gap: 24, padding: 2 }}
                             showsVerticalScrollIndicator={false}>
+                            <TouchableOpacity style={[styles.card, { alignItems: "center", flexDirection: "row" }]}
+                                onPress={() => navigation.navigate("MENU_CALENDAR", { groupId: groupId, isAdmin: isAdmin })}
+                            >
+                                <View style={{ flexDirection: "column", gap: 10 }}>
+                                    <Text style={{
+                                        fontSize: AppData.fontSizes.medium,
+                                        fontWeight: "500",
+                                        color: AppData.colors.text[900],
+                                    }}>
+                                        {'Lên lịch món ăn'}
+                                    </Text>
+                                </View>
+                                <View style={{
+                                    height: 40,
+                                    width: 40,
+                                    backgroundColor: AppData.colors.primary,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: 8,
+                                    marginLeft: 'auto',
+                                }}>
+                                    <CalendarDays color="white" />
+                                </View>
+                            </TouchableOpacity>
                             <View style={{ flexDirection: "row", alignItems: "center" }}>
                                 <Input
                                     flex={1}
