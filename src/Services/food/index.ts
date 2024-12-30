@@ -25,38 +25,47 @@ export interface CreateFoodPayload {
     imageUrl?: string;
 }
 
-const foodApi = API.injectEndpoints({
+const foodApi = API
+.enhanceEndpoints({addTagTypes:["Food"]})
+.injectEndpoints({
     endpoints: (build) => ({
-        getAllFood2: build.query<Food[], void>({
-            query: () => ({
-                url: `food`,
-                method: "GET",
-            }),
-            transformResponse: (response: { rows: Food[] }, meta, arg) => response.rows,
+      getAllFood2: build.query<Food[], void>({
+        query: () => ({
+          url: `food`,
+          method: "GET",
         }),
-        createFood: build.mutation<any, CreateFoodPayload>({
-            query: (payload) => ({
-                url: `food`,
-                method: "POST",
-                body: payload,
-            })
+        transformResponse: (response: { rows: Food[] }, meta, arg) => response.rows,
+        providesTags: (result, error, arg) => [{ type: "Food", id: "LIST" }],
+      }),
+      createFood: build.mutation<any, CreateFoodPayload>({
+        query: (payload) => ({
+          url: `food`,
+          method: "POST",
+          body: payload,
         }),
-        updateFood: build.mutation<any, UpdateFoodPayload>({
-            query: ({ id, ...payload }) => ({
-                url: `food/${id}`,
-                method: "PUT",
-                body: payload,
-            })
+        invalidatesTags: [{ type: "Food", id: "LIST" }],
+      }),
+      updateFood: build.mutation<any, UpdateFoodPayload>({
+        query: ({ id, ...payload }) => ({
+          url: `food/${id}`,
+          method: "PUT",
+          body: payload,
         }),
-        deleteFood: build.mutation<any, string>({
-            query: (id) => ({
-                url: `food/${id}`,
-                method: "DELETE",
-            }),
+        invalidatesTags: (result, error, { id }) => [
+          { type: "Food", id: `${id}` },
+          { type: "Food", id: "LIST" },
+        ],
+      }),
+      deleteFood: build.mutation<any, string>({
+        query: (id) => ({
+          url: `food/${id}`,
+          method: "DELETE",
         }),
+        invalidatesTags: [{ type: "Food", id: "LIST" }],
+      }),
     }),
     overrideExisting: true,
-});
+  });
 
 export const {
     useLazyGetAllFood2Query,

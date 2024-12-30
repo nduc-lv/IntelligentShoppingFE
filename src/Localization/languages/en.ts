@@ -76,4 +76,6 @@ export const en = {
   [LocalizationKey.PLEASE_SELECT_AN_ASSIGNEE]: "Please select an assignee",
   [LocalizationKey.REMOVE]: "Remove",
   [LocalizationKey.DELETE]: "Delete",
+
+  [LocalizationKey.NETWORK_NOT_CONNECTED]: 'Network disconnected'
 };

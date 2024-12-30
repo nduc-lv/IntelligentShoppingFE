@@ -76,4 +76,6 @@ export const vi = {
   [LocalizationKey.PLEASE_SELECT_AN_ASSIGNEE]: "Vui lòng chọn người nhận nhiệm vụ",
   [LocalizationKey.REMOVE]: "Xóa",
   [LocalizationKey.DELETE]: "Xóa",
+
+  [LocalizationKey.NETWORK_NOT_CONNECTED]: 'Mất kết nối'
 };

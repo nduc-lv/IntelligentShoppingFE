@@ -47,9 +47,11 @@ export const API = createApi({
   extractRehydrationInfo(action, { reducerPath }): any {
     if (isHydrateAction(action)) {
       try{
-        return action.payload[reducerPath]
+        return action.payload[API.reducerPath]
       } catch(e){
-
+        if(action.key=='root'){
+          return action.payload??{}
+        }
       }
     }
   },

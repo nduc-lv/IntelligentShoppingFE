@@ -17,44 +17,59 @@ export interface UpdateGroupPayload {
     imageUrl?: string;
 }
 
-const groupApi = API.injectEndpoints({
+const groupApi = API.enhanceEndpoints({addTagTypes:["Group"]}).injectEndpoints({
     endpoints: (build) => ({
-        getAllGroup: build.query<Group[], void>({
-            query: () => ({
-                url: `group/`,
-                method: "GET",
-            })
+      getAllGroup: build.query<Group[], void>({
+        query: () => ({
+          url: `group/`,
+          method: "GET",
         }),
-        getGroupInfo: build.query<any, { groupId: string }>({
-            query: ({ groupId }) => ({
-                url: `group/${groupId}`,
-                method: "GET",
-            })
+        providesTags: (result) =>
+          result
+            ? [
+                ...result.map(({ group_id:id }) => ({ type: "Group" as const, id })),
+                { type: "Group", id: "LIST" },
+              ]
+            : [{ type: "Group", id: "LIST" }],
+      }),
+      getGroupInfo: build.query<any, { groupId: string }>({
+        query: ({ groupId }) => ({
+          url: `group/${groupId}`,
+          method: "GET",
         }),
-        createGroup: build.mutation<any, CreateGroupPayload>({
-            query: (payload) => ({
-                url: `group`,
-                method: "POST",
-                body: payload,
-            })
+      }),
+      createGroup: build.mutation<any, CreateGroupPayload>({
+        query: (payload) => ({
+          url: `group`,
+          method: "POST",
+          body: payload,
         }),
-        updateGroup: build.mutation<any, UpdateGroupPayload>({
-            query: ({ id, ...payload }) => ({
-                url: `group/${id}`,
-                method: "PUT",
-                body: payload,
-            })
+        invalidatesTags: [{ type: "Group", id: "LIST" }],
+      }),
+      updateGroup: build.mutation<any, UpdateGroupPayload>({
+        query: ({ id, ...payload }) => ({
+          url: `group/${id}`,
+          method: "PUT",
+          body: payload,
         }),
-        deleteGroup: build.mutation<any, string>({
-            query: (id) => ({
-                url: `group/${id}`,
-                method: "DELETE",
-            }),
+        invalidatesTags: (result, error, { id }) => [
+          { type: "Group", id },
+          { type: "Group", id: "LIST" },
+        ],
+      }),
+      deleteGroup: build.mutation<any, string>({
+        query: (id) => ({
+          url: `group/${id}`,
+          method: "DELETE",
         }),
+        invalidatesTags: (result, error, id) => [
+          { type: "Group", id },
+          { type: "Group", id: "LIST" },
+        ],
+      }),
     }),
     overrideExisting: true,
-});
-
+  });
 export const {
     useLazyGetAllGroupQuery,
     useLazyGetGroupInfoQuery,

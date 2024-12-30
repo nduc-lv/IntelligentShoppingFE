@@ -27,48 +27,60 @@ export interface Food {
 }
 
 
-const foodGroupsApi = API.injectEndpoints({
+const foodGroupsApi = API
+.enhanceEndpoints({addTagTypes:["FoodGroup"]})
+.injectEndpoints({
     endpoints: (build) => ({
-        getAllFoodByCategory: build.query<Food[], { group_id: string; category_id: string, search: string }>({
-            query: ({ group_id, category_id, search }) => ({
-                url: `foodgroup/food/${group_id}/${category_id}`,
-                method: "GET",
-                params: { search: search },
-            }),
-            transformResponse: (response: { rows: Food[] }, meta, arg) => response.rows,
+      getAllFoodByCategory: build.query<Food[], { group_id: string; category_id: string; search: string }>({
+        query: ({ group_id, category_id, search }) => ({
+          url: `foodgroup/food/${group_id}/${category_id}`,
+          method: "GET",
+          params: { search },
         }),
-        createFoodGroup: build.mutation<any, CreateFoodGroupPayload>({
-            query: (payload) => ({
-                url: `foodgroup`,
-                method: "POST",
-                body: payload,
-            }),
+        transformResponse: (response: { rows: Food[] }, meta, arg) => response.rows,
+        providesTags: (result, error, { group_id, category_id }) => [
+          { type: "FoodGroup", id: `${group_id}-${category_id}` },
+          { type: "FoodGroup", id: "LIST" },
+        ],
+      }),
+      createFoodGroup: build.mutation<any, CreateFoodGroupPayload>({
+        query: (payload) => ({
+          url: `foodgroup`,
+          method: "POST",
+          body: payload,
         }),
-        deleteFoodGroup: build.mutation<void, { id: string }>({
-            query: ({ id }) => ({
-                url: `foodgroup/${id}`,
-                method: "DELETE",
-            }),
-            transformResponse: (response: { data: void }, meta, arg) => response.data,
+        invalidatesTags: [{ type: "FoodGroup", id: "LIST" }],
+      }),
+      deleteFoodGroup: build.mutation<void, { id: string }>({
+        query: ({ id }) => ({
+          url: `foodgroup/${id}`,
+          method: "DELETE",
         }),
-        createFood: build.mutation<any, CreateFoodPayload>({
-            query: (payload) => ({
-                url: `food`,
-                method: "POST",
-                body: payload,
-            }),
+        transformResponse: (response: { data: void }, meta, arg) => response.data,
+        invalidatesTags: [{ type: "FoodGroup", id: "LIST" }],
+      }),
+      createFood: build.mutation<any, CreateFoodPayload>({
+        query: (payload) => ({
+          url: `food`,
+          method: "POST",
+          body: payload,
         }),
-        updateFoodGroup: build.mutation<any, UpdateFoodGroupPayload>({
-            query: ({ id, ...payload }) => ({
-                url: `foodgroup/${id}`,
-                method: "PATCH",
-                body: payload,
-            }),
-        })
+        invalidatesTags: [{ type: "FoodGroup", id: "LIST" }],
+      }),
+      updateFoodGroup: build.mutation<any, UpdateFoodGroupPayload>({
+        query: ({ id, ...payload }) => ({
+          url: `foodgroup/${id}`,
+          method: "PATCH",
+          body: payload,
+        }),
+        invalidatesTags: (result, error, { id }) => [
+          { type: "FoodGroup", id: `${id}` },
+          { type: "FoodGroup", id: "LIST" },
+        ],
+      }),
     }),
     overrideExisting: true,
-});
-
+  });
 export const {
     useLazyGetAllFoodByCategoryQuery,
     useCreateFoodGroupMutation,

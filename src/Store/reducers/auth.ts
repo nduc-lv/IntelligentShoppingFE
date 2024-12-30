@@ -2,6 +2,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { User } from "../types";
+import { persistor } from "..";
 export interface AuthState {
   initialized: boolean,
   accessToken: string | null,
@@ -56,6 +57,7 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.user = null;
       state.initialized = false;
+      persistor.purge()
     });
     builder.addCase(fetchTokens.fulfilled, (state, action) => {
       state.accessToken = action.payload.accessToken;

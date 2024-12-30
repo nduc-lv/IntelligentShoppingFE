@@ -15,6 +15,7 @@ import {
 import { homeReducers, themeReducers, authReducer } from "./reducers";
 import { dataReducer } from "./reducers/data";
 import { useSelector } from "react-redux";
+import autoMergeLevel1 from "redux-persist/es/stateReconciler/autoMergeLevel1";
 const reducers = combineReducers({
   api: API.reducer,
   theme: themeReducers,
@@ -24,16 +25,17 @@ const reducers = combineReducers({
 });
 
 
-const persistedReducer = persistReducer(
+const persistedReducers = persistReducer(
   {
     key: "root",
     storage: AsyncStorage,
-    blacklist: [`user/me`]
+    // blacklist: [`user/me`]
+    stateReconciler:autoMergeLevel1<any>
   },
   reducers);
 
 const store = configureStore({
-  reducer: persistedReducer,
+  reducer: persistedReducers,
   middleware: (getDefaultMiddleware) => {
     const middlewares = getDefaultMiddleware({
       serializableCheck: {

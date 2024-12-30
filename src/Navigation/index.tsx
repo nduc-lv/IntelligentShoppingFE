@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, StatusBar, View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createNavigationContainerRef, NavigationContainer } from "@react-navigation/native";
+import { CommonActions, createNavigationContainerRef, NavigationContainer } from "@react-navigation/native";
 import { MainNavigator } from "./Main";
 import { WelcomeContainer } from "@/Screens/Welcome";
 import { AdminScreens, RootScreens } from "@/Screens";
@@ -137,17 +137,32 @@ const _ApplicationNavigator = () => {
 		if(PublicScreens.has(currentRoute)){
 			if(isLoggedin){
 				console.log("NAV MAIN")
-				RootNavigationContainerRef.navigate(RootScreens.MAIN)
+				RootNavigationContainerRef.dispatch(
+					CommonActions.reset({
+					  index: 0,
+					  routes: [{ name: RootScreens.MAIN }],
+					})
+				  );
 			}
 		} else {
 			if ((initializedAuth && !accessToken)) {
 				console.log("NAV")
-				RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
+				RootNavigationContainerRef.dispatch(
+					CommonActions.reset({
+					  index: 0,
+					  routes: [{ name: RootScreens.SIGN_IN }],
+					})
+				  );
 			} else if (!isGettingMe) {
 				if (!isLoggedin) {
 				console.log("NAV!!")
 					dispatch(clearTokens())
-					RootNavigationContainerRef.navigate(RootScreens.SIGN_IN)
+					RootNavigationContainerRef.dispatch(
+						CommonActions.reset({
+						  index: 0,
+						  routes: [{ name: RootScreens.SIGN_IN }],
+						})
+					  );
 				}
 			}
 		}
