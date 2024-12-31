@@ -4,6 +4,7 @@ export interface Group {
     group_id: string;
     name: string;
     is_admin: boolean;
+    link_avatar: string;
 }
 
 export interface CreateGroupPayload {

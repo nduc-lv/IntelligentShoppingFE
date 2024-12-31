@@ -131,7 +131,7 @@ export const GroupScreen = () => {
 							<View style={styles.groupItem}>
 								<View style={styles.leftContent}>
 									<Image
-										source={{ uri: AppConfig.defaultAvatar }}
+										source={{ uri: item.link_avatar }}
 										defaultSource={{ uri: AppConfig.defaultAvatar }}
 										style={styles.groupImage}
 									/>

@@ -253,9 +253,9 @@ export const GroupDetailScreen = () => {
                             <ArrowLeft size={24} color={AppData.colors.text[900]} />
                         </TouchableOpacity>
                         <Image
-                            // source={{
-                            //     uri: data.link_avatar,
-                            // }}
+                            source={{
+                                uri: data.link_avatar,
+                            }}
                             defaultSource={{ uri: AppConfig.defaultAvatar}}
                             style={styles.groupImage}
                         />
