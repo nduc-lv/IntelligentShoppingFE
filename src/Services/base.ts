@@ -45,15 +45,21 @@ export const API = createApi({
   baseQuery: baseQueryWithInterceptor,
   // to prevent circular type issues, the return type needs to be annotated as any
   extractRehydrationInfo(action, { reducerPath }): any {
+    console.log(action)
     if (isHydrateAction(action)) {
-      try{
-        return action.payload[API.reducerPath]
-      } catch(e){
-        if(action.key=='root'){
-          return action.payload??{}
-        }
+      // if(action.payload){
+      //   action.payload=Object.keys(action.payload).reduce((pre, key)=>{
+
+      //   })
+      // }
+      if(action.key=='root'){
+        console.log(action.payload[API.reducerPath]??undefined)
+        return action.payload[API.reducerPath]??undefined
       }
+        console.log(action.payload??undefined)
+        return action.payload??undefined
     }
+    console.log("returns empty")
   },
   endpoints: () => ({}),
 });

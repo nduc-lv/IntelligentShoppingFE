@@ -46,6 +46,7 @@ import {
 
 import { useFocus } from "native-base/lib/typescript/components/primitives";
 import { Unit } from "@/Services/unit";
+import DateTimePickerInput from "@/General/Components/DateTimePicker";
 
 type ShoppingListRouteParams = {
 	ShoppingListById: { shoppingId: string; groupId: string };
@@ -417,7 +418,7 @@ export const ShoppingListById: React.FC = () => {
 	};
 	const saveItemToFridge = async (record: any) => {
 		try {
-			await addItemToFridge(record);
+			await addItemToFridge({...record,date});
 			if (isAddError) {
 				Toast.show("failed to add");
 				return;
@@ -570,7 +571,7 @@ export const ShoppingListById: React.FC = () => {
                 isOpen={isModalVisible}
                 onClose={() => setIsModalVisible(false)}
             >
-                <Modal.Content>
+                <Modal.Content width={"95%"}>
                     {action == 'addToFridge' && selectedItem &&
                         <>
                             <Modal.CloseButton />
@@ -648,12 +649,11 @@ export const ShoppingListById: React.FC = () => {
                                         <Text style={{ marginTop: 10, marginBottom: 10 }}>
                                             Expired Date
                                         </Text>
-                                        <TouchableOpacity onPress={() => showDatepicker()} style={{ display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
-                                            <Text style={{ fontSize: 20 }}>
-                                                {formDate}
-                                            </Text>
-                                            <Calendar />
-                                        </TouchableOpacity>
+                                        <DateTimePickerInput
+                                            onChange={(val)=>{
+                                                onChange(null,val)
+                                            }}
+                                        />
                                     </Form.Item>
                                     {/* <Button onPress={() => showDatepicker()}>
                                         Choose Date

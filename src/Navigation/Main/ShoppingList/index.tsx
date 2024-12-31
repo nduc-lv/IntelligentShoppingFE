@@ -4,6 +4,7 @@ import { RootStackParamList } from "@/Navigation";
 import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContainer";
 import { ShoppingListDetailContainer } from "@/Screens/ShoppingListDetail/ShoppingListDetailContainer";
 import { ShoppingListByIdContainer } from "@/Screens/ShoppingListById/ShoppingListByIdContainer";
+import { i18n, LocalizationKey } from "@/Localization";
 
 
 
@@ -17,7 +18,7 @@ export const ShoppingListTabNavigation = () => {
 				name="SHOPPING_LIST"
 				component={ShoppingListContainer}
 				options={() => ({
-					headerTitle: `Shopping List`,
+					headerTitle: i18n.t(LocalizationKey.SHOPPING_LIST),
 					headerLeft: () => null,
 				})}
 			/>
@@ -25,15 +26,15 @@ export const ShoppingListTabNavigation = () => {
 				name="SHOPPING_LIST_DETAIL"
 				component={ShoppingListDetailContainer}
 				options={() => ({
-					headerTitle: `Shopping List By Group`,
+					headerTitle: i18n.t(LocalizationKey.SHOPPING_LIST_BY_GROUP),
 				})}
 			/>
 			<ShoppingListTab.Screen
 				name="SHOPPING_LIST_BY_ID"
 				component={ShoppingListByIdContainer}
 				options={({ route }) => ({
-					headerTitle: `Shopping List Detail`,
-					headerShown: false,
+					headerTitle: i18n.t(LocalizationKey.SHOPPING_LIST_DETAIL),
+					headerShown: true,
 				})}
 			/>
 		</ShoppingListTab.Navigator>

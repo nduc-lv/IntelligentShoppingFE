@@ -104,13 +104,8 @@ export const ManageUnitScreen = () => {
 				/>
 			) : isError ? (
 				<View style={styles.header}>
-					<TouchableOpacity
-						onPress={() => navigation.navigate(RootScreens.ADMIN)}
-					>
-						<ArrowLeft size={24} color="#000" />
-					</TouchableOpacity>
 					<View style={styles.centered}>
-						<Text style={styles.errorText}>Failed to load users.</Text>
+						<Text style={styles.errorText}>Failed to load.</Text>
 					</View>
 				</View>
 			) : data ? (

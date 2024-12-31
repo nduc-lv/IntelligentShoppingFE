@@ -39,6 +39,7 @@ import {
 import { useToast } from 'react-native-toast-notifications'
 import { TextInput } from "react-native-paper";
 import AppData from "@/General/Constants/AppData";
+import DateTimePickerInput from "@/General/Components/DateTimePicker";
 type ShoppingListRouteParams = {
   ShoppingListDetail: { groupId: string };
 };
@@ -112,7 +113,7 @@ export const ShoppingListDetail: React.FC = () => {
       const values = await form.validateFields();
       const payload = {
         groupId: groupId,
-        date: values.date,
+        date ,
         name: values.name,
         foods: []
       }
@@ -187,7 +188,7 @@ export const ShoppingListDetail: React.FC = () => {
         <Text>No shopping lists found.</Text>
       )}
       <Modal isOpen={isModalVisible} onClose={() => setIsModalVisible(false)}>
-        <Modal.Content>
+        <Modal.Content width={"95%"}>
           {currentAction == 'delete' && (
             <>
               <Modal.CloseButton />
@@ -208,16 +209,19 @@ export const ShoppingListDetail: React.FC = () => {
               <>
                 <Modal.CloseButton />
                 <Modal.Header>Create</Modal.Header>
-                <Modal.Body>
-                  <Form form={form}>
+                <Modal.Body style={{flex:1,width:"100%"}}>
+                  <Form form={form} style={{width:"100%"}}>
                     <Form.Item name="date" rules={[{ required: true, message: "Please select a date" }]}
                     >
-                      <TouchableOpacity onPress={() => showDatepicker()} style={{ display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
+                      {/* <TouchableOpacity onPress={() => showDatepicker()} style={{ display: "flex", flexDirection: "row", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
                         <Text style={{ fontSize: 20 }}>
                           {moment(date).format("YYYY-MM-DD")}
                         </Text>
                         <Calendar />
-                      </TouchableOpacity>
+                      </TouchableOpacity> */}
+                      <DateTimePickerInput onChange={(date)=>{
+                        onChange(null,date)
+                      }} />
                     </Form.Item>
 
                     <Form.Item name="name" rules={[{ required: true, message: "Please provide a name" }]}>

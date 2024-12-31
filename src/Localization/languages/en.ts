@@ -77,5 +77,8 @@ export const en = {
   [LocalizationKey.REMOVE]: "Remove",
   [LocalizationKey.DELETE]: "Delete",
 
-  [LocalizationKey.NETWORK_NOT_CONNECTED]: 'Network disconnected'
+  [LocalizationKey.NETWORK_NOT_CONNECTED]: 'Network disconnected',
+  [LocalizationKey.SHOPPING_LIST] : "Shopping list",
+  [LocalizationKey.SHOPPING_LIST_BY_GROUP] : "Shopping list by group",
+  [LocalizationKey.SHOPPING_LIST_DETAIL] : "Shopping list detail"
 };

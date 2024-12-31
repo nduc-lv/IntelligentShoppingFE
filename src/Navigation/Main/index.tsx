@@ -105,6 +105,7 @@ export const MainNavigator = () => {
 				options={{
 					tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
 					tabBarLabelPosition: "below-icon",
+					
 				}}
 			/>
 		</Tab.Navigator>

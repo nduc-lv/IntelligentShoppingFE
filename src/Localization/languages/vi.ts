@@ -77,5 +77,8 @@ export const vi = {
   [LocalizationKey.REMOVE]: "Xóa",
   [LocalizationKey.DELETE]: "Xóa",
 
-  [LocalizationKey.NETWORK_NOT_CONNECTED]: 'Mất kết nối'
+  [LocalizationKey.NETWORK_NOT_CONNECTED]: 'Mất kết nối',
+  [LocalizationKey.SHOPPING_LIST]: 'Danh sách mua sắm',
+  [LocalizationKey.SHOPPING_LIST_BY_GROUP]: 'Danh sách mua sắm theo nhóm',
+  [LocalizationKey.SHOPPING_LIST_DETAIL]: 'Chi tiết danh sách mua sắm',
 };
