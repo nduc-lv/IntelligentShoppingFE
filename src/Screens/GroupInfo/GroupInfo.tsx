@@ -147,9 +147,9 @@ export const GroupInfoScreen = () => {
                 <View>
                     <View style={styles.imageContainer}>
                         <Image
-                            // source={{
-                            //     uri: data.link_avatar,
-                            // }}
+                            source={{
+                                uri: info.rows[0].group.link_avatar ?? AppConfig.defaultAvatar,
+                            }}
                             defaultSource={{ uri: AppConfig.defaultAvatar}}
                             style={styles.image}
                         />
