@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { ManageContainer } from "@/Screens/Manage";
 import { Bolt, Heart, Home, User, Users } from "lucide-react-native"; // Import các icon từ Lucide
 import { RootScreens } from "@/Screens";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { CommonActions, NavigationProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "..";
 import { useSelector } from "react-redux";
 import { AuthState } from "@/Store/reducers";
@@ -21,7 +21,12 @@ export const AdminNavigator = () => {
   );
   useEffect(()=>{
     if(user?.user_role?.role_id !='admin'){
-      navigation.navigate(RootScreens.MAIN);
+      navigation.dispatch(
+				CommonActions.reset({
+				  index: 0,
+				  routes: [{ name: RootScreens.MAIN }],
+				})
+			  );
     }
   },[user])
 

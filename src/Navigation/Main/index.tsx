@@ -8,7 +8,7 @@ import { ShoppingListContainer } from "@/Screens/ShoppingList/ShoppinglistContai
 import { UserTabContainer } from "@/Screens/UserTab/UserTabContainer";
 import { RecipeContainer } from "@/Screens/Recipe/RecipeContainer";
 import { RootScreens } from "@/Screens";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { CommonActions, NavigationProp, useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { AuthState } from "@/Store/reducers";
 import { userApi } from "@/Services";
@@ -67,7 +67,12 @@ export const MainNavigator = () => {
 	const user=useSelector((state:{auth:AuthState})=>(state.auth.user))
 	useEffect(()=>{
 		if(user?.user_role?.role_id === "admin"){
-			navigation.navigate(RootScreens.ADMIN);
+			navigation.dispatch(
+				CommonActions.reset({
+				  index: 0,
+				  routes: [{ name: RootScreens.ADMIN }],
+				})
+			  );
 		}
 	},[user])
 	return (
